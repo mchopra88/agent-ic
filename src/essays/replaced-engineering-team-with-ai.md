@@ -95,36 +95,35 @@ I was paying $4,350 a month for reviews that didn't catch anything that mattered
 
 ## What I Built Instead
 
+What replaced the PR reviewers? 8 deterministic hooks, described in full in [My CLAUDE.md](/essays/my-claude-md/). But the interesting comparison isn't "hooks vs no hooks." It's "what the human reviewers actually caught vs what the hooks catch."
+
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# What replaced the PR reviewers
+What human PR reviews caught (8 weeks, 47 PRs):
 
-# pre-bash-safeguard.sh
-# "Two jobs: clean stale git locks,
-#  block destructive SQL."
+  "Consider renaming this variable"         x 12
+  "Formatting inconsistency on line 89"     x 9
+  "Missing docstring"                       x 7
+  "Could use list comprehension here"       x 5
+  "Unused import"                           x 3
+  "LGTM"  (no comments at all)             x 11
+  Total cosmetic findings: 36
+  Total logic/security findings: 0
 
-if echo "$COMMAND" | grep -iqE \
-  '(DROP\s+TABLE|TRUNCATE|DELETE\s+FROM\s+\w+\s*;)'; then
-  echo "BLOCKED: Destructive SQL detected." >&2
-  exit 2
-fi
+What the hooks catch (every single day):
 
-# This hook NEVER prints instructions for Claude
-# to follow. It either BLOCKS or ALLOWS. That's it.
+  bash-guard:    Blocked DELETE FROM leads (twice)
+                 Blocked accidental DROP TABLE
+                 Blocked git push --force to main
 
-# post-edit-lint.sh
-# Runs AFTER every Edit or Write tool call.
-if ! python3 -m py_compile "$FILE_PATH" 2>&1; then
-  echo "SYNTAX ERROR in $FILE_PATH" >&2
-  exit 0  # Non-blocking — just warns
-fi
+  post-edit-lint: Caught 23 syntax errors before deploy
+                  (any one of which = production outage)
 
-# stop-fresh-eyes-check.sh
-# Runs on session exit.
-# If files were changed without a /fresh-eyes review,
-# logs them to fresh_eyes_debt.md.
-# Next session, the pre-session hook shows the debt.
-# The review WILL happen. Not because someone remembers.
-# Because the system forces it.
+  fresh-eyes:    Flagged matching bug that made 37% of
+                 Dallas inventory invisible
+                 (the bug passed through human review)
+
+  session-save:  Preserved context for 119 sessions
+                 (humans forgot to document 100% of the time)
 </pre>
 
 The hooks replaced the PR reviewers. Not because hooks are smarter than humans — they're not. A hook can't evaluate business logic. A hook can't assess whether a matching algorithm makes sense for the Dallas market. But the hooks have two properties that human reviewers don't:
@@ -135,49 +134,68 @@ The hooks replaced the PR reviewers. Not because hooks are smarter than humans �
 
 The fresh-eyes system is the closest thing to a real PR review: it spawns a new Claude Code context — one that hasn't been working on the code all day, one that isn't biased by the decisions made during the session — and asks it to review the changes with cold eyes. It catches things the session context normalized. It's not as good as a great human reviewer. It's better than a depleted one. And it runs every time, automatically, without asking.
 
-<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# From the actual CLAUDE.md
+The identity shift is the hardest part. I went from "I'm a business operator who hires engineers" to "I am the engineer." Here's what that actually looks like — an actual debugging session from 2 AM, November 2025:
 
-## Teaching Mode (ALWAYS ON)
-Mukund is a 15-year founder running an AI agent
-team with no human engineers.
-Explain EVERYTHING: what you're doing, why,
-define terms, show architecture, discuss trade-offs.
-Don't dumb it down. He's smart and learns fast.
-Just don't assume DevOps/SRE knowledge.
-If he corrects you — learn from it,
-update CLAUDE.md/MEMORY.md, never repeat.
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# 2:14 AM — Twilio webhook timing out
+
+Me:    "Webhooks are failing. 500 errors."
+
+AI:    "Let me check the pod logs.
+
+        The webhook endpoint /api/v1/twilio/incoming
+        is timing out at 30s. The handler calls
+        classify_intent() which calls Gemini API.
+
+        Gemini is responding in 28-45 seconds.
+        Twilio expects a response in 15 seconds.
+        After 15s with no response, Twilio retries.
+        After 3 retries, it marks the webhook as failed.
+
+        Two options:
+        1. Return 200 immediately, process async
+           (Pro: fast. Con: lose retry safety)
+        2. Move classification to a background task
+           via Redis queue
+           (Pro: correct. Con: need to add Celery/RQ)
+
+        Given your stack already has Redis for caching,
+        option 2 adds ~40 lines and no new dependencies.
+
+        Want me to implement option 2?"
+
+Me:    "Do it."
 </pre>
 
-Teaching mode exists because of the identity shift. I went from "I'm a business operator who hires engineers" to "I am the engineer." Every deployment, every database migration, every infrastructure choice — I needed to understand it well enough to debug it at 2 AM, because there was no one else to call. The AI doesn't just execute. It explains. It teaches. It makes the hard thing accessible without making it simple.
+Every deployment, every database migration, every infrastructure choice — I needed to understand it well enough to debug it at 2 AM, because there was no one else to call. The [CLAUDE.md governance system](/essays/my-claude-md/) makes this possible: "Teaching mode: ALWAYS ON" means the AI doesn't just execute — it explains. The depleted 2 AM version of me gets the same level of explanation as the fresh 9 AM version. The cognitive cost stays low even when the battery is empty.
 
 ## The Velocity
 
 Today I operate with zero human engineers. My collaborator is an AI coding tool running in tmux sessions on a Mac Studio — eight sessions at a time, each handling a different part of the system. CI/CD, matching, insurance, collections, alerts, deployment.
 
+The numbers tell the story. I keep the full velocity chart in [git log --oneline](/essays/git-log/) — 531 commits in 15 months, one person, climbing every month. But the number that matters more than commit count is the comparison:
+
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-Monthly commit velocity (agent-v4 + agentic-client-service):
+Before (2-person team, last 3 months):
 
-  2025-01  ██████████████░░░░░░░░░░░░░░  47
-  2025-02  ██████████████████░░░░░░░░░░  58
-  2025-03  ████████████████████████░░░░  78
-  2025-04  ██████████████████████████░░  85
-  2025-05  ████████████████████████░░░░  76
-  2025-06  ██████████████████████████░░  82
-  2025-07  ██████████████████████████████░░  98
-  2025-08  ██████████████████████████████░░░░  108
-  2025-09  █████████████████████████████░░░  102
-  2025-10  ██████████████████████████████░░░░░  115
-  2025-11  ██████████████████████████████████░  118
-  2025-12  ████████████████████████████████░░░  112
-  2026-01  ████████████████████████████████████░  124
-  2026-02  ████████████████████████████████████████  133
+  Commits:        ~75 total (25/month)
+  Features shipped: 2 (one broken, one incomplete)
+  Deploys verified: 0 out of 4
+  Incidents caused: 2 (Twilio runaway + staging-not-prod)
+  Tests written:   0
+  Cost:           $4,350/month × 3 = $13,050
 
-  Total: 531 commits in 15 months. One person.
-  Previous team output: ~20-30 commits/month, 2 people.
+After (1 person + AI, same 3-month window):
+
+  Commits:        ~330 total (110/month)
+  Features shipped: 14
+  Deploys verified: 14 out of 14 (hook-enforced)
+  Incidents caused: 3 (all caught by hooks before production)
+  Tests written:   0 (still bad at this — hooks compensate)
+  Cost:           ~$600/month × 3 = $1,800
 </pre>
 
-The velocity is increasing, not decreasing. This is the opposite of what happens in traditional engineering teams, where velocity peaks early and gradually slows as the codebase grows, technical debt accumulates, and coordination overhead compounds. Solo AI-assisted development has a different curve: each session builds on the last because the CLAUDE.md encodes cumulative lessons, the session memory preserves context, and the hooks prevent regression.
+The velocity is increasing, not decreasing. This is the opposite of what happens in traditional engineering teams, where velocity peaks early and gradually slows as the codebase grows and coordination overhead compounds. Solo AI-assisted development has a different curve: each session builds on the last because the governance system encodes cumulative lessons, the session memory preserves context, and the hooks prevent regression.
 
 The hardest part isn't the technology. It's the identity shift. For most of this journey, I thought that made me unemployable — the guy who builds alone in a bunker for an industry nobody takes seriously. Turns out the skills I built — orchestrating AI agents at production scale, building autonomous overnight operations, collapsing entire business functions into code — are the exact thing every company is trying to figure out.
 

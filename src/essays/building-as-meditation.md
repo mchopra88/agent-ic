@@ -23,40 +23,37 @@ Every morning, I open the tmux sessions on the Mac Studio and the pre-session ho
 
 More often, something broke. A Twilio webhook timed out. A database connection pool exhausted. An ILS feed returned malformed data. A lead that should have been qualified got flagged as dead because a classifier misread the conversation. These are not catastrophes. They are the daily texture of operating a system that processes 30,000 conversations a month without human supervision.
 
+Here is an actual morning. February 18, 2026. I open the terminal, attach the tmux session, and this is what I see — not the generic template, but the real output from a night that went badly:
+
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# A typical morning — pre-session hook output
+# Real morning — February 18, 2026, 7:42 AM
 
-╔══════════════════════════════════════════════╗
-║   MANDATORY PRE-SESSION CONTEXT LOAD         ║
-╚══════════════════════════════════════════════╝
+Last session: 2026-02-17 23:58 → 2026-02-18 06:14
+  Type: Overnight autonomous (Ralph loop)
+  Task: Inventory recovery scan
 
-DEPLOYMENT STATE (last 50 lines):
-────────────────────────────────────
-  Current: 2c917d4 on main
-  Last deploy: 2 hours ago (overnight batch)
-  Status: GREEN — all services healthy
+  Result: PARTIAL FAILURE
+  ─────────────────────────
+  Scanned: 1,558 active leads
+  Leads with zero building matches: 1,497 (96.1%)
 
-LAST SESSION MEMORY:
-────────────────────────────────────
-  Session: 2026-03-24 02:15 (Ralph loop)
-  Duration: 6 hours (autonomous)
-  Tasks: Inventory refresh, 342 lead recovery
-  Result: 338/342 recovered, 4 permanently dead
-  New issues: None
+  Root cause: hotsheet email pipeline stalled.
+  201 unread emails in finance@homeeasy.com
+  containing building availability updates.
+  Pipeline hadn't processed them in 11 days.
 
-FRESH EYES DEBT: 0 unreviewed change sets
-────────────────────────────────────
+  The overnight machine found the problem.
+  It did NOT fix it — insufficient permissions
+  to modify the email ingestion service.
 
-════════════════════════════════════
-  READ THE ABOVE. Do NOT start work until you
-  understand what is deployed, what broke,
-  and what the last session did.
-════════════════════════════════════
+  Waiting for human.
 </pre>
 
-That hook output is my morning meditation. I read it the way Aurelius read the notes from the previous night — not as information, but as orientation. Where am I? What happened while I wasn't watching? What needs attention? What can wait?
+That's what I read at 7:42 AM with my coffee. 96% of active leads had zero building matches because 201 emails containing availability data were sitting unread in an inbox for eleven days. The overnight machine found it. It couldn't fix it. It was waiting for me.
 
-The "READ THE ABOVE" instruction is yelling at an AI. In all caps. In a hook. Because without it, Claude Code will cheerfully skip the context and start working on whatever you ask. The AI needs to be told to read, the same way I need to be told to pause before diving into the day's work. The hook makes the pause automatic for the AI. For me, it's still a choice. Some mornings I skip it. Those are the mornings things go wrong.
+That is the morning meditation. Not the green dashboard, not the "all services healthy" status. The reality: something broke while I slept, the machine discovered it, and now I have to decide what to do about it before I do anything else. Where am I? What happened while I wasn't watching? What needs attention? What can wait?
+
+I described the hooks in detail in [My CLAUDE.md](/essays/my-claude-md/) — the pre-session hook that yells "READ THE ABOVE" in all caps at an AI that would otherwise cheerfully skip the context and start working on whatever you ask. The AI needs to be told to read, the same way I need to be told to pause before diving into the day's work. Some mornings I skip it. Those are the mornings things go wrong.
 
 ## The Gayatri Mantra
 
@@ -64,41 +61,7 @@ The Gayatri Mantra runs continuously. It doesn't need active attention. You don'
 
 The overnight machine does the same thing. At midnight, the Ralph Wiggum loop starts. Inventory refreshes. Lead scoring recalculations. Stale data detection. Automated outreach cadences. Follow-up sequences for leads that went silent. Document reminders for qualification files that are missing pieces. All of it runs while I sleep. I wake up to a dashboard, not a backlog.
 
-<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# What runs while I sleep — the overnight loop
-
-Overnight Operations (midnight to 6 AM):
-
-  00:00  Inventory pipeline refresh
-         → Voice calls to buildings (automated)
-         → ILS API pulls (Zillow, Apts.com feeds)
-         → Transaction history cross-reference
-
-  01:00  Lead scoring recalculation
-         → Re-score all active leads
-         → Flag leads approaching expiration
-         → Identify recovery candidates
-
-  02:00  Stale data detection
-         → Flag listings with price > 14 days old
-         → Flag buildings with no response in 30 days
-         → Update availability status
-
-  03:00  Automated outreach cadences
-         → Follow-up messages to warm leads
-         → Re-engagement to cold leads
-         → Document reminders for YGL pipeline
-
-  04:00  Ralph Wiggum autonomous analysis
-         → Whatever batch task I queued before bed
-         → Self-referential loop: checks own output
-         → Continues until completion promise met
-
-  05:00  Session save + state checkpoint
-         → Write session memory
-         → Update DEPLOYMENT_STATE.md
-         → Log any anomalies
-</pre>
+The overnight machine is described in full in [The Overnight Machine](/essays/the-overnight-machine/) — the 12 headless jobs, the Ralph Wiggum loop, the real session data. But the spiritual parallel is what matters here: the Gayatri Mantra runs continuously, indifferent to the practitioner's state of mind. The system runs at midnight whether I'm sleeping, frustrated, or inspired. The leads get scored. The stale data gets flagged. The inventory gets refreshed. It doesn't wait for me to feel ready. It just runs.
 
 The structure is the same as the mantra: continuous, autonomous, indifferent to my mood. The system doesn't care if I'm frustrated or inspired. It runs or it doesn't. The leads flow or they don't. The overnight batch completes or it errors. The question isn't "how do I feel about this?" The question is "what does the data say?"
 

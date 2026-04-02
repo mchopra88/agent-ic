@@ -10,20 +10,30 @@ Most teams have one feedback loop. They do retrospectives. What happened this sp
 The **retro loop** operates at the conversation level. This lead went cold — why? The AI agent misclassified a response. The follow-up cadence was too aggressive. The building match was wrong. Each failure is a lesson. Each lesson becomes a rule. The CLAUDE.md grows by one line.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Retro loop example — actual production rule
+# Retro loop example — a real incident becomes a rule
 
-## Bottom-Up Analysis Law (ABSOLUTE — enforced by hook)
-- NEVER run aggregate queries as your FIRST step
-- ALWAYS sample 20+ individual records first
-- Classifiers lie. Summary fields are stale.
-- client_stage_progression.stage_name is garbage.
+November 2025: Lead #47203 showed as "Closed - Won"
+in the dashboard. Revenue report counted it.
 
-# This rule exists because I spent months making
-# business decisions based on classifier fields
-# that turned out to be LLM-generated freeform labels.
+I read the actual conversation:
+  Renter: "I found a place on my own, thanks"
+  Agent: "Great, glad you found something!"
+  Status: "Closed - Won"
+
+The AI classified "found a place" as a win.
+It wasn't our place. Zero commission. The "won"
+status was hallucinated by a classifier that
+confused "outcome: resolved" with "outcome: revenue."
+
+One incident. One line added to the rules.
+Now a hook checks: does "Closed - Won" have
+a matching invoice? If not, flag it.
+
+That's the retro loop: incident → lesson → rule → hook.
+The lesson persists even when I forget it.
 </pre>
 
-That's a retro loop output. I found a specific failure (garbage classifier field), extracted the lesson (don't trust summary fields), and encoded it as a rule (the bottom-up analysis law). Now a hook enforces it. The lesson persists even when I forget it.
+That's a retro loop output. A specific failure, a specific lesson, encoded as a rule that a hook enforces automatically. (I wrote about how these rules accumulate into the [CLAUDE.md governance system](/essays/my-claude-md/) — 1,334 lines of scars across 7 files.)
 
 The **macro loop** operates at the pattern level. Not "what happened in this conversation" but "what's happening across 30,000 conversations this month?" Are qualification rates trending down? Is a particular building generating complaints? Are follow-up cadences converting differently in Dallas than Chicago?
 

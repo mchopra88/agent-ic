@@ -30,44 +30,45 @@ The key insight is that AI coding tools don't just write code faster — they ch
 
 The CLAUDE.md is the critical piece. It's not a style guide — it's the institutional knowledge of the entire engineering organization. Seven CLAUDE.md files across different services, totaling 1,334 lines. They encode every rule, every lesson, every scar from every production incident. When I switch from the insurance agent session to the CI/CD session, the AI already knows the context. It read the CLAUDE.md. It loaded the session memory. It knows what was deployed, what broke, and what's next.
 
-<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# pre-session-read-state.sh — fires on every session start
-
-echo "╔══════════════════════════════════════════════╗"
-echo "║   MANDATORY PRE-SESSION CONTEXT LOAD         ║"
-echo "╚══════════════════════════════════════════════╝"
-
-# 1. Deployment State
-tail -50 "$DEPLOY_LOG"
-
-# 2. Last session memory
-cat "$LAST_SESSION"
-
-# 3. Fresh eyes debt
-DEBT_COUNT=$(grep -c "NOT REVIEWED" "$FRESH_EYES_DEBT")
-if [[ "$DEBT_COUNT" -gt 0 ]]; then
-  echo "ACTION REQUIRED: Run /fresh-eyes FIRST"
-fi
-
-# 4. Current git state
-echo "Branch: $(git branch --show-current)"
-echo "Last commit: $(git log --oneline -1)"
-echo "Uncommitted: $(git status --porcelain | wc -l) files"
-</pre>
-
-This hook runs before every session. It's deterministic — can't be skipped, can't be ignored. It forces context loading before any new work starts. The equivalent in a traditional engineering team would be a mandatory standup where everyone reads the incident log before writing any code. Except the standup happens automatically and takes two seconds.
-
-The velocity numbers tell the story:
+Here's what context switching actually looks like. I'm in session 3 (insurance agent), debugging a Socratic question that's misfiring on "already have insurance" objections. I get a Slack notification: matching is returning zero results for Dallas leads. I switch to session 1:
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-531 commits in 15 months (one person)
+# The switch — tmux session 3 → session 1
 
-7 CLAUDE.md files — 1,334 lines of governance
-12 skills — reusable domain knowledge
-7 commands — slash commands for workflows
-8 hooks — deterministic guardrails
-119 session memory files — institutional memory
+$ tmux select-window -t agent-v4
+
+# Session 1 loads. CLAUDE.md already loaded.
+# Session memory shows last context:
+
+  Last session: 2025-10-14 22:30
+  Task: Geographic scoring fix (Dallas)
+  Status: Deployed, monitoring
+  Note: "Watch for zero-result queries in Dallas.
+         The radius bug may have siblings."
+
+# The session PREDICTED the current bug.
+# I don't need to re-explain the context.
+# I type one sentence:
+
+Me: "Dallas zero-result queries are back.
+     Check if the radius fix regressed."
+
+AI: "Reading the deploy log...
+     The fix from Oct 14 is still live (commit a3f91c2).
+     But there's a new issue: the ILS feed for
+     Apartments.com changed their coordinate format
+     from (lat,lng) to (lng,lat) on Oct 16.
+     Every Dallas building imported since then has
+     inverted coordinates. 847 buildings affected."
+
+# Total time from Slack notification to root cause: 90 seconds.
+# No standup. No context doc. No "let me catch up."
+# The session memory already knew the context.
 </pre>
+
+That's the coordination model. The AI holds the context via the CLAUDE.md (governance), the session memory (what happened last time), and the hooks (what to check before starting). The equivalent in a traditional team would be a mandatory standup where everyone reads the incident log before writing any code. Except it happens automatically and takes two seconds. I wrote about the full hook system — including the one that yells "READ THE ABOVE" at the AI in all caps — in [My CLAUDE.md](/essays/my-claude-md/).
+
+The velocity: [531 commits in 15 months](/essays/git-log/), one person. 7 CLAUDE.md files (1,334 lines), 8 hooks, 12 skills, 119 session memory files. The institutional memory of an entire engineering organization, stored in text files that the AI reads on every interaction.
 
 The definition of "technical" has changed. It used to mean "can you write a sorting algorithm on a whiteboard?" Now it means "can you orchestrate AI systems at production scale?" I can't write a sorting algorithm on a whiteboard. I can orchestrate eight concurrent AI workstreams, each running production services handling thousands of conversations a day, with governance hooks that prevent the catastrophic failures that used to require a team to catch.
 

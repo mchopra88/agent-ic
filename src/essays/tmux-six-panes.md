@@ -25,21 +25,28 @@ I work in one session, switch to another, come back. The sessions don't lose sta
 Mutagen keeps the local filesystem in sync with the remote development environment. The Mac Studio is both the development machine and the deployment staging server. When I SSH from my MacBook Air — whether I'm on the couch or in a Vienna airport lounge — I'm looking at the same tmux sessions, the same git state, the same running services.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# What each session has loaded:
+# What Mutagen syncs — the invisible layer
 
-1. Its own CLAUDE.md (business-unit specific rules)
-2. The master CLAUDE.md (cross-cutting governance)
-3. Session memory from the last conversation
-4. Pre-session hook output:
-   - Current deployment state
-   - Last session summary
-   - Fresh-eyes debt
-   - Current git state
-5. All hooks active:
-   - bash-guard (blocks destructive commands)
-   - post-edit-lint (catches syntax errors)
-   - session-end-save (preserves state)
-   - Ralph Wiggum (autonomous loop control)
+$ mutagen sync list
+  Name: homeeasy-main
+  Alpha: /Users/mukund/homeeasy-hq (Mac Studio)
+  Beta:  mukund@macbook:/Users/mukund/homeeasy-hq
+  Status: Watching for changes
+  Last sync: 0.3s ago
+
+# When I SSH from the MacBook Air:
+$ ssh studio -t "tmux attach -t agent-v4"
+
+# I'm looking at the same terminal, same git state,
+# same running services. Whether I'm on the couch,
+# in a Vienna airport lounge, or at a coffee shop
+# in Connaught Place.
+
+# The Mac Studio is always on. tmux is always running.
+# The sessions don't close when I disconnect.
+# I can start debugging a matching bug at 10 PM,
+# disconnect, reconnect at 2 AM from bed,
+# and the cursor is exactly where I left it.
 </pre>
 
 The 96GB of RAM matters because Claude Code is memory-hungry when running multiple instances. Each session loads the full context — CLAUDE.md files, session memory, the entire codebase index. Eight sessions × roughly 8-10GB each = most of the RAM. The M4 Pro handles it without thermal throttling, which matters at 3 AM when you've been running overnight batch jobs for six hours.

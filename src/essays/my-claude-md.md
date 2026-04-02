@@ -221,29 +221,48 @@ By the time Karpathy published autoResearch and Garry Tan published gstack, my C
 Both approaches work. But mine has something theirs doesn't: 119 session memory files that carry context across conversations. When I start a new session, the pre-session hook fires and shows me what the last session did, what's deployed, what's broken. I don't start from zero. I start from the last checkpoint.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# pre-session-read-state.sh — fires on every session start
+# pre-session-read-state.sh (47 lines)
+# "MANDATORY. Not a reminder. Not a suggestion. MANDATORY."
 
-╔══════════════════════════════════════════════╗
-║   MANDATORY PRE-SESSION CONTEXT LOAD         ║
-╚══════════════════════════════════════════════╝
+#!/bin/bash
+set -euo pipefail
 
-DEPLOYMENT STATE (last 50 lines):
-────────────────────────────────────
-[shows what's deployed and what broke]
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
+DEPLOY_STATE="$REPO_ROOT/DEPLOYMENT_STATE.md"
+SESSION_DIR="$REPO_ROOT/session_memory"
+FRESH_EYES="$SESSION_DIR/fresh_eyes_debt.md"
 
-LAST SESSION MEMORY:
-────────────────────────────────────
-[shows what happened last time]
+echo "╔══════════════════════════════════════════════╗"
+echo "║   MANDATORY PRE-SESSION CONTEXT LOAD         ║"
+echo "╚══════════════════════════════════════════════╝"
 
-FRESH EYES DEBT: 3 unreviewed change sets!
-────────────────────────────────────
-ACTION REQUIRED: Run /fresh-eyes FIRST
+# 1. What is deployed right now?
+if [[ -f "$DEPLOY_STATE" ]]; then
+  echo "DEPLOYMENT STATE:"
+  tail -50 "$DEPLOY_STATE"
+fi
 
-════════════════════════════════════
-  READ THE ABOVE. Do NOT start work until you
-  understand what is deployed, what broke, and
-  what the last session did.
-════════════════════════════════════
+# 2. What did the last session do?
+LAST_SESSION=$(ls -t "$SESSION_DIR"/20*.md 2>/dev/null | head -1)
+if [[ -n "$LAST_SESSION" ]]; then
+  echo "LAST SESSION: $(basename "$LAST_SESSION")"
+  head -30 "$LAST_SESSION"
+fi
+
+# 3. Is there unreviewed code?
+if [[ -f "$FRESH_EYES" ]]; then
+  DEBT=$(grep -c "NOT REVIEWED" "$FRESH_EYES" 2>/dev/null || echo 0)
+  if [[ "$DEBT" -gt 0 ]]; then
+    echo "⚠ FRESH EYES DEBT: $DEBT unreviewed change sets!"
+    echo "ACTION REQUIRED: Run /fresh-eyes FIRST"
+  fi
+fi
+
+echo "════════════════════════════════════════════════"
+echo "  READ THE ABOVE. Do NOT start work until you"
+echo "  understand what is deployed, what broke, and"
+echo "  what the last session did."
+echo "════════════════════════════════════════════════"
 </pre>
 
 The "READ THE ABOVE" instruction is yelling at an AI. In all caps. In a pre-session hook. Because without it, Claude Code will cheerfully skip the context and start working on whatever you ask it to do. The AI needs to be told to read. Just like the engineering team needed to be told to check their deploy. The hook makes it automatic.

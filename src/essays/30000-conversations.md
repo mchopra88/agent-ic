@@ -138,21 +138,7 @@ Then I finally looked at the raw data:
 # For months.
 </pre>
 
-That's where the bottom-up analysis law comes from:
-
-<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# From the CLAUDE.md — enforced by hook
-
-## Bottom-Up Analysis Law (ABSOLUTE — enforced by hook)
-- NEVER run aggregate queries as your FIRST step
-- ALWAYS sample 20+ individual records first
-- Build understanding from what you OBSERVE,
-  then verify with aggregates
-- Classifiers lie. Summary fields are stale.
-- client_stage_progression.stage_name is garbage.
-</pre>
-
-That last line is in the actual CLAUDE.md. A specific field name, called out as garbage, in a governance document. Because I will never make that mistake again, and neither will any AI that reads that file.
+That's where the [bottom-up analysis law](/essays/my-claude-md/) comes from — it's one of the absolute rules in the governance system that every AI session reads on startup. A specific database field name, called out as garbage, in a governance document. Because I will never make that mistake again, and neither will any AI that reads that file. The rule is enforced by a hook that literally blocks aggregate queries until you've read 20+ individual records first.
 
 ## The Sniff Test
 

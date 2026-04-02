@@ -31,39 +31,45 @@ The same thing happened to me. I am avoidant. I am neglectful of issues I know n
 
 When I say the human agents were burning out and not doing the work and costing us deals — I know that because I do it too. I am deeply, fundamentally subject to the same ego depletion that affects everyone. I'm using this technology to compensate for the parts of human nature that I can observe in myself and have observed in others for fifteen years: **people don't like doing things that are hard and require them to think.**
 
-<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# The production CLAUDE.md — teaching mode
-
-## Teaching Mode (ALWAYS ON)
-Mukund is a 15-year founder running an AI agent
-team with no human engineers.
-Explain EVERYTHING: what you're doing, why,
-define terms, show architecture,
-discuss trade-offs.
-Don't dumb it down. He's smart and learns fast.
-Just don't assume DevOps/SRE knowledge.
-</pre>
-
-"Teaching mode" is an ego depletion countermeasure. When I'm debugging at 2 AM, I don't have the cognitive bandwidth to reverse-engineer what the AI did. So the system explains itself to me. It lowers the cognitive cost of every interaction. It makes the hard thing easier — not by removing the complexity, but by removing the activation energy.
-
-The hooks are the same pattern at a different scale:
+Here's what depletion looks like in production data. I pulled the actual agent conversation quality from a single Wednesday in October 2025 — a day where our human agent handled 23 leads:
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# pre-bash-safeguard.sh — blocks destructive SQL
+Agent conversation quality — one Wednesday, 23 leads:
 
-# This hook NEVER prints instructions for Claude
-# to follow. It either BLOCKS or ALLOWS. That's it.
+  9:02 AM  Lead #1  — 14 messages, 3 qualifying questions,
+                      asked about move date, budget, pets.
+                      Notes: "2br, $1400 max, cat, Jan move"
+                      Follow-up: scheduled for Friday.
 
-if echo "$COMMAND" | grep -iqE \
-  '(DROP\s+TABLE|TRUNCATE|DELETE\s+FROM)'; then
-  echo "BLOCKED" >&2
-  exit 2
-fi
+  9:38 AM  Lead #2  — 11 messages, full qualification.
+                      Notes: "3br voucher, 2 kids, ASAP"
+                      Follow-up: docs requested same day.
+
+  ...
+
+  3:47 PM  Lead #19 — 4 messages. "What area?"
+                      "South side." "Ok I'll look."
+                      Notes: empty.
+                      Follow-up: none.
+
+  4:22 PM  Lead #20 — 3 messages. "Budget?"
+                      "$1200" "Ok."
+                      Notes: empty.
+                      Follow-up: none.
+
+  4:51 PM  Lead #22 — 1 message. "Hi are you still looking?"
+                      No response. No follow-up. Lead died.
+
+  Morning leads:  avg 12.3 messages, 94% had notes
+  Afternoon leads: avg 3.8 messages, 15% had notes
+  The battery drained in real time.
 </pre>
 
-I don't trust myself to remember the database safety rules when I'm depleted. The hook doesn't deplete. It doesn't have a bad day. It doesn't get tired at 5 PM. It just runs, deterministically, every single time.
+I wrote about this phenomenon in [my CLAUDE.md essay](/essays/my-claude-md/) — the governance file that runs the whole system. One of its rules is "Teaching mode: ALWAYS ON." The AI explains everything it does, defines every term, shows every trade-off. Not because the AI needs to be didactic. Because at 2 AM, when I'm debugging and depleted, I need the cognitive cost of every interaction to be as low as possible. The system explains itself to me the way a pharmacist labels pills: not because you're stupid, but because you might be exhausted.
 
-The bottom-up analysis law? Same pattern. When I'm tired, I reach for the aggregate query — the fast answer, the summary table, the dashboard number. The hook blocks me. "Have you read individual records first?" It forces me to do the hard thing, even when my ego is depleted and I want the shortcut.
+The hooks are the same pattern. There are 8 of them — deterministic scripts that run on every tool call, every edit, every session start and stop. They can't be skipped. They don't deplete. One blocks destructive SQL. One catches syntax errors on every file save. One forces context loading before any session starts.
+
+I don't trust myself to remember the database safety rules when I'm depleted. The hook doesn't deplete. It doesn't have a bad day. It doesn't get tired at 5 PM. It just runs, deterministically, every single time. When I'm tired and I reach for the aggregate query — the fast answer, the summary table, the dashboard number — the hook blocks me. "Have you read individual records first?" It forces me to do the hard thing, even when my ego is depleted and I want the shortcut.
 
 McRaney also writes about the [survivorship bias](https://youarenotsosmart.com/2013/05/23/survivorship-bias/) — the Abraham Wald story about studying bullet holes on returning bombers. Every founder biography is a returning bomber. You read about the ones who pushed through, who ground it out, who "just kept going." You don't read about the ones who burned out, made bad decisions from ego depletion, and quietly failed. Those planes didn't come back.
 
