@@ -2,8 +2,8 @@ name: Update Build Journal
 
 on:
   schedule:
-    # Every 6 hours
-    - cron: '0 */6 * * *'
+    # Daily at 6 AM UTC (midnight CT)
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 permissions:
