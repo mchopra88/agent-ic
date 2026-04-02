@@ -1,0 +1,39 @@
+name: Update Build Journal
+
+on:
+  schedule:
+    # Every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-journal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch commits from all production repos
+        env:
+          GH_TOKEN: ${{ secrets.JOURNAL_PAT }}
+        run: node .github/scripts/fetch-journal.mjs
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git diff --quiet src/_data/journal-cache.json && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push updated journal
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "journal-bot"
+          git config user.email "journal-bot@agent-ic.co"
+          git add src/_data/journal-cache.json
+          git commit -m "chore: auto-update build journal ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push
