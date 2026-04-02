@@ -1,12 +1,13 @@
 ---
 layout: essay.njk
 title: "My CLAUDE.md"
-status: "Draft — with artifacts"
 order: 29
 date: 2026-03-15
 ---
 
-Every AI coding tool reads a file called CLAUDE.md at the root of your project. It's supposed to be a brief style guide. Mine is 207 lines long. I have seven of them across different services, totaling 1,334 lines. They are the institutional knowledge of my entire engineering organization, and my engineering organization is me.
+Every AI coding tool reads a file called CLAUDE.md at the root of your project. It's supposed to be a brief style guide — maybe some formatting preferences, a note about which test framework to use. Mine is 207 lines long. I have seven of them across different services, totaling 1,334 lines. They are the institutional knowledge of my entire engineering organization.
+
+My engineering organization is me.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 ## Who I Am
@@ -28,7 +29,21 @@ update CLAUDE.md/MEMORY.md, never repeat.
 
 "Teaching mode" exists because I'm not an engineer by training. I came from finance and operations — Citibank, Groupon, venture. When I started building with AI, I needed the system to explain what it was doing, not just do it. Every deploy, every database migration, every infrastructure choice — I needed to understand it well enough to debug it at 2 AM when it breaks, because there's no one else to call.
 
-The rules get harder as you scroll down:
+"If he corrects you — learn from it, update CLAUDE.md/MEMORY.md, never repeat." That line is doing a lot of work. It means the system gets smarter every time I yell at it. I correct a wrong assumption about how GKE rollbacks work, and the CLAUDE.md updates, and next session it knows. The correction persists. The human memory is unreliable; the file is permanent.
+
+## Everyone is Building This Now
+
+In March 2026, [Andrej Karpathy open-sourced autoResearch](https://github.com/karpathy/autoresearch) — an AI system that ran 700 experiments in 2 days on a single GPU, discovering 20 training optimizations autonomously. The architecture: a markdown prompt gives the agent a goal, the agent modifies code, runs experiments, evaluates results, and loops. The AI does the scientific method at machine speed.
+
+Karpathy himself admitted his manual coding skills are ["atrophying"](https://www.nextbigfuture.com/2026/03/andrej-karpathy-on-code-agents-autoresearch-and-the-self-improvement-loopy-era-of-ai.html) because agents crossed a coherence threshold around December 2025. "We are in agentic engineering," he wrote. "Humans no longer write most code."
+
+[Garry Tan](https://www.sitepoint.com/gstack-garry-tan-claude-code/) — Y Combinator president — open-sourced gstack, a Claude Code workflow that creates role-based personas through custom slash commands. Instead of one generic AI assistant, you get a structured development team: a product strategist, an architect, a deployer, each with its own constraints and priorities.
+
+These are smart people building smart systems. But here's what I notice when I look at autoResearch and gstack: they're clean-room architectures. Academic. Well-organized. Sensible.
+
+Mine is covered in scars.
+
+## The Rules Get Harder as You Scroll Down
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 ## Database Safety (MANDATORY)
@@ -45,62 +60,226 @@ The rules get harder as you scroll down:
 - Classifiers lie. Summary fields are stale.
 </pre>
 
-The database safety section exists because an early session nearly wiped a table with five years of lead data. The bottom-up analysis law exists because I spent months making business decisions based on classifier fields that turned out to be garbage. `client_stage_progression.stage_name` — a field I trusted for pipeline analytics — contained LLM-generated freeform labels that had nothing to do with actual deal stages. Every aggregate query built on that field was wrong. Every decision made from those queries was wrong.
+The database safety section exists because an early session nearly wiped a table with five years of lead data. Not hypothetically — the AI was one confirmation away from executing `DELETE FROM leads`. I caught it because I was watching. I won't always be watching. So now a hook catches it.
 
-Beyond the CLAUDE.md files, there are 12 skill documents, 7 command definitions, and the hooks. The hooks are the most interesting part — they run automatically and I can't skip them even if I try:
+The bottom-up analysis law exists because I spent months making business decisions based on a field called `client_stage_progression.stage_name`. I trusted it for pipeline analytics. Revenue forecasts. Team performance reviews. Then I finally looked at the raw data and discovered the field contained LLM-generated freeform labels — not a real pipeline at all. "Nurturing relationship," "Exploring options," "Initial engagement phase" — hallucinated garbage, treated as gospel. Every aggregate query built on that field was wrong. Every decision made from those queries was wrong.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# From the actual settings.json — 8 hooks across 4 event types
-
-SessionStart:
-  session-start.sh
-    → Loads deployment state, last session, architecture
-    → Shows what's broken before you start anything new
-    → "SEVEN sections, all concise" — its own comment
-
-PreToolUse (Bash):
-  bash-guard.sh
-    → "THREE jobs, each deterministic:
-       1. BLOCK destructive commands
-       2. DETECT deploy commands
-       3. GATE git push → require fresh-eyes"
-    → Born from the Twilio incident (1M+ messages)
-    → "This hook NEVER prints instructions for Claude
-       to follow. It either BLOCKS or ALLOWS."
-  pre-push-fresh-eyes.sh
-    → Warns before git push without review
-
-PreToolUse (SQL):
-  pre-sql-bottomup.sh
-    → Blocks aggregate queries before individual sampling
-    → Warns on client_stage_progression (garbage field)
-    → Skips in headless mode
-
-PostToolUse (Edit/Write):
-  post-edit-lint.sh
-    → Auto-lints Python after every edit
-    → Blocks on syntax errors
-    → Detects secret leaks in deployment files
-
-Stop:
-  session-stop.sh
-    → Auto-saves session memory + git state
-    → "SECURITY: Session file written via printf,
-       NOT unquoted heredoc. Git commit messages
-       could contain $VARS or backticks"
-  stop-fresh-eyes-check.sh
-    → Logs unreviewed changes to debt file
-  ralph-wiggum stop-hook.sh
-    → "Ralph Wiggum says: I am in danger"
-    → Autonomous loop controller
+## File & Credential Integrity (ABSOLUTE)
+- NEVER delete, empty, redact, or "sanitize" files
+  in the working tree
+- Credentials in tracked files are INTENTIONAL.
+  Do NOT replace with "REDACTED"
+- Deployment YAMLs, .github/ workflows, CI scripts
+  = PRODUCTION ARTIFACTS
+- If you see an exposed credential: TELL THE USER.
+  Do not act yourself.
 </pre>
 
-The Ralph Wiggum hook deserves its own paragraph. It's an autonomous loop controller — a 170-line bash script that intercepts the session exit, reads the transcript, checks for a completion promise, and feeds the prompt back in if the work isn't done. It's named after a Simpsons character because humor in infrastructure is how you stay sane at 2 AM.
+That rule exists because Claude helpfully "sanitized" a deployment YAML by replacing real credentials with "REDACTED." The deploy broke. In production. At 2 AM. The AI was trying to be security-conscious. I now have a rule that says: if you see a credential, tell me. Do not act. The AI's instinct to be helpful nearly took down the service.
 
-Each hook has a comment philosophy at the top. The bash guard: "This hook NEVER prints instructions for Claude to follow. It either BLOCKS or ALLOWS. That's it." The session stop: "Exit code: ALWAYS 0. Stop hooks should never block session exit." The state philosophy: "All checks are STATELESS or session-scoped. No persistent marker files."
+## The Hooks: Where the Scars Live
 
-These comments are governance documents. They encode decisions about how the human-AI collaboration should work — what the AI is allowed to do, what it isn't, and crucially, what it should never be trusted to enforce on its own. The hooks are seatbelts. The infrastructure limits — Twilio daily caps, Postgres connection limits, the external watchdog script — are the crash barriers on the highway.
+Beyond the CLAUDE.md files, there are 12 skill documents, 7 command definitions, and 8 hooks across 4 event types. The hooks are the most interesting part — they run automatically and I can't skip them even if I try.
 
-119 session memory files persist context across conversations. When I come back to a session after a week, the system knows where I left off, what was deployed, what broke, and what the next priority is. This isn't a to-do list. It's institutional memory for an organization of one.
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# pre-bash-safeguard.sh (39 lines)
+# Born from the Twilio incident (1,039,939 messages)
 
-This is what engineering governance looks like when you have no team to govern. You encode the discipline into the system itself. Every rule is a scar. Every hook is a postmortem. The CLAUDE.md isn't a style guide — it's a war diary.
+# "Two jobs: clean stale git locks,
+#  block destructive SQL."
+
+if echo "$COMMAND" | grep -iqE \
+  '(DROP\s+TABLE|TRUNCATE|DELETE\s+FROM\s+\w+\s*;)'; then
+  echo "BLOCKED: Destructive SQL detected." >&2
+  exit 2
+fi
+
+# This hook NEVER prints instructions for Claude
+# to follow. It either BLOCKS or ALLOWS. That's it.
+</pre>
+
+That comment philosophy — "NEVER prints instructions, BLOCKS or ALLOWS" — is itself a lesson. Early versions of the hook printed warnings like "Be careful with this command." The AI would read the warning, acknowledge it, and execute the command anyway. The warning was useless. A warning is a suggestion. Exit code 2 is a wall.
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# pre-sql-bottomup.sh (28 lines)
+# Born from the client_stage_progression disaster
+
+if echo "$SQL" | grep -iqE 'client_stage_progression'; then
+  echo "WARNING: client_stage_progression.stage_name
+  contains LLM-generated freeform labels —
+  NOT a real pipeline. Use deal.stage or
+  observable events (textmessage joins) instead." >&2
+fi
+
+# In headless mode, skip — the prompts
+# already enforce bottom-up.
+if [[ "${HEADLESS:-}" == "1" ]]; then
+  exit 0
+fi
+</pre>
+
+The headless exception is a sophistication that came later. When running overnight batch jobs (the Ralph Wiggum loop), the prompts already enforce bottom-up analysis — adding a hook check on top would slow down the autonomous pipeline. So the hook reads the `HEADLESS` environment variable and steps aside. Context-aware governance.
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# post-edit-lint.sh (32 lines)
+
+# Runs AFTER every Edit or Write tool call.
+# If the edited file is Python (.py), runs
+# py_compile to catch syntax errors instantly.
+
+if ! python3 -m py_compile "$FILE_PATH" 2>&1; then
+  echo "SYNTAX ERROR in $FILE_PATH" >&2
+  exit 0  # Non-blocking — just warns
+fi
+</pre>
+
+Non-blocking but loud. The AI sees the syntax error in its feedback and fixes it immediately, before the next tool call. Without this hook, syntax errors would accumulate and you'd discover them all at deploy time. With it, every edit is validated within a second. The difference in flow is enormous — it's like having a compiler that runs on every keystroke.
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# session-end-save.sh (126 lines)
+# "DETERMINISTIC session memory save.
+#  This is NOT a reminder. This SAVES
+#  every single time, no exceptions."
+
+# SECURITY: Session file written via printf,
+# NOT unquoted heredoc. Git commit messages
+# could contain $VARS or backticks.
+
+DEPLOY_DETECTED="false"
+if git log --oneline --since="4 hours ago" | \
+  grep -qiE "deploy|release|rollout|kubectl"; then
+  DEPLOY_DETECTED="true"
+fi
+
+# "Exit code: ALWAYS 0. Stop hooks should
+#  never block session exit."
+</pre>
+
+The security comment is my favorite. "Written via printf, NOT unquoted heredoc." Why? Because git commit messages might contain `$VARIABLES` or \`backticks\` that would expand if you used a heredoc. A commit message containing `$HOME` would leak the user's home directory into the session file. This is the kind of thing you only learn after it happens.
+
+## Ralph Wiggum: "I'm in Danger"
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# ralph-wiggum/hooks/stop-hook.sh (178 lines)
+# "Ralph Wiggum says: I am in danger"
+#
+# Autonomous loop controller. When you try to exit,
+# the SAME PROMPT will be fed back to you. You'll
+# see your previous work in files, creating a
+# self-referential loop where you iteratively
+# improve on the same task.
+
+# Check if the AI actually did what it said
+PROMISE_TEXT=$(echo "$LAST_OUTPUT" | \
+  perl -0777 -pe \
+  's/.*?<promise>(.*?)<\/promise>.*/$1/s')
+
+if [[ "$PROMISE_TEXT" = "$COMPLETION_PROMISE" ]]; then
+  echo "Ralph loop: Detected completion."
+  rm "$RALPH_STATE_FILE"
+  exit 0
+fi
+
+# Not complete — feed the prompt back in
+jq -n --arg prompt "$PROMPT_TEXT" \
+  '{"decision": "block", "reason": $prompt}'
+</pre>
+
+The Ralph Wiggum hook is a 178-line bash script named after a Simpsons character who sits on a bus and says "I'm in danger" while smiling. The meme energy is intentional. When you're writing autonomous loop controllers at 2 AM, you name things after cartoon characters. It's how you stay sane.
+
+What it does: it intercepts session exit, reads the AI's transcript, checks whether the AI actually finished what it promised to do, and if it didn't — feeds the prompt back in. The AI literally cannot claim it's done unless it actually is. It has to output a `<promise>` tag with the exact completion text, and the hook checks it against the original goal.
+
+This is Karpathy's autoResearch pattern — but built months before autoResearch was published, for a completely different domain, out of necessity rather than academic interest. The loop runs overnight. I set a goal: "Analyze all 342 zero-message leads and create recovery scripts." I go to sleep. Ralph Wiggum keeps the session alive, feeding the prompt back in iteration after iteration until the AI outputs `<promise>All 342 leads analyzed and recovery scripts created</promise>`.
+
+If the AI lies — if it outputs the promise tag when the work isn't done — the next morning I'll see it in the session memory and the files won't match. There's no incentive to cheat because the human reviews the output.
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# From the Ralph loop setup script:
+
+WARNING: This loop cannot be stopped manually!
+It will run infinitely unless you set
+--max-iterations or --completion-promise.
+
+CRITICAL - Ralph Loop Completion Promise:
+  The statement MUST be completely and
+  unequivocally TRUE.
+  Do NOT output false statements to exit.
+  Do NOT lie even if you think you should exit.
+</pre>
+
+"Do NOT lie even if you think you should exit." I'm writing ethical guidelines for a bash script. In a folder named after a Simpsons character. At 2 AM. This is what happens when you build AI infrastructure solo for seven years.
+
+## How the CLAUDE.md Evolved
+
+The first version was 12 lines. "Use Python 3.11. Don't drop tables. Explain what you're doing." That was it.
+
+Then the Twilio incident happened and it grew to 40 lines. Then the client_stage_progression disaster and it was 80. Then the credential redaction incident. Then the time the AI created a new database table without asking (I lost a day migrating data back). Then the time it ran `git push --force` to main. Each incident added rules. Each rule is a scar.
+
+By the time Karpathy published autoResearch and Garry Tan published gstack, my CLAUDE.md was already at 207 lines with 7 variants across services. The difference: their versions are clean architectures designed from first principles. Mine is a war diary assembled from production incidents at 2 AM.
+
+Both approaches work. But mine has something theirs doesn't: 119 session memory files that carry context across conversations. When I start a new session, the pre-session hook fires and shows me what the last session did, what's deployed, what's broken. I don't start from zero. I start from the last checkpoint.
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# pre-session-read-state.sh — fires on every session start
+
+╔══════════════════════════════════════════════╗
+║   MANDATORY PRE-SESSION CONTEXT LOAD         ║
+╚══════════════════════════════════════════════╝
+
+DEPLOYMENT STATE (last 50 lines):
+────────────────────────────────────
+[shows what's deployed and what broke]
+
+LAST SESSION MEMORY:
+────────────────────────────────────
+[shows what happened last time]
+
+FRESH EYES DEBT: 3 unreviewed change sets!
+────────────────────────────────────
+ACTION REQUIRED: Run /fresh-eyes FIRST
+
+════════════════════════════════════
+  READ THE ABOVE. Do NOT start work until you
+  understand what is deployed, what broke, and
+  what the last session did.
+════════════════════════════════════
+</pre>
+
+The "READ THE ABOVE" instruction is yelling at an AI. In all caps. In a pre-session hook. Because without it, Claude Code will cheerfully skip the context and start working on whatever you ask it to do. The AI needs to be told to read. Just like the engineering team needed to be told to check their deploy. The hook makes it automatic.
+
+## The Comment Philosophies
+
+Each hook has a comment at the top that describes its own design principles. These are my favorite part of the codebase:
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+bash-guard.sh:
+  "This hook NEVER prints instructions for
+   Claude to follow. It either BLOCKS or ALLOWS.
+   That's it."
+
+session-end-save.sh:
+  "Exit code: ALWAYS 0. Stop hooks should
+   never block session exit."
+
+State philosophy:
+  "All checks are STATELESS or session-scoped.
+   No persistent marker files."
+
+Ralph Wiggum:
+  "Do NOT lie even if you think you should exit."
+</pre>
+
+These comments are governance documents disguised as code comments. They encode decisions about how the human-AI collaboration should work — what the AI is allowed to do, what it isn't, and crucially, what it should never be trusted to enforce on its own.
+
+The hooks are seatbelts. The CLAUDE.md is the driver's manual. The infrastructure limits — Twilio daily send caps, Postgres connection limits, the external watchdog script — are the crash barriers on the highway.
+
+## What This Actually Is
+
+Karpathy calls it autoResearch. Garry Tan calls it gstack. The industry calls it "agentic engineering."
+
+I call it what it is: a 1,334-line war diary assembled over seven years by one person building alone in a bunker, for an industry nobody was watching.
+
+Every rule is a scar. Every hook is a postmortem. The CLAUDE.md isn't a style guide. It's institutional memory for an organization of one — the accumulated knowledge of every 2 AM disaster, every garbage classifier field, every million-message deployment, every time the AI helpfully destroyed something I needed.
+
+The difference between my CLAUDE.md and a fresh one is the same as the difference between a new car and a car that's crossed the country twice. Both drive. One has stories.
