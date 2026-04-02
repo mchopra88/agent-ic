@@ -1,7 +1,6 @@
 ---
 layout: essay.njk
 title: "One tmux, Eight Sessions, Zero Engineers"
-status: "Draft"
 order: 18
 date: 2025-11-10
 ---
@@ -9,23 +8,42 @@ date: 2025-11-10
 Right now, on a Mac Studio M4 Pro with 96GB of RAM sitting in my home office, there are eight tmux sessions running. Each one has Claude Code active. Each one is a different workstream. This is what my "engineering team" looks like:
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-tmux sessions:
-  cicd          — CI/CD pipeline, Cloud Build, GKE deployments
-  ygl           — Landlord Rep agent (YGL/Blue Lake deals)
-  insurance     — Ken agent (renters insurance SMS sales)
-  matching-fix  — Lead-to-inventory matching logic
-  collections   — Commission tracking and payment reconciliation
-  alerts        — Discord webhooks, monitoring, error channels
-  deploy-fix    — Production hotfixes when something breaks at 2am
-  redteam       — Adversarial testing against production agents
+$ tmux list-sessions
+
+agent-v4:     3 windows  — Apartment Locator
+ygl-service:  2 windows  — Landlord Rep (Blue Lake)
+ken-agent:    2 windows  — Insurance Agent (Assurant)
+ci-pipeline:  1 window   — CI/CD, testing, deploys
+data-pipe:    2 windows  — Inventory pipeline
+financial:    1 window   — Revenue, P&L, payments
+red-team:     1 window   — Adversarial testing
+infra:        1 window   — GKE, monitoring, debugging
 </pre>
 
-I context-switch between these the way an engineering manager would context-switch between team standups. But I'm not managing. I'm building. In each session, Claude Code has the full context of that workstream — the CLAUDE.md, the session memory, the relevant skill documents. When I come back to a session after four hours, the context is still there.
+I work in one session, switch to another, come back. The sessions don't lose state because they're tmux — they persist. The AI doesn't lose context because the CLAUDE.md loads fresh on every interaction, and the session memory carries what happened in the last conversation. I can leave the insurance agent mid-conversation, go fix a matching bug in the locator, deploy it, come back to the insurance agent, and it knows exactly where we left off.
 
-The Mac Studio matters. 96GB of unified memory means I can run multiple LLM sessions, a local PostgreSQL connection, Docker builds, and Mutagen file sync simultaneously without swapping. The M4 Pro's single-thread performance means compilation is instant. The machine is an investment — but it costs less than one month of one junior engineer's salary, and it will last three years.
+Mutagen keeps the local filesystem in sync with the remote development environment. The Mac Studio is both the development machine and the deployment staging server. When I SSH from my MacBook Air — whether I'm on the couch or in a Vienna airport lounge — I'm looking at the same tmux sessions, the same git state, the same running services.
 
-Mutagen syncs my local filesystem to the GKE cluster. When I save a file locally, it's on the cluster within seconds. When I `git push`, Cloud Build triggers, Docker builds, and the new image rolls out to production. The entire deploy pipeline is 3-4 minutes from commit to live.
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# What each session has loaded:
 
-This is not how software engineering is supposed to work. One person shouldn't be able to run eight parallel workstreams across four business units. But that's the whole point of AI-native development: the bottleneck is no longer typing speed or engineering headcount. The bottleneck is architectural judgment and domain knowledge. I have both. The machine handles the rest.
+1. Its own CLAUDE.md (business-unit specific rules)
+2. The master CLAUDE.md (cross-cutting governance)
+3. Session memory from the last conversation
+4. Pre-session hook output:
+   - Current deployment state
+   - Last session summary
+   - Fresh-eyes debt
+   - Current git state
+5. All hooks active:
+   - bash-guard (blocks destructive commands)
+   - post-edit-lint (catches syntax errors)
+   - session-end-save (preserves state)
+   - Ralph Wiggum (autonomous loop control)
+</pre>
 
-<p class="coming-soon">Full essay coming soon — will include actual tmux screenshots, the Mutagen config, the Mac Studio build vs. previous team output, and the daily workflow documented hour by hour.</p>
+The 96GB of RAM matters because Claude Code is memory-hungry when running multiple instances. Each session loads the full context — CLAUDE.md files, session memory, the entire codebase index. Eight sessions × roughly 8-10GB each = most of the RAM. The M4 Pro handles it without thermal throttling, which matters at 3 AM when you've been running overnight batch jobs for six hours.
+
+This is the one-person engineering team. Not a heroic individual working 80-hour weeks. A system designed so that one person, with the right tools and architecture, can operate at the same throughput as a small engineering department. The leverage isn't working harder — it's the CLAUDE.md files, the hooks, the session memory, and the governance layer that makes every AI interaction build on every previous one.
+
+The machine on my desk costs less than one month of a junior engineer's salary. It runs 24/7. It doesn't take PTO. And every session it runs makes the next session better, because the rules accumulate and the scars persist.

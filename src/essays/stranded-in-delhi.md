@@ -1,7 +1,6 @@
 ---
 layout: essay.njk
 title: "Stranded in Delhi, Deploying From Vienna"
-status: "Draft"
 order: 13
 date: 2025-10-20
 ---
@@ -10,14 +9,42 @@ The Indian airspace closed while I was in Delhi. No flights out. Full stop.
 
 I was running a 30,000-lead-per-day operation from a hotel room on the other side of the planet. The systems were still processing. The agents were still conversing. The overnight machine was still running. But I needed to deploy a fix — a matching logic update that was causing leads in Dallas to miss buildings that should have been in their result set.
 
-I got rerouted through Vienna on Air India AI-127. Somewhere over Central Asia, connected to whatever Wi-Fi the Dreamliner was offering, I was reviewing logs from the overnight run. The matching fix needed to ship before the next morning's lead wave.
+The routing to get out went Delhi → Vienna → Chicago. Seventeen hours of travel. Somewhere over the Arabian Sea, the Dallas team reported the matching bug was costing us deals. I couldn't wait.
 
-I deployed from the Vienna airport lounge during a layover. Pushed the code, watched Cloud Build compile, confirmed the pods rolled over in GKE, verified the fix in production. The whole thing took twenty minutes.
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# What a deploy looks like from a Vienna airport lounge
 
-This is what I mean when I talk about the overnight machine. Not that I work from airports — that's just circumstance. But that the system is designed to be operated from anywhere, by one person, with a laptop and an internet connection. There's no office to go to. There's no team to coordinate. There's a tmux session and a deployment pipeline.
+1. SSH into Mac Studio from hotel WiFi
+   (Mutagen sync keeps local and remote in sync)
 
-The question people always ask is: "Doesn't it stress you out, running everything solo?" The honest answer is yes, sometimes, at 2 AM when something breaks and there's no one to call. But the alternative — managing a team of humans across time zones, hoping they don't push a million text messages on a Friday, trusting that the deploy actually landed — that stressed me out more.
+2. Open tmux session — agent-v4
 
-The machine is reliable. The machine doesn't sleep, but it also doesn't make mistakes at scale. If something breaks, I can see exactly what broke, exactly when, and exactly why. Try getting that from a team of five engineers.
+3. The CLAUDE.md loads. The pre-session hook fires:
+   "Branch: main"
+   "Last commit: fix matching radius ..."
+   "Uncommitted: 0 files"
+   "Deploy detected: false"
 
-<p class="coming-soon">Full essay coming soon.</p>
+4. Fix the WHERE clause. Test locally.
+   The post-edit hook auto-lints.
+
+5. git push. GKE picks it up.
+
+6. The bash-guard hook confirms:
+   no destructive commands in the deploy.
+
+7. /verify-deploy — 7-step checklist.
+   All green.
+
+Total time: 22 minutes from Vienna to production.
+</pre>
+
+This is what the overnight machine buys you. Not just "the system runs while you sleep" — the system runs while you're stranded in another continent, debugging over airport WiFi, deploying from a lounge chair. The architecture doesn't care where I am. The hooks run the same. The CLAUDE.md loads the same. The verification checklist is the same.
+
+The matching bug was a radius calculation that used miles instead of kilometers for the Dallas market. A 5-mile radius was actually filtering at 5 kilometers — about 3 miles. Every building between 3 and 5 miles from the renter was invisible. 37% of Dallas inventory, gone from the results.
+
+I found it because the macro loop — the pattern-level feedback system — flagged it. Tour bookings in Dallas dropped 18% over two days. The retro loop showed individual conversations where renters were saying "you don't have anything near me." The meta loop asked: did something change in the matching system? Yes — a commit three days earlier that refactored the distance calculation.
+
+The fix was one line. The deploy was 22 minutes. The architecture that made it possible was seven years.
+
+Marc Andreessen says "forward." The arrows always point forward. But forward from Delhi goes through Vienna. And the machine keeps running the whole way.

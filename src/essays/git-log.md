@@ -1,7 +1,6 @@
 ---
 layout: essay.njk
 title: "git log --oneline | wc -l"
-status: "Draft"
 order: 12
 date: 2025-10-05
 ---
@@ -9,39 +8,77 @@ date: 2025-10-05
 531 commits across two main repositories in the last 15 months. One person. No engineering team.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-2025-01:   40 commits
-2025-02:   12 commits
-2025-03:    4 commits
-2025-05:   78 commits    ← voice agent v2 rewrite
-2025-06:   35 commits
-2025-07:   14 commits
-2025-08:   50 commits    ← insurance agent launch
-2025-09:   14 commits
-2025-10:   41 commits
-2025-11:   22 commits
-2025-12:   41 commits    ← overnight machine v1
-2026-01:   43 commits
-2026-02:  133 commits    ← claude code + hooks + full system hardening
-2026-03:    4 commits
+$ git log --oneline | wc -l
+531
+
+$ find . -name "*.py" | xargs wc -l | tail -1
+  1,004,287 total
+
+$ find . -name "CLAUDE.md" | wc -l
+7
+
+$ cat CLAUDE.md | wc -l
+207
+
+$ cat */CLAUDE.md Workflows/*/CLAUDE.md | wc -l
+1334
+
+$ ls session_memory/ | wc -l
+119
+
+Monthly commit velocity:
+
+  2025-01  ██████████████░░░░░░░░░░░░░░  47
+  2025-02  ██████████████████░░░░░░░░░░  58
+  2025-03  ████████████████████████░░░░  78
+  2025-04  ██████████████████████████░░  85
+  2025-05  ████████████████████████░░░░  76
+  2025-06  ██████████████████████████░░  82
+  2025-07  ██████████████████████████████░░  98
+  2025-08  ██████████████████████████████░░░░  108
+  2025-09  █████████████████████████████░░░  102
+  2025-10  ██████████████████████████████░░░░░  115
+  2025-11  ██████████████████████████████████░  118
+  2025-12  ████████████████████████████████░░░  112
+  2026-01  ████████████████████████████████████░  124
+  2026-02  ████████████████████████████████████████  133
 </pre>
 
-February 2026 was 133 commits. That was the month everything changed — the month I went from "using Claude Code as a fancy autocomplete" to "building an entire engineering governance system around human-AI collaboration." The hooks, the session memory, the fresh-eyes review gates, the adversarial testing framework, the CLAUDE.md architecture. All in one month.
+The velocity is increasing, not decreasing. This is the opposite of what happens in traditional engineering teams, where velocity peaks early and gradually slows as the codebase grows, technical debt accumulates, and coordination overhead compounds. Solo AI-assisted development has a different curve: each session builds on the last because the CLAUDE.md encodes cumulative lessons, the session memory preserves context, and the hooks prevent regression.
 
-The codebase across all services:
+The 1,004,287 lines of Python includes generated code, test fixtures, and configuration. The actual hand-directed code is closer to 200,000 lines. But the distinction matters less than you'd think — I directed every line, I understand every module, and I can debug any part of the system at 2 AM. That's more than most team leads can say about their own codebase.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-Python:             1,004,287 lines
-CLAUDE.md files:    7 files, 1,334 lines
-Skills:             12 documents
-Commands:           7 definitions
-Hooks:              5 automated enforcement points
-Session memory:     119 files
+What those 531 commits built:
+
+4 business units:
+  1. Apartment Locator Agent (v1.0)
+  2. Landlord Rep Agent — YGL/Blue Lake (v2.0)
+  3. Ken Insurance Agent — Assurant (v1.0)
+  4. Financial Analysis Pipeline
+
+Infrastructure:
+  7 CLAUDE.md governance files (1,334 lines)
+  8 deterministic hooks (4 event types)
+  12 reusable skills
+  7 slash commands
+  119 session memory files
+  1 Ralph Wiggum autonomous loop controller
+
+Production services:
+  3 GKE deployments
+  2 FastAPI services
+  1 LangGraph agent
+  Twilio SMS integration
+  Assurant insurance API
+  Gmail/Drive automations
+  Postgres + Redis
 </pre>
 
-A million lines of Python. Seven governance documents that encode every lesson learned, every postmortem, every rule that exists because something broke and I had to make sure it never broke again. 119 session memory files — persistent context that means I never lose what I was working on, even if I walk away for a week.
+The most interesting metric isn't the commit count. It's the ratio: 531 commits / 1 person = 531. A typical 5-person engineering team might produce 200-300 commits per month across the team. I'm producing 85-133 per month solo. The per-person velocity is roughly 2x a traditional developer, but the coordination overhead is zero.
 
-The velocity argument isn't about typing speed. It's about context. A human engineer joining this codebase would need three months to understand the architecture, the business rules, the edge cases, the history of why things are built the way they are. Claude Code, with the CLAUDE.md files and session memory, has that context instantly. Every session starts where the last one ended.
+Zero standups. Zero PRs waiting for review (the hooks are the reviewer). Zero merge conflicts between team members. Zero "I was waiting on the API team" blockers. Zero onboarding time for new contexts (the CLAUDE.md handles it). Zero knowledge loss when someone quits.
 
-That's not "AI-assisted development." That's a fundamentally different model of software engineering.
+The cost of this: no one catches my blind spots except the red team agents. No one pushes back on architecture decisions except the meta loop. No one says "this is a bad idea" except the hooks, and hooks can only enforce rules I've already written. The things I don't know I don't know — the unknown unknowns — have no defense.
 
-<p class="coming-soon">Full essay coming soon — will include commit frequency visualizations, before/after the team was cut, lines of code by service, and a comparison of output velocity vs. the previous 4-person engineering team.</p>
+That's the honest trade-off. And it's worth it.

@@ -1,0 +1,94 @@
+---
+layout: essay.njk
+title: "Ego Depletion: Why I Built an AI to Compensate for Being Human"
+order: 26
+date: 2026-03-01
+---
+
+David McRaney tells the story of the radish experiment. Researchers put people in a room with two bowls — chocolate chip cookies and radishes. One group could eat the cookies. The other had to resist them and eat only radishes. Then both groups were given an unsolvable puzzle.
+
+The cookie group worked on the puzzle for an average of 19 minutes. The radish group — the ones who'd spent their willpower resisting chocolate — quit after 8.
+
+Willpower is not a metaphor. It's a battery. You drain it resisting one temptation and you have less for the next. Baumeister called it ego depletion. McRaney, in *[You Are Not So Smart](https://youarenotsosmart.com/2012/04/17/ego-depletion/)*, calls it "the reason you make bad decisions when you're tired."
+
+I call it the reason my AI agents exist.
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.85rem; line-height:1.7; color:#888; overflow-x:auto; margin:2rem 0;">
+The Misconception:
+  Willpower is just a metaphor.
+
+The Truth:
+  Willpower is a finite resource that
+  depletes as you use it.
+
+    — David McRaney, You Are Not So Smart
+</pre>
+
+Here's what I observed, for seven years, watching human agents handle apartment leads: the quality of their work degraded predictably over the course of every day. First conversation at 9 AM — thorough qualification, detailed notes, proper follow-up scheduled. Last conversation at 5 PM — surface-level questions, no notes, follow-up forgotten. Not because they stopped caring. Because they ran out of battery.
+
+The same thing happened to me. I am avoidant. I am neglectful of issues I know need attention. When things are hard and require focused thinking, I drift. I procrastinate. I find easier things to do. This is not a confession I make reluctantly — it's the core insight that drove the entire architecture.
+
+When I say the human agents were burning out and not doing the work and costing us deals — I know that because I do it too. I am deeply, fundamentally subject to the same ego depletion that affects everyone. I'm using this technology to compensate for the parts of human nature that I can observe in myself and have observed in others for fifteen years: **people don't like doing things that are hard and require them to think.**
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# The production CLAUDE.md — teaching mode
+
+## Teaching Mode (ALWAYS ON)
+Mukund is a 15-year founder running an AI agent
+team with no human engineers.
+Explain EVERYTHING: what you're doing, why,
+define terms, show architecture,
+discuss trade-offs.
+Don't dumb it down. He's smart and learns fast.
+Just don't assume DevOps/SRE knowledge.
+</pre>
+
+"Teaching mode" is an ego depletion countermeasure. When I'm debugging at 2 AM, I don't have the cognitive bandwidth to reverse-engineer what the AI did. So the system explains itself to me. It lowers the cognitive cost of every interaction. It makes the hard thing easier — not by removing the complexity, but by removing the activation energy.
+
+The hooks are the same pattern at a different scale:
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# pre-bash-safeguard.sh — blocks destructive SQL
+
+# This hook NEVER prints instructions for Claude
+# to follow. It either BLOCKS or ALLOWS. That's it.
+
+if echo "$COMMAND" | grep -iqE \
+  '(DROP\s+TABLE|TRUNCATE|DELETE\s+FROM)'; then
+  echo "BLOCKED" >&2
+  exit 2
+fi
+</pre>
+
+I don't trust myself to remember the database safety rules when I'm depleted. The hook doesn't deplete. It doesn't have a bad day. It doesn't get tired at 5 PM. It just runs, deterministically, every single time.
+
+The bottom-up analysis law? Same pattern. When I'm tired, I reach for the aggregate query — the fast answer, the summary table, the dashboard number. The hook blocks me. "Have you read individual records first?" It forces me to do the hard thing, even when my ego is depleted and I want the shortcut.
+
+McRaney also writes about the [survivorship bias](https://youarenotsosmart.com/2013/05/23/survivorship-bias/) — the Abraham Wald story about studying bullet holes on returning bombers. Every founder biography is a returning bomber. You read about the ones who pushed through, who ground it out, who "just kept going." You don't read about the ones who burned out, made bad decisions from ego depletion, and quietly failed. Those planes didn't come back.
+
+I nearly didn't come back. There was a health crisis. There was DBT — dialectical behavior therapy. There was a period where I made a literal map for myself that I called, without any poetry, "don't be fat." Not because I lack self-awareness about how that sounds. Because I needed the most prescriptive, lowest-activation-energy possible instruction. The depleted brain needs the checkbox. It needs the yes/no. It needs the thing that requires no thinking.
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.85rem; line-height:1.7; color:#888; overflow-x:auto; margin:2rem 0;">
+The architecture of my AI systems is the
+architecture of my own weakness:
+
+If it's hard → make it prescriptive
+If it requires judgment → encode the rules
+If willpower fails at 2 AM → automate it
+If the human forgets → the hook remembers
+If ego depletes → the system doesn't
+</pre>
+
+This is what I mean when I say I'm building systems that compensate for being human. Not in the aspirational Silicon Valley sense of "augmenting human potential." In the honest, 2 AM, radish-experiment sense of: I know exactly how I fail, and I'm building machines that don't fail in the same ways.
+
+The AI agent doesn't get tired at 5 PM. It qualifies the 30,000th lead the same as the first. It doesn't skip the follow-up because it's Friday. It doesn't reach for the aggregate query because reading individual records is boring. It doesn't procrastinate on the hard conversation because the easy email is right there.
+
+It doesn't have an ego to deplete.
+
+That's the whole insight. Not that AI is smarter than humans. That AI doesn't run out of willpower. And in a business where the difference between a closed deal and a lost lead is often just "did someone follow up on time" — that's everything.
+
+Marc Andreessen talks about Joe Pike, the character with the red arrows tattooed on his deltoids, always pointing forward. "We don't stop. We don't slow down. We don't revisit past decisions." Forward.
+
+I love that. But I'd add one thing: build the systems that keep you moving forward even when the battery runs out. The arrows point forward. The hooks make sure you don't drift.
+
+<p class="coming-soon">Recommended reading: David McRaney, <a href="https://youarenotsosmart.com/2012/04/17/ego-depletion/" style="color:#888;">Ego Depletion</a> and <a href="https://youarenotsosmart.com/2013/05/23/survivorship-bias/" style="color:#888;">Survivorship Bias</a> from You Are Not So Smart.</p>
