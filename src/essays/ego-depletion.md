@@ -3,6 +3,7 @@ layout: essay.njk
 title: "Ego Depletion: Why I Built an AI to Compensate for Being Human"
 order: 26
 date: 2026-03-01
+private: true
 ---
 
 David McRaney tells the story of the radish experiment. Researchers put people in a room with two bowls — chocolate chip cookies and radishes. One group could eat the cookies. The other had to resist them and eat only radishes. Then both groups were given an unsolvable puzzle.
@@ -66,7 +67,7 @@ The bottom-up analysis law? Same pattern. When I'm tired, I reach for the aggreg
 
 McRaney also writes about the [survivorship bias](https://youarenotsosmart.com/2013/05/23/survivorship-bias/) — the Abraham Wald story about studying bullet holes on returning bombers. Every founder biography is a returning bomber. You read about the ones who pushed through, who ground it out, who "just kept going." You don't read about the ones who burned out, made bad decisions from ego depletion, and quietly failed. Those planes didn't come back.
 
-I nearly didn't come back. There was a health crisis. There was DBT — dialectical behavior therapy. There was a period where I made a literal map for myself that I called, without any poetry, "don't be fat." Not because I lack self-awareness about how that sounds. Because I needed the most prescriptive, lowest-activation-energy possible instruction. The depleted brain needs the checkbox. It needs the yes/no. It needs the thing that requires no thinking.
+I nearly didn't come back. There was a health crisis — the kind that comes from years of avoidance, from pouring every unit of willpower into the machine and leaving nothing for the maintenance of being a human body. There was a 75-page medical package that Karin helped me assemble. There was a period where I built myself a calorie tracking app — DBF, "Don't Be Fat" — because I needed the most prescriptive, lowest-activation-energy possible instruction. Not because I lack self-awareness about how that sounds. Because the depleted brain needs the checkbox. It needs the yes/no. It needs the thing that requires no thinking. The same design principle as the hooks: make the right behavior automatic, because willpower won't be there when you need it.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.85rem; line-height:1.7; color:#888; overflow-x:auto; margin:2rem 0;">
 The architecture of my AI systems is the

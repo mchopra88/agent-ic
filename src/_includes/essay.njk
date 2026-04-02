@@ -3,10 +3,57 @@ layout: base.njk
 navActive: essays
 ---
 
-<article>
+<article{% if private %} class="private-gate" id="private-gate"{% endif %}>
   <h1>{{ title }}</h1>
   {% if date %}<div style="color:#666; font-size:0.9rem; margin-bottom:2rem; font-style:italic;">{{ date | isoDate }}</div>{% endif %}
+  {% if private %}
+  <div class="gate-overlay" id="gate-overlay">
+    <h3>Private Essay</h3>
+    <p>This is personal writing shared with friends and collaborators. Enter the access code to read.</p>
+    <input type="password" id="gate-password" placeholder="Access code" autocomplete="off" />
+    <button onclick="checkGatePassword()">Unlock</button>
+    <div class="gate-error" id="gate-error">Wrong code. Ask Mukund.</div>
+  </div>
+  {% endif %}
   <div class="essay-body">
     {{ content | safe }}
   </div>
 </article>
+
+{% if private %}
+<script>
+// Simple hash — not cryptographic security, just casual gating
+function simpleHash(str) {
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    var char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return hash;
+}
+
+// The hash of the password (not the password itself)
+var GATE_HASH = -859821843;
+
+function checkGatePassword() {
+  var input = document.getElementById('gate-password').value;
+  if (simpleHash(input) === GATE_HASH) {
+    localStorage.setItem('agent-ic-access', 'granted');
+    document.getElementById('private-gate').classList.add('unlocked');
+  } else {
+    document.getElementById('gate-error').style.display = 'block';
+  }
+}
+
+// Check on load
+if (localStorage.getItem('agent-ic-access') === 'granted') {
+  document.getElementById('private-gate').classList.add('unlocked');
+}
+
+// Enter key support
+document.getElementById('gate-password').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') checkGatePassword();
+});
+</script>
+{% endif %}

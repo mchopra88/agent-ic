@@ -1,0 +1,45 @@
+---
+layout: base.njk
+title: Journal
+navActive: journal
+---
+
+<h1>Build Journal</h1>
+
+<p style="color:#999; font-size:1.05rem; margin-bottom:1rem;">What I built, what broke, and what I fixed. Updated every push.</p>
+<p style="color:#666; font-size:0.85rem; margin-bottom:3rem;">Inspired by <a href="https://buffer.com/resources/open-blog/" style="color:#888;">Buffer's Open Blog</a> and the idea that building in the open makes you more honest. This journal is auto-generated from the git log of the actual production repositories. Every entry is a real commit with a real timestamp.</p>
+
+<div style="margin-bottom:3rem; padding:1.5rem; background:#0a0a0a; border:1px solid #222;">
+  <div style="font-size:0.8rem; color:#666; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.8rem;">Legend</div>
+  <span class="journal-tag feature">feature</span>
+  <span class="journal-tag fix">fix</span>
+  <span class="journal-tag deploy">deploy</span>
+  <span class="journal-tag incident">incident</span>
+  <span class="journal-tag">build</span>
+</div>
+
+{%- for day in journal %}
+<div class="journal-entry">
+  <div class="journal-date">{{ day.displayDate }} &middot; {{ day.commitCount }} commit{{ 's' if day.commitCount != 1 }} &middot; {{ day.summary }}</div>
+  {%- for tag in day.tags %}
+  <span class="journal-tag {{ tag }}">{{ tag }}</span>
+  {%- endfor %}
+  <div style="margin-top:1rem;">
+    {%- for commit in day.commits %}
+    <div style="margin-bottom:0.6rem; font-size:0.95rem;">
+      <code style="color:#555; font-size:0.8rem; font-family:monospace;">{{ commit.hash }}</code>
+      <span style="color:#b0aca6;">{{ commit.message }}</span>
+    </div>
+    {%- endfor %}
+  </div>
+</div>
+{%- endfor %}
+
+{%- if journal.length == 0 %}
+<p style="color:#666; font-style:italic;">No journal entries yet. Commits will appear here after the next build.</p>
+{%- endif %}
+
+<div style="margin-top:4rem; padding-top:2rem; border-top:1px solid #222; color:#666; font-size:0.9rem;">
+  <p>This page auto-generates from <code style="font-family:monospace; font-size:0.85rem;">git log</code> at build time. Every commit to the production repositories appears here with its real timestamp and message. The tags are auto-categorized from commit message keywords.</p>
+  <p style="margin-top:1rem;">Not every commit is interesting. Some days are just dependency bumps and formatting fixes. Other days have 15 commits and three incidents. That's what building looks like — not a highlight reel, but the actual daily texture of operating a system that processes 30,000 conversations a month.</p>
+</div>

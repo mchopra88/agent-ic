@@ -4,6 +4,7 @@ title: "Building as Meditation"
 status: "Draft"
 order: 30
 date: 2026-03-25
+private: true
 ---
 
 Marcus Aurelius wrote *Meditations* as private notes to himself. Not for publication. Not for an audience. Not for a Substack. Private reckoning with how to live and lead while the Roman Empire fell apart around him. He'd return from a frontier war, sit in his tent, and write to himself about impermanence, about the gap between what you control and what you don't, about the discipline of returning to the work regardless of whether the work returns the favor.

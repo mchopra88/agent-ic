@@ -3,6 +3,7 @@ layout: essay.njk
 title: "Guarding: Why You Protect the Thing That Already Healed"
 order: 28
 date: 2026-03-10
+private: true
 ---
 
 In physical therapy, there's a phenomenon called "guarding." After a surgery or a serious injury, the body heals. The tissue repairs. The bone knits. The MRI comes back clean. The surgeon says you're good. But you don't move like you're good. You move like you're still injured — stiff, cautious, holding back. Protecting the thing that doesn't need protection anymore.

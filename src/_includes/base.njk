@@ -190,6 +190,120 @@
       color: #444;
     }
 
+    /* — Private essay gate — */
+    .private-gate {
+      position: relative;
+    }
+    .private-gate .essay-body {
+      filter: blur(8px);
+      user-select: none;
+      pointer-events: none;
+      transition: filter 0.5s ease;
+    }
+    .private-gate.unlocked .essay-body {
+      filter: none;
+      user-select: auto;
+      pointer-events: auto;
+    }
+    .gate-overlay {
+      position: absolute;
+      top: 8rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.85);
+      border: 1px solid #333;
+      padding: 2.5rem;
+      text-align: center;
+      z-index: 10;
+      max-width: 420px;
+      width: 90%;
+    }
+    .gate-overlay h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      color: #e8e4de;
+    }
+    .gate-overlay p {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    .gate-overlay input {
+      background: #111;
+      border: 1px solid #333;
+      color: #e8e4de;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1rem;
+      padding: 0.6rem 1rem;
+      width: 100%;
+      margin-bottom: 0.8rem;
+      outline: none;
+    }
+    .gate-overlay input:focus {
+      border-color: #666;
+    }
+    .gate-overlay button {
+      background: #222;
+      border: 1px solid #444;
+      color: #e8e4de;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 0.95rem;
+      padding: 0.5rem 2rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .gate-overlay button:hover {
+      background: #333;
+    }
+    .gate-error {
+      color: #cc4444;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .private-gate.unlocked .gate-overlay {
+      display: none;
+    }
+
+    /* — Journal — */
+    .journal-entry {
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .journal-date {
+      font-size: 0.85rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+    .journal-entry h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .journal-entry p {
+      color: #b0aca6;
+      font-size: 1rem;
+    }
+    .journal-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      color: #888;
+      border: 1px solid #333;
+      padding: 0.1rem 0.5rem;
+      margin-right: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .journal-tag.fix { border-color: #664444; color: #cc8888; }
+    .journal-tag.feature { border-color: #446644; color: #88cc88; }
+    .journal-tag.deploy { border-color: #444466; color: #8888cc; }
+    .journal-tag.incident { border-color: #664400; color: #cc8844; }
+
     /* — Responsive — */
     @media (max-width: 720px) {
       html { font-size: 17px; }
@@ -209,6 +323,7 @@
       <nav>
         <a href="/essays/"{% if navActive == "essays" %} class="active"{% endif %}>Essays</a>
         <a href="/videos/"{% if navActive == "videos" %} class="active"{% endif %}>Videos</a>
+        <a href="/journal/"{% if navActive == "journal" %} class="active"{% endif %}>Journal</a>
         <a href="/assets/"{% if navActive == "assets" %} class="active"{% endif %}>Assets</a>
         <a href="/about/"{% if navActive == "about" %} class="active"{% endif %}>About</a>
       </nav>

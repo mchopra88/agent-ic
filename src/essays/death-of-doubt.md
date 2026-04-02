@@ -4,6 +4,7 @@ title: "The Death of Doubt"
 status: "Draft"
 order: 20
 date: 2026-02-01
+private: true
 ---
 
 For most of the last few years, I believed I was unemployable.
@@ -36,7 +37,7 @@ David McRaney writes about ego depletion in *You Are Not So Smart* — the idea 
 
 I know ego depletion from the inside. Not from reading about it — from living it. For years, I poured every unit of willpower into building the machine. The machine got better. Everything else got worse. Health. Relationships. The basic maintenance of being a human being. I'm very avoidant. I'm very neglectful of things that need attention. The easy thing to avoid is the thing that doesn't have a deploy button and a green checkmark.
 
-I went through a period where someone close to me drew a map on a whiteboard. Not a system architecture diagram. A personal one. The kind that comes from the DBT framework — Dialectical Behavior Therapy — where you map out the behaviors you're avoiding and the consequences of that avoidance. At the center of the map, in a circle, it said: "Don't be fat." Around it, all the avoidance patterns: don't go to the doctor, don't look at the scale, don't address the thing that's actually wrong. Focus on the machine instead. The machine doesn't judge you. The machine just runs.
+I went through a period where someone close to me drew a map on a whiteboard. Not a system architecture diagram. A personal one. At the center, in a circle, it said: "Don't be fat." Around it, all the avoidance patterns: don't go to the doctor, don't look at the scale, don't address the thing that's actually wrong. Focus on the machine instead. I ended up building myself a calorie tracking app — DBF, "Don't Be Fat" — because I needed the lowest-activation-energy possible system. A checkbox. A yes/no. The same design principle as the hooks: make the right behavior automatic. Karin helped me assemble a 75-page health package. The depleted version of me won't take care of himself. The system has to do it.
 
 The honest truth about building autonomous systems is that the autonomy cuts both ways. The machine runs while you sleep — that's the pitch. But it also runs while you avoid. While you neglect. While you pour every ounce of energy into the thing with clean outputs and ignore everything with messy ones. The system compensates for your weaknesses. That's the design. But a system that compensates for your weaknesses can also enable them.
 
