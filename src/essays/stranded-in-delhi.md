@@ -1,8 +1,9 @@
 ---
 layout: essay.njk
 title: "Stranded in Delhi, Deploying From Vienna"
-status: "Coming soon"
+status: "Draft"
 order: 13
+date: 2025-10-20
 ---
 
 The Indian airspace closed while I was in Delhi. No flights out. Full stop.

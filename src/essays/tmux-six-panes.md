@@ -1,8 +1,9 @@
 ---
 layout: essay.njk
 title: "One tmux, Eight Sessions, Zero Engineers"
-status: "Coming soon — with screenshots"
+status: "Draft"
 order: 18
+date: 2025-11-10
 ---
 
 Right now, on a Mac Studio M4 Pro with 96GB of RAM sitting in my home office, there are eight tmux sessions running. Each one has Claude Code active. Each one is a different workstream. This is what my "engineering team" looks like:

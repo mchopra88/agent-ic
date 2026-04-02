@@ -1,8 +1,9 @@
 ---
 layout: essay.njk
 title: "30,000 Conversations a Day: What the Data Looks Like"
-status: "Coming soon — with data visualizations"
+status: "Draft"
 order: 19
+date: 2025-11-25
 ---
 
 Everyone quotes the number. 30,000 leads a day. It sounds impressive in a pitch. It means nothing without the data underneath.

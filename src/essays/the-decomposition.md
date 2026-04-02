@@ -1,8 +1,9 @@
 ---
 layout: essay.njk
 title: "The Decomposition: From Monolith to Microservices in a Sales Organization"
-status: "Coming soon"
+status: "Draft"
 order: 5
+date: 2025-08-10
 ---
 
 Alex Rampell at a16z wrote an investment memo about Fly Homes that decomposed a real estate transaction into its component services. I read it and thought: he's describing what I already built. But he stopped at the first level. I went three levels deeper.

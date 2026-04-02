@@ -1,8 +1,9 @@
 ---
 layout: essay.njk
 title: "git log --oneline | wc -l"
-status: "Coming soon — with real data"
+status: "Draft"
 order: 12
+date: 2025-10-05
 ---
 
 531 commits across two main repositories in the last 15 months. One person. No engineering team.

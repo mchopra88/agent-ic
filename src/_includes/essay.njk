@@ -5,6 +5,7 @@ navActive: essays
 
 <article>
   <h1>{{ title }}</h1>
+  {% if date %}<div style="color:#666; font-size:0.9rem; margin-bottom:2rem; font-style:italic;">{{ date | isoDate }}</div>{% endif %}
   <div class="essay-body">
     {{ content | safe }}
   </div>

@@ -1,8 +1,9 @@
 ---
 layout: essay.njk
 title: "The One-Person Engineering Team: How I Push More Code Than a Department"
-status: "Coming soon"
+status: "Draft"
 order: 4
+date: 2025-07-20
 ---
 
 On a typical day I have eight or nine tmux sessions running on a Mac Studio with 96GB of RAM. Each session is a different workstream: CI/CD pipeline, lead matching, insurance agent, collections, alerts, deployment, YGL deals, red team testing, financial analysis. Claude Code runs in each one.

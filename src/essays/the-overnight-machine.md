@@ -1,8 +1,9 @@
 ---
 layout: essay.njk
 title: "The Overnight Machine: Building Systems That Run While You Sleep"
-status: "Coming soon"
+status: "Draft"
 order: 6
+date: 2025-08-28
 ---
 
 Every morning I wake up to a dashboard, not a backlog.

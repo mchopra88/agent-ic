@@ -1,8 +1,9 @@
 ---
 layout: essay.njk
 title: "Three Loops: Retro, Macro, Meta"
-status: "Coming soon"
+status: "Draft"
 order: 2
+date: 2025-06-15
 ---
 
 Most teams have one feedback loop. They do retrospectives. What happened this sprint? What went well? What didn't? This is the retro loop and it operates at the level of individual events. It's necessary and insufficient.

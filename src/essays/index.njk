@@ -12,7 +12,7 @@ navActive: essays
 {%- for essay in collections.essays %}
   <li>
     <a href="{{ essay.url }}">{{ essay.data.title }}</a>
-    <div class="essay-meta">{{ essay.data.status }}</div>
+    <div class="essay-meta">{% if essay.data.date %}{{ essay.data.date | isoDate }}{% endif %}</div>
   </li>
 {%- endfor %}
 </ul>

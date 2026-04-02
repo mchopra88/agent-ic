@@ -1,8 +1,9 @@
 ---
 layout: essay.njk
 title: "Red Teams All the Way Down: Adversarial Testing for AI Agents"
-status: "Coming soon"
+status: "Draft"
 order: 3
+date: 2025-07-01
 ---
 
 Every conversational agent I run in production has an adversary. Not a test suite — an adversary. An AI agent whose job is to attack the production agent and find ways to break it.
