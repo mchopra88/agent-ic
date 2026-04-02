@@ -6,439 +6,646 @@ navActive: assets
 
 <h1>Assets</h1>
 
-<p style="color:#999; font-size:1.05rem; margin-bottom:3rem;">Seven years of production infrastructure. No prototypes. No demos. These systems process real volume every day.</p>
+<p style="color:#999; font-size:1.05rem; margin-bottom:3rem;">Seven years of production infrastructure. No prototypes. No demos. Each system handles real volume every day. This page peels back the layers — from the surface-level architecture down to the code that runs at 3 AM.</p>
 
-<!-- ═══════ SYSTEM OVERVIEW ═══════ -->
+<!-- ═══════ THE ONION: OVERVIEW ═══════ -->
 
-<div class="asset">
-  <h2>System Overview</h2>
-  <p>Four autonomous business units running on shared infrastructure. Each unit has its own AI agent, its own conversation engine, its own state machine. They share a database, a message queue, and a deployment pipeline.</p>
-  <svg viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
+<div class="asset" style="margin-bottom:4rem;">
+  <h2>The Onion: System Architecture</h2>
+  <p>Four business units. Three AI agents. Dozens of background services. The architecture looks simple from the outside — leads come in, conversations happen, deals close. But each layer you peel back reveals another system: background research agents, tonality calibration, customer profiling, inventory polling, compliance gates, ILS integrations, and the governance layer that keeps it all from exploding.</p>
+
+  <svg viewBox="0 0 680 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
     <style>
       .box { fill:none; stroke:#444; stroke-width:1; }
       .box-active { fill:#111; stroke:#666; stroke-width:1; }
-      .label { fill:#e8e4de; font-family:'Cormorant Garamond',Georgia,serif; font-size:13px; }
-      .label-sm { fill:#888; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px; }
-      .label-metric { fill:#e8e4de; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px; font-weight:600; }
+      .box-accent { fill:#0a1a0a; stroke:#363; stroke-width:1; }
+      .box-warn { fill:#1a0a0a; stroke:#633; stroke-width:1; }
+      .label { fill:#e8e4de; font-family:'Cormorant Garamond',Georgia,serif; font-size:11px; text-anchor:middle; }
+      .label-sm { fill:#888; font-family:'Cormorant Garamond',Georgia,serif; font-size:9px; text-anchor:middle; }
+      .label-xs { fill:#666; font-family:'Cormorant Garamond',Georgia,serif; font-size:8px; text-anchor:middle; }
+      .label-metric { fill:#6b6; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px; font-weight:600; text-anchor:middle; }
+      .section { fill:#555; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; }
       .line { stroke:#333; stroke-width:1; }
       .line-data { stroke:#555; stroke-width:1; stroke-dasharray:4,4; }
     </style>
-    <!-- Agent boxes row -->
-    <rect x="10" y="20" width="150" height="70" rx="3" class="box-active"/>
-    <text x="85" y="48" text-anchor="middle" class="label">Locator Agent</text>
-    <text x="85" y="64" text-anchor="middle" class="label-sm">Voice + SMS</text>
-    <text x="85" y="78" text-anchor="middle" class="label-metric">30K leads/day</text>
+    <defs><marker id="arr" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><polygon points="0 0, 6 2, 0 4" fill="#555"/></marker></defs>
 
-    <rect x="178" y="20" width="150" height="70" rx="3" class="box-active"/>
-    <text x="253" y="48" text-anchor="middle" class="label">Landlord Rep</text>
-    <text x="253" y="64" text-anchor="middle" class="label-sm">YGL / Blue Lake</text>
-    <text x="253" y="78" text-anchor="middle" class="label-metric">Doc + Deal Pipeline</text>
+    <!-- LAYER 1: External Sources -->
+    <text x="10" y="15" class="section">Layer 1: Lead Sources (ILS + Direct)</text>
 
-    <rect x="346" y="20" width="150" height="70" rx="3" class="box-active"/>
-    <text x="421" y="48" text-anchor="middle" class="label">Ken Agent</text>
-    <text x="421" y="64" text-anchor="middle" class="label-sm">Renters Insurance</text>
-    <text x="421" y="78" text-anchor="middle" class="label-metric">SMS Sales Engine</text>
+    <rect x="10" y="25" width="85" height="35" rx="3" class="box-active"/>
+    <text x="52" y="40" class="label-xs">Zillow</text>
+    <text x="52" y="52" class="label-xs">Apartments.com</text>
 
-    <rect x="514" y="20" width="156" height="70" rx="3" class="box-active"/>
-    <text x="592" y="48" text-anchor="middle" class="label">Data Pipeline</text>
-    <text x="592" y="64" text-anchor="middle" class="label-sm">Building Intel</text>
-    <text x="592" y="78" text-anchor="middle" class="label-metric">10K+ buildings/day</text>
+    <rect x="105" y="25" width="85" height="35" rx="3" class="box-active"/>
+    <text x="147" y="40" class="label-xs">YouGotListings</text>
+    <text x="147" y="52" class="label-xs">paid syndication</text>
 
-    <!-- Connection lines down -->
-    <line x1="85" y1="90" x2="85" y2="140" class="line"/>
-    <line x1="253" y1="90" x2="253" y2="140" class="line"/>
-    <line x1="421" y1="90" x2="421" y2="140" class="line"/>
-    <line x1="592" y1="90" x2="592" y2="140" class="line"/>
+    <rect x="200" y="25" width="85" height="35" rx="3" class="box-active"/>
+    <text x="242" y="40" class="label-xs">Craigslist</text>
+    <text x="242" y="52" class="label-xs">direct ads</text>
 
-    <!-- Shared infra row -->
-    <rect x="10" y="140" width="660" height="50" rx="3" class="box"/>
-    <text x="100" y="170" text-anchor="middle" class="label">PostgreSQL</text>
-    <text x="250" y="170" text-anchor="middle" class="label">RabbitMQ + Redis</text>
-    <text x="420" y="170" text-anchor="middle" class="label">GKE Cluster</text>
-    <text x="590" y="170" text-anchor="middle" class="label">Cloud Build CI/CD</text>
-    <text x="340" y="155" text-anchor="middle" class="label-sm">Shared Infrastructure</text>
+    <rect x="295" y="25" width="85" height="35" rx="3" class="box-active"/>
+    <text x="337" y="40" class="label-xs">Building partners</text>
+    <text x="337" y="52" class="label-xs">API feeds</text>
 
-    <!-- External APIs row -->
-    <line x1="340" y1="190" x2="340" y2="220" class="line-data"/>
-    <rect x="10" y="220" width="660" height="50" rx="3" class="box"/>
-    <text x="70" y="250" text-anchor="middle" class="label-sm">Twilio</text>
-    <text x="160" y="250" text-anchor="middle" class="label-sm">Claude / Gemini</text>
-    <text x="270" y="250" text-anchor="middle" class="label-sm">Bland AI</text>
-    <text x="360" y="250" text-anchor="middle" class="label-sm">Asana</text>
-    <text x="440" y="250" text-anchor="middle" class="label-sm">Stripe</text>
-    <text x="520" y="250" text-anchor="middle" class="label-sm">Assurant</text>
-    <text x="620" y="250" text-anchor="middle" class="label-sm">Gmail API</text>
-    <text x="340" y="235" text-anchor="middle" class="label-sm">External Services</text>
+    <rect x="390" y="25" width="85" height="35" rx="3" class="box-active"/>
+    <text x="432" y="40" class="label-xs">Google Ads</text>
+    <text x="432" y="52" class="label-xs">organic search</text>
 
-    <!-- Bottom label -->
-    <text x="340" y="300" text-anchor="middle" class="label-sm">All systems built and maintained by one person. No engineering team.</text>
+    <rect x="485" y="25" width="85" height="35" rx="3" class="box-active"/>
+    <text x="527" y="40" class="label-xs">S2 Capital</text>
+    <text x="527" y="52" class="label-xs">partner feed</text>
+
+    <rect x="580" y="25" width="90" height="35" rx="3" class="box-active"/>
+    <text x="625" y="40" class="label-xs">Direct referrals</text>
+    <text x="625" y="52" class="label-xs">walk-ins</text>
+
+    <!-- Funnel down -->
+    <line x1="340" y1="60" x2="340" y2="80" class="line" marker-end="url(#arr)"/>
+
+    <!-- LAYER 2: Intake + Qualification -->
+    <text x="10" y="90" class="section">Layer 2: Lead Intake + Qualification</text>
+
+    <rect x="10" y="100" width="160" height="55" rx="3" class="box-accent"/>
+    <text x="90" y="117" class="label" style="fill:#6b6;">Sniff Test</text>
+    <text x="90" y="130" class="label-xs" style="fill:#4a4;">8 qualification checks</text>
+    <text x="90" y="142" class="label-xs" style="fill:#4a4;">ZIP demographics • credit estimate</text>
+
+    <rect x="185" y="100" width="155" height="55" rx="3" class="box-active"/>
+    <text x="262" y="117" class="label">Customer Profiler</text>
+    <text x="262" y="130" class="label-xs">Google the lead (2-3 signals)</text>
+    <text x="262" y="142" class="label-xs">income estimate • household size</text>
+
+    <rect x="355" y="100" width="155" height="55" rx="3" class="box-active"/>
+    <text x="432" y="117" class="label">Background Agent</text>
+    <text x="432" y="130" class="label-xs">web search on renter</text>
+    <text x="432" y="142" class="label-xs">LinkedIn • public records • news</text>
+
+    <rect x="525" y="100" width="145" height="55" rx="3" class="box-warn"/>
+    <text x="597" y="117" class="label" style="fill:#c66;">TCPA Gate</text>
+    <text x="597" y="130" class="label-xs" style="fill:#966;">DNC registry check</text>
+    <text x="597" y="142" class="label-xs" style="fill:#966;">opt-out suppression list</text>
+
+    <line x1="340" y1="155" x2="340" y2="175" class="line" marker-end="url(#arr)"/>
+
+    <!-- LAYER 3: The Conversation Engine -->
+    <text x="10" y="185" class="section">Layer 3: Conversation Engine (The Agent Brain)</text>
+
+    <rect x="10" y="195" width="320" height="85" rx="3" class="box-accent" style="stroke:#464;"/>
+    <text x="170" y="212" class="label" style="fill:#6b6; font-size:13px;">Agent Brain (Tool-Use LLM)</text>
+    <text x="170" y="228" class="label-xs" style="fill:#4a4;">Claude Opus primary • Gemini fallback</text>
+    <text x="170" y="242" class="label-xs" style="fill:#4a4;">No decision trees. Full context window per turn.</text>
+    <text x="170" y="256" class="label-xs" style="fill:#4a4;">Post-generation guardrails. Tonality calibration.</text>
+    <text x="170" y="270" class="label-xs" style="fill:#4a4;">Socratic question framework in all sales conversations.</text>
+
+    <!-- Tools the brain calls -->
+    <text x="350" y="198" class="label-xs" style="text-anchor:start; fill:#555;">Tools the brain calls:</text>
+
+    <rect x="345" y="205" width="155" height="25" rx="2" class="box"/>
+    <text x="422" y="222" class="label-xs">inventory_search(city, budget, beds)</text>
+
+    <rect x="345" y="235" width="155" height="25" rx="2" class="box"/>
+    <text x="422" y="252" class="label-xs">building_lookup(name | address)</text>
+
+    <rect x="345" y="265" width="155" height="25" rx="2" class="box"/>
+    <text x="422" y="282" class="label-xs">schedule_tour(building_id, date)</text>
+
+    <rect x="515" y="205" width="155" height="25" rx="2" class="box"/>
+    <text x="592" y="222" class="label-xs">web_search(renter query)</text>
+
+    <rect x="515" y="235" width="155" height="25" rx="2" class="box"/>
+    <text x="592" y="252" class="label-xs">commission_check(building_id)</text>
+
+    <rect x="515" y="265" width="155" height="25" rx="2" class="box"/>
+    <text x="592" y="282" class="label-xs">escalate_to_human(reason)</text>
+
+    <line x1="340" y1="295" x2="340" y2="310" class="line" marker-end="url(#arr)"/>
+
+    <!-- LAYER 4: Background Services -->
+    <text x="10" y="320" class="section">Layer 4: Background Services (Run 24/7)</text>
+
+    <rect x="10" y="330" width="105" height="50" rx="3" class="box-active"/>
+    <text x="62" y="347" class="label-xs">Inventory Poller</text>
+    <text x="62" y="359" class="label-xs">10K+ buildings/day</text>
+    <text x="62" y="371" class="label-xs">voice calls + API</text>
+
+    <rect x="125" y="330" width="105" height="50" rx="3" class="box-active"/>
+    <text x="177" y="347" class="label-xs">Follow-up Engine</text>
+    <text x="177" y="359" class="label-xs">every 15 minutes</text>
+    <text x="177" y="371" class="label-xs">drip cadences</text>
+
+    <rect x="240" y="330" width="105" height="50" rx="3" class="box-active"/>
+    <text x="292" y="347" class="label-xs">Stale Data Detector</text>
+    <text x="292" y="359" class="label-xs">72-hour threshold</text>
+    <text x="292" y="371" class="label-xs">priority re-call</text>
+
+    <rect x="355" y="330" width="105" height="50" rx="3" class="box-active"/>
+    <text x="407" y="347" class="label-xs">Lead Scoring</text>
+    <text x="407" y="359" class="label-xs">recalc vs fresh</text>
+    <text x="407" y="371" class="label-xs">inventory nightly</text>
+
+    <rect x="470" y="330" width="100" height="50" rx="3" class="box-active"/>
+    <text x="520" y="347" class="label-xs">Compliance Audit</text>
+    <text x="520" y="359" class="label-xs">every outbound msg</text>
+    <text x="520" y="371" class="label-xs">TCPA + DNC</text>
+
+    <rect x="580" y="330" width="90" height="50" rx="3" class="box-active"/>
+    <text x="625" y="347" class="label-xs">Red Team Agent</text>
+    <text x="625" y="359" class="label-xs">adversarial tests</text>
+    <text x="625" y="371" class="label-xs">continuous</text>
+
+    <line x1="340" y1="380" x2="340" y2="395" class="line" marker-end="url(#arr)"/>
+
+    <!-- LAYER 5: Infrastructure -->
+    <text x="10" y="405" class="section">Layer 5: Infrastructure + External APIs</text>
+
+    <rect x="10" y="415" width="660" height="35" rx="3" class="box"/>
+    <text x="60" y="437" class="label-xs">PostgreSQL</text>
+    <text x="145" y="437" class="label-xs">Redis</text>
+    <text x="220" y="437" class="label-xs">RabbitMQ</text>
+    <text x="310" y="437" class="label-xs">GKE Cluster</text>
+    <text x="400" y="437" class="label-xs">Cloud Build</text>
+    <text x="490" y="437" class="label-xs">Mutagen Sync</text>
+    <text x="585" y="437" class="label-xs">Mac Studio M4 Pro</text>
+
+    <rect x="10" y="458" width="660" height="35" rx="3" class="box"/>
+    <text x="55" y="480" class="label-xs">Twilio SMS</text>
+    <text x="140" y="480" class="label-xs">Bland AI Voice</text>
+    <text x="230" y="480" class="label-xs">Claude API</text>
+    <text x="310" y="480" class="label-xs">Gemini API</text>
+    <text x="395" y="480" class="label-xs">Assurant</text>
+    <text x="470" y="480" class="label-xs">Stripe</text>
+    <text x="540" y="480" class="label-xs">Gmail/Drive</text>
+    <text x="625" y="480" class="label-xs">Asana</text>
   </svg>
 </div>
 
-<!-- ═══════ VOICE AGENT ═══════ -->
+<!-- ═══════ THE CONVERSATION ENGINE IN DETAIL ═══════ -->
 
 <div class="asset">
-  <h2>Voice Conversational Agent</h2>
-  <p>An automated realtor. Processes tens of thousands of inbound and outbound calls daily. Takes renter requirements through natural conversation, queries live inventory, presents matching apartments, and books tours. Seven years of real conversation data training the system.</p>
+  <h2>The Conversation Engine: How the Agent Brain Works</h2>
+  <p>The agent is not a chatbot. It's a tool-use LLM orchestrator with a sales doctrine encoded in its system prompt. It doesn't follow decision trees — it reasons about each message, calls tools to look things up, and generates responses calibrated to the conversation state. Here's the actual code that handles an inbound message:</p>
 
-  <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0 1rem;">
-    <rect x="10" y="30" width="120" height="50" rx="3" class="box-active"/>
-    <text x="70" y="52" text-anchor="middle" class="label">Inbound Call</text>
-    <text x="70" y="68" text-anchor="middle" class="label-sm">Twilio / Bland AI</text>
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# From ken.py — the actual production insurance agent
 
-    <line x1="130" y1="55" x2="170" y2="55" class="line" marker-end="url(#arrow)"/>
+class KenAgent:
+    """
+    Ken - The Jamboree Insurance SMS Agent
 
-    <rect x="170" y="30" width="120" height="50" rx="3" class="box-active"/>
-    <text x="230" y="52" text-anchor="middle" class="label">Agent Brain</text>
-    <text x="230" y="68" text-anchor="middle" class="label-sm">Claude Opus</text>
+    Handles:
+    - Initial outreach (WE message THEM)
+    - Response classification (20+ intents)
+    - Info gathering (address, move-in, email)
+    - Quote delivery (ONLY after Assurant API)
+    - Follow-up sequencing
+    - Objection handling
+    """
 
-    <line x1="290" y1="55" x2="330" y2="55" class="line"/>
+    def handle_inbound(self, lead, message):
+        """
+        Handle an inbound message from a lead.
 
-    <rect x="330" y="30" width="120" height="50" rx="3" class="box-active"/>
-    <text x="390" y="52" text-anchor="middle" class="label">Inventory DB</text>
-    <text x="390" y="68" text-anchor="middle" class="label-sm">10K+ buildings</text>
+        Returns: (response, event, action_needed)
 
-    <line x1="450" y1="55" x2="490" y2="55" class="line"/>
+        action_needed can be:
+        - {"action": "generate_quote",
+           "address": "...", "city": "..."}
+        - {"action": "escalate_to_human",
+           "reason": "..."}
+        - None
+        """
+        # Classify the message
+        classification = classify_message(message)
 
-    <rect x="490" y="30" width="140" height="50" rx="3" class="box-active"/>
-    <text x="560" y="52" text-anchor="middle" class="label">Match + Present</text>
-    <text x="560" y="68" text-anchor="middle" class="label-sm">Tour booking</text>
+        # ALWAYS extract statements for later
+        # urgency building
+        self._extract_statements(lead, message)
 
-    <!-- Feedback loop -->
-    <path d="M 560 80 L 560 120 L 230 120 L 230 80" fill="none" class="line-data"/>
-    <text x="395" y="115" text-anchor="middle" class="label-sm">Conversation state persists across sessions</text>
+        # Handle by intent
+        response, event, action = \
+            self._handle_intent(
+                lead, classification, message
+            )
 
-    <!-- Stack labels -->
-    <text x="10" y="165" class="label-sm">Stack: Python 3.11 / Celery / RabbitMQ / PostgreSQL / Twilio / Bland AI ($0.09/min) / FancyHands (human escalation)</text>
-    <text x="10" y="182" class="label-sm">Pattern: Tool-use LLM agent. No decision trees. Full context window per turn. Post-generation guardrails.</text>
+        # Process state transition
+        if event:
+            self.state_machine.process_event(
+                lead, event
+            )
 
-    <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/></marker></defs>
-  </svg>
+        return response, event, action</pre>
+
+  <p>The key design decision: <code>action_needed</code>. The agent brain decides <em>what</em> to do, but external services execute the action. When the agent needs a quote, it doesn't call Assurant directly — it returns <code>{"action": "generate_quote"}</code> and the orchestrator handles the API call. This separation means the agent can be tested without live API calls, and the Assurant integration can change without touching the agent logic.</p>
+
+  <h2 style="font-size:1.1rem; margin-top:3rem;">The Tonality System</h2>
+  <p>The agent doesn't just generate text — it calibrates tone based on the conversation state and the lead's profile. The CLAUDE.md encodes the doctrine:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# From Workflows/ken-insurance/CLAUDE.md
+
+## Tone: DIRECT, NOT INQUISITIVE
+
+WRONG: "Hey Sarah, are you moving in Austin soon?
+        Do you need help?"
+
+RIGHT: "Hey Sarah - we got flagged that you're
+        moving into a rental in Austin. I'm reaching
+        out to get you set up with renters insurance
+        — it's required before you can get keys
+        in Texas."
+
+Key principles:
+- TELL (with an out if wrong)
+- DRIVE to next action
+- Emphasize REQUIREMENT not optional</pre>
+
+  <p>The tonality isn't random. "Tell, don't ask" converts at 2x the rate of inquisitive opening messages. This was measured across thousands of conversations — the macro loop identified the pattern, and it became a rule in the CLAUDE.md.</p>
+
+  <h2 style="font-size:1.1rem; margin-top:3rem;">The Socratic Sales Framework</h2>
+  <p>Every sales conversation follows the Socratic pattern: ask questions where the only honest answer moves the deal forward.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# From Workflows/apartment-locator/CLAUDE.md
+
+## INVERT THE BURDEN OF PROOF
+
+Constantly lower the bar so saying NO
+becomes the insane option.
+
+With renters:
+  "At a minimum, if nothing else worked out,
+   could you make this work?"
+
+With buildings:
+  "I've got a renter ready to sign.
+   Want the commission or should I send
+   them across the street?"
+
+Each question has only one honest answer.
+The logical conclusion is inescapable.</pre>
 </div>
 
-<!-- ═══════ DATA GATHERING ═══════ -->
+<!-- ═══════ THE INVENTORY SYSTEM ═══════ -->
 
 <div class="asset">
-  <h2>Multi-Family Data Gathering System</h2>
-  <p>Automated voice system calling tens of thousands of apartment buildings daily. Extracts commission rates, vacancy data, move-in specials, and application requirements directly from leasing offices. The calls happen every day. The data is always current.</p>
+  <h2>Inventory Intelligence: How We Know What's Available</h2>
+  <p>The apartment database isn't scraped from listing sites. It's built from three independent data streams that cross-reference each other. Here's how the polling works:</p>
 
-  <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0 1rem;">
-    <rect x="10" y="30" width="130" height="50" rx="3" class="box-active"/>
-    <text x="75" y="52" text-anchor="middle" class="label">Building List</text>
-    <text x="75" y="68" text-anchor="middle" class="label-sm">10K+ properties</text>
+  <svg viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
+    <style>
+      .i-box { fill:#111; stroke:#444; stroke-width:1; rx:3; }
+      .i-accent { fill:#0a1a0a; stroke:#363; stroke-width:1; rx:3; }
+      .i-label { fill:#e8e4de; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px; text-anchor:middle; }
+      .i-sm { fill:#666; font-family:'Cormorant Garamond',Georgia,serif; font-size:8.5px; text-anchor:middle; }
+    </style>
 
-    <line x1="140" y1="55" x2="175" y2="55" class="line"/>
+    <text x="10" y="15" class="i-sm" style="text-anchor:start; fill:#555; text-transform:uppercase; letter-spacing:0.1em;">Three Independent Data Streams</text>
 
-    <rect x="175" y="30" width="130" height="50" rx="3" class="box-active"/>
-    <text x="240" y="52" text-anchor="middle" class="label">Voice Caller</text>
-    <text x="240" y="68" text-anchor="middle" class="label-sm">Bland AI automated</text>
+    <!-- Stream 1: Voice calls -->
+    <rect x="10" y="30" width="200" height="80" rx="3" class="i-box"/>
+    <text x="110" y="50" class="i-label">Stream 1: Automated Voice Calls</text>
+    <text x="110" y="65" class="i-sm">Bland AI calls 10K+ buildings/day</text>
+    <text x="110" y="78" class="i-sm">Extracts: vacancy, commission %,</text>
+    <text x="110" y="91" class="i-sm">specials, app requirements, contacts</text>
+    <text x="110" y="104" class="i-sm" style="fill:#4a4;">$0.09/min per call</text>
 
-    <line x1="305" y1="55" x2="340" y2="55" class="line"/>
+    <!-- Stream 2: ILS APIs -->
+    <rect x="240" y="30" width="200" height="80" rx="3" class="i-box"/>
+    <text x="340" y="50" class="i-label">Stream 2: ILS Platform APIs</text>
+    <text x="340" y="65" class="i-sm">Zillow API • Apartments.com feed</text>
+    <text x="340" y="78" class="i-sm">YouGotListings • RentPath</text>
+    <text x="340" y="91" class="i-sm">Listing prices, photos, unit types</text>
+    <text x="340" y="104" class="i-sm" style="fill:#aa6;">Often stale ($280 avg delta)</text>
 
-    <rect x="340" y="30" width="130" height="50" rx="3" class="box-active"/>
-    <text x="405" y="52" text-anchor="middle" class="label">Extract + Parse</text>
-    <text x="405" y="68" text-anchor="middle" class="label-sm">LLM transcription</text>
+    <!-- Stream 3: Transaction data -->
+    <rect x="470" y="30" width="200" height="80" rx="3" class="i-box"/>
+    <text x="570" y="50" class="i-label">Stream 3: Transaction History</text>
+    <text x="570" y="65" class="i-sm">Actual closed deals + payments</text>
+    <text x="570" y="78" class="i-sm">Commission received vs promised</text>
+    <text x="570" y="91" class="i-sm">Revenue per building over time</text>
+    <text x="570" y="104" class="i-sm" style="fill:#6b6;">Ground truth signal</text>
 
-    <line x1="470" y1="55" x2="505" y2="55" class="line"/>
+    <!-- Merge into DB -->
+    <line x1="110" y1="110" x2="340" y2="140" stroke="#444" stroke-width="1"/>
+    <line x1="340" y1="110" x2="340" y2="140" stroke="#444" stroke-width="1"/>
+    <line x1="570" y1="110" x2="340" y2="140" stroke="#444" stroke-width="1"/>
 
-    <rect x="505" y="30" width="155" height="50" rx="3" class="box-active"/>
-    <text x="582" y="52" text-anchor="middle" class="label">Building Database</text>
-    <text x="582" y="68" text-anchor="middle" class="label-sm">Updated daily</text>
-
-    <!-- Loop back -->
-    <path d="M 582 80 L 582 130 L 75 130 L 75 80" fill="none" class="line-data"/>
-    <text x="330" y="125" text-anchor="middle" class="label-sm">Daily refresh cycle — stale data triggers priority re-call</text>
-
-    <text x="10" y="170" class="label-sm">Extracts: commission %, vacancy count, move-in specials, application requirements, contact info</text>
-    <text x="10" y="187" class="label-sm">Verification: Cross-referenced against actual transaction data. Commission agreements validated against payments received.</text>
-  </svg>
-</div>
-
-<!-- ═══════ BUILDING DATABASE ═══════ -->
-
-<div class="asset">
-  <h2>Apartment Building Database</h2>
-  <p>The most accurate and current database of commission-paying apartment buildings in the US. Not scraped from listing sites — built from real transaction data, verified by daily automated calls, and updated continuously. Every record has a revenue history attached to it.</p>
-
-  <svg viewBox="0 0 680 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0 1rem;">
-    <!-- Data sources -->
-    <rect x="10" y="10" width="140" height="35" rx="3" class="box-active"/>
-    <text x="80" y="32" text-anchor="middle" class="label-sm">Automated voice calls</text>
-
-    <rect x="10" y="55" width="140" height="35" rx="3" class="box-active"/>
-    <text x="80" y="77" text-anchor="middle" class="label-sm">Transaction history</text>
-
-    <rect x="10" y="100" width="140" height="35" rx="3" class="box-active"/>
-    <text x="80" y="122" text-anchor="middle" class="label-sm">Commission payments</text>
-
-    <!-- Lines to center -->
-    <line x1="150" y1="27" x2="220" y2="70" class="line"/>
-    <line x1="150" y1="72" x2="220" y2="70" class="line"/>
-    <line x1="150" y1="117" x2="220" y2="70" class="line"/>
-
-    <!-- Central DB -->
-    <rect x="220" y="40" width="200" height="60" rx="3" class="box-active"/>
-    <text x="320" y="65" text-anchor="middle" class="label">Building Intelligence</text>
-    <text x="320" y="82" text-anchor="middle" class="label-metric">PostgreSQL + Embeddings</text>
+    <rect x="190" y="140" width="300" height="60" rx="3" class="i-accent"/>
+    <text x="340" y="162" class="i-label" style="fill:#6b6; font-size:12px;">Building Intelligence Database</text>
+    <text x="340" y="178" class="i-sm" style="fill:#4a4;">PostgreSQL + embeddings</text>
+    <text x="340" y="191" class="i-sm" style="fill:#4a4;">Cross-referenced, freshness-scored, revenue-ranked</text>
 
     <!-- Output signals -->
-    <line x1="420" y1="55" x2="480" y2="27" class="line"/>
-    <line x1="420" y1="70" x2="480" y2="72" class="line"/>
-    <line x1="420" y1="85" x2="480" y2="117" class="line"/>
+    <line x1="240" y1="200" x2="100" y2="230" stroke="#444" stroke-width="1"/>
+    <line x1="340" y1="200" x2="340" y2="230" stroke="#444" stroke-width="1"/>
+    <line x1="440" y1="200" x2="580" y2="230" stroke="#444" stroke-width="1"/>
 
-    <rect x="480" y="10" width="180" height="35" rx="3" class="box"/>
-    <text x="570" y="32" text-anchor="middle" class="label-sm">Commission freshness score</text>
+    <rect x="10" y="230" width="180" height="40" rx="3" class="i-box"/>
+    <text x="100" y="248" class="i-label">Commission Freshness</text>
+    <text x="100" y="262" class="i-sm">How recently verified?</text>
 
-    <rect x="480" y="55" width="180" height="35" rx="3" class="box"/>
-    <text x="570" y="77" text-anchor="middle" class="label-sm">Vacancy + availability signal</text>
+    <rect x="250" y="230" width="180" height="40" rx="3" class="i-box"/>
+    <text x="340" y="248" class="i-label">Vacancy Confidence</text>
+    <text x="340" y="262" class="i-sm">Voice-verified vs ILS-scraped</text>
 
-    <rect x="480" y="100" width="180" height="35" rx="3" class="box"/>
-    <text x="570" y="122" text-anchor="middle" class="label-sm">Revenue-per-building ranking</text>
+    <rect x="490" y="230" width="180" height="40" rx="3" class="i-box"/>
+    <text x="580" y="248" class="i-label">Revenue Ranking</text>
+    <text x="580" y="262" class="i-sm">Actual $ earned per building</text>
 
-    <text x="10" y="160" class="label-sm">Not a listing site. A revenue intelligence system. Every building ranked by actual dollars earned, recency of payment, and likelihood of future commission.</text>
+    <text x="340" y="300" class="i-sm">The stale data detector triggers priority re-calls when any building hasn't been reached in 72 hours.</text>
+    <text x="340" y="315" class="i-sm" style="fill:#555;">ILS data is noise. Voice calls are signal. Transaction history is truth.</text>
   </svg>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# From the production FastAPI lifecycle — automated jobs
+
+# Follow-up job every 15 minutes, all night
+scheduler.add_job(
+    process_followups,
+    IntervalTrigger(minutes=15),
+    args=[db, sms, ken],
+    id='followup_job',
+)
+
+# Expiration job daily at 6 AM
+scheduler.add_job(
+    expire_past_move_ins,
+    CronTrigger(hour=6, minute=0),
+    args=[db],
+    id='expiration_job',
+)
+
+# TCPA gate: reject leads on suppression list
+if await compliance.is_suppressed(lead.phone):
+    raise HTTPException(
+        status_code=409,
+        detail="Phone is on suppression list"
+    )
+if await compliance.is_on_dnc(lead.phone):
+    raise HTTPException(
+        status_code=409,
+        detail="Phone is on DNC registry"
+    )</pre>
 </div>
 
-<!-- ═══════ HR AUTOMATION ═══════ -->
+<!-- ═══════ THE INSURANCE AGENT ═══════ -->
 
 <div class="asset">
-  <h2>HR &amp; Recruiting Automation</h2>
-  <p>Processes tens of thousands of offshore candidates through automated pipelines. English proficiency testing, skill evaluation, and accent detection — all without a human recruiter touching a resume until the candidate is pre-qualified. Built to staff a 24/7 operation without a traditional HR department.</p>
+  <h2>Ken: The Insurance Sales Agent</h2>
+  <p>SMS-based renters insurance sales. HO4 renters insurance via Assurant (Fortune 500 carrier). The key constraint: we outbound to them — they don't come to us. We get leads from partner buildings. We have: first_name, phone, city, state. We don't have: exact address, exact building, move-in date. The agent has to extract all of that through conversation before it can quote.</p>
 
-  <svg viewBox="0 0 680 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0 1rem;">
-    <rect x="10" y="30" width="100" height="50" rx="3" class="box-active"/>
-    <text x="60" y="52" text-anchor="middle" class="label-sm">Candidate</text>
-    <text x="60" y="66" text-anchor="middle" class="label-sm">Application</text>
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# Ken's lead lifecycle state machine
 
-    <line x1="110" y1="55" x2="140" y2="55" class="line"/>
+NEW → CONTACTED → ENGAGED → INFO_GATHERED
+      → QUOTED → PAYMENT_SENT → CONVERTED
+                    │
+              NO_RESPONSE → FOLLOWUP_1 → FOLLOWUP_2
+              → FOLLOWUP_3 → EXPIRED
+                    │
+              OPTED_OUT (terminal)
+              HUMAN_ESCALATION
 
-    <rect x="140" y="30" width="100" height="50" rx="3" class="box-active"/>
-    <text x="190" y="52" text-anchor="middle" class="label-sm">English</text>
-    <text x="190" y="66" text-anchor="middle" class="label-sm">Proficiency</text>
+# Drip cadence: 4h → 24h → 48h → 5d → 7d → 14d
 
-    <line x1="240" y1="55" x2="270" y2="55" class="line"/>
+# Intent classification: 20+ intents
+# Each one forged by the red team
 
-    <rect x="270" y="30" width="100" height="50" rx="3" class="box-active"/>
-    <text x="320" y="52" text-anchor="middle" class="label-sm">Accent</text>
-    <text x="320" y="66" text-anchor="middle" class="label-sm">Detection</text>
+STOP           → opt out immediately
+YES_INTERESTED → ask for address
+PRICE_QUESTION → ask address first (NEVER quote before API)
+ALREADY_HAS    → verify $100k liability
+WHO_IS_THIS    → explain we got flagged
+IS_THIS_SCAM   → licensed, Assurant-backed, Fortune 500
+FOXEN_MENTION  → explain waiver vs real insurance
+GAVE_ADDRESS   → trigger Assurant API quote</pre>
 
-    <line x1="370" y1="55" x2="400" y2="55" class="line"/>
+  <p>The critical rule: <strong>NEVER hardcode prices.</strong> Prices come from the Assurant API based on address, coverage level, and dwelling type. The flow is: Outreach (NO PRICE) → Collect address → Call Assurant API → THEN show price. If the agent quotes before calling the API, the price is a hallucination. If too low, the renter signs, discovers the real price, cancels, and files a complaint. If too high, the renter walks. Either way: legal liability.</p>
 
-    <rect x="400" y="30" width="100" height="50" rx="3" class="box-active"/>
-    <text x="450" y="52" text-anchor="middle" class="label-sm">Skill</text>
-    <text x="450" y="66" text-anchor="middle" class="label-sm">Evaluation</text>
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# Lead intake endpoint — actual FastAPI code
 
-    <line x1="500" y1="55" x2="530" y2="55" class="line"/>
+class LeadCreate(BaseModel):
+    """New lead intake"""
+    first_name: Optional[str] = None
+    phone: str = Field(..., pattern=r'^\+1\d{10}$')
+    city: Optional[str] = None
+    state: str = Field(..., pattern=r'^(TX|IL|MI)$')
+    move_in_date: Optional[date] = None
+    source: Optional[str] = None
+    partner_code: Optional[str] = None
 
-    <rect x="530" y="30" width="130" height="50" rx="3" class="box-active"/>
-    <text x="595" y="52" text-anchor="middle" class="label">Qualified Pool</text>
-    <text x="595" y="66" text-anchor="middle" class="label-sm">Human review here</text>
+@router.post("/leads")
+async def create_lead(lead: LeadCreate, ...):
+    """
+    Create a new lead and trigger outreach.
 
-    <!-- Drop-off indicators -->
-    <line x1="190" y1="80" x2="190" y2="105" class="line-data"/>
-    <text x="190" y="118" text-anchor="middle" class="label-sm" style="fill:#555">~60% filtered</text>
-
-    <line x1="320" y1="80" x2="320" y2="105" class="line-data"/>
-    <text x="320" y="118" text-anchor="middle" class="label-sm" style="fill:#555">~25% filtered</text>
-
-    <line x1="450" y1="80" x2="450" y2="105" class="line-data"/>
-    <text x="450" y="118" text-anchor="middle" class="label-sm" style="fill:#555">~10% filtered</text>
-
-    <text x="10" y="150" class="label-sm">Fully automated pipeline. First human touchpoint is the final interview. Designed for offshore teams across time zones.</text>
-  </svg>
+    This endpoint:
+    1. Creates the lead record
+    2. Links to building if found
+    3. Queues initial SMS outreach
+    """
+    # TCPA gate first
+    if await compliance.is_suppressed(lead.phone):
+        raise HTTPException(409, "Opted out")
+    if await compliance.is_on_dnc(lead.phone):
+        raise HTTPException(409, "DNC registry")</pre>
 </div>
 
-<!-- ═══════ SMS AGENT ═══════ -->
+<!-- ═══════ GOVERNANCE LAYER ═══════ -->
 
 <div class="asset">
-  <h2>SMS Conversational Agent</h2>
-  <p>Multi-turn reasoning engine connected to a national apartment database. Handles complex renter conversations over SMS — qualifying needs, answering questions about specific buildings, sending floor plans and layouts from a vector store. Thousands of concurrent conversations, zero human agents.</p>
+  <h2>The Governance Layer: Hooks, Rules, and Scars</h2>
+  <p>Eight hooks across four event types. They run deterministically — can't be skipped, can't be overridden. Each one exists because of a production incident. The CLAUDE.md files (1,334 lines across 7 files) encode every rule, every lesson, every scar.</p>
 
-  <svg viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0 1rem;">
-    <!-- Inbound -->
-    <rect x="10" y="40" width="110" height="50" rx="3" class="box-active"/>
-    <text x="65" y="62" text-anchor="middle" class="label">SMS In</text>
-    <text x="65" y="76" text-anchor="middle" class="label-sm">Twilio webhook</text>
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# Hook architecture — 8 hooks, 4 event types
 
-    <line x1="120" y1="65" x2="155" y2="65" class="line"/>
+SessionStart:
+  pre-session-read-state.sh
+    → Loads deployment state, last session
+    → Shows what's broken before you start
+    → "READ THE ABOVE. Do NOT start work until
+       you understand what is deployed, what broke,
+       and what the last session did."
 
-    <!-- Agent core -->
-    <rect x="155" y="20" width="180" height="90" rx="3" class="box-active"/>
-    <text x="245" y="45" text-anchor="middle" class="label">Agent Core v2</text>
-    <text x="245" y="62" text-anchor="middle" class="label-sm">Tool-use LLM orchestrator</text>
-    <text x="245" y="78" text-anchor="middle" class="label-sm">Claude → Gemini fallback</text>
-    <text x="245" y="94" text-anchor="middle" class="label-sm">No decision trees</text>
+PreToolUse (Bash):
+  pre-bash-safeguard.sh
+    → Blocks DROP TABLE, TRUNCATE, DELETE FROM
+    → Cleans stale git locks
+    → "This hook NEVER prints instructions.
+       It either BLOCKS or ALLOWS. That's it."
 
-    <!-- Tools -->
-    <line x1="335" y1="45" x2="380" y2="30" class="line"/>
-    <line x1="335" y1="65" x2="380" y2="65" class="line"/>
-    <line x1="335" y1="85" x2="380" y2="100" class="line"/>
+PreToolUse (SQL):
+  pre-sql-bottomup.sh
+    → Blocks aggregate queries before sampling
+    → Warns on client_stage_progression (garbage)
+    → "Classifiers lie. Summary fields are stale."
 
-    <rect x="380" y="10" width="140" height="35" rx="3" class="box"/>
-    <text x="450" y="32" text-anchor="middle" class="label-sm">Inventory search</text>
+PostToolUse (Edit/Write):
+  post-edit-lint.sh
+    → Auto-lints Python after every edit
+    → Blocks on syntax errors
+    → Detects secret leaks
 
-    <rect x="380" y="50" width="140" height="35" rx="3" class="box"/>
-    <text x="450" y="72" text-anchor="middle" class="label-sm">Vector store (floor plans)</text>
+Stop:
+  session-end-save.sh (126 lines)
+    → Auto-saves session memory + git state
+    → Detects deploys automatically
+    → "Exit code: ALWAYS 0. Stop hooks should
+       never block session exit."
 
-    <rect x="380" y="90" width="140" height="35" rx="3" class="box"/>
-    <text x="450" y="112" text-anchor="middle" class="label-sm">Deal state machine</text>
+  stop-fresh-eyes-check.sh
+    → Logs unreviewed changes to debt file
 
-    <!-- Guardrails -->
-    <line x1="520" y1="65" x2="545" y2="65" class="line"/>
+  ralph-wiggum/hooks/stop-hook.sh (178 lines)
+    → Autonomous loop controller
+    → Intercepts session exit
+    → Reads transcript for completion promise
+    → Feeds prompt back in if work isn't done
+    → Named after a Simpsons character because
+      humor in infrastructure is how you stay
+      sane at 2 AM</pre>
 
-    <rect x="545" y="40" width="120" height="50" rx="3" class="box-active"/>
-    <text x="605" y="58" text-anchor="middle" class="label-sm">Guardrails</text>
-    <text x="605" y="72" text-anchor="middle" class="label-sm">TCPA / Rate / Brand</text>
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# The Ralph Wiggum autonomous loop — actual code
 
-    <!-- State machine detail -->
-    <text x="10" y="155" class="label-sm">State machine: NEW → CONTACTED → ENGAGED → TOUR_OFFERED → APPLICATION → APPROVED → MOVED_IN</text>
-    <text x="10" y="172" class="label-sm">Qualification lanes: 00 (Voucher Attack) → 01 (Slam Dunk) → 02 (Qualified) → 03 (Mitigation) → 04 (Edge Case)</text>
-    <text x="10" y="189" class="label-sm">Integrations: Asana (ticket sync), Gmail (doc monitoring), Discord (16 alert channels), FancyHands (human escalation)</text>
-  </svg>
+# When you try to exit, it checks: did you
+# actually finish what you promised?
+
+PROMISE_TEXT=$(echo "$LAST_OUTPUT" | \
+  perl -0777 -pe \
+  's/.*?<promise>(.*?)<\/promise>.*/$1/s')
+
+if [[ "$PROMISE_TEXT" = "$COMPLETION_PROMISE" ]]; then
+  echo "Ralph loop: Detected completion."
+  rm "$RALPH_STATE_FILE"
+  exit 0
+fi
+
+# Not complete — feed the prompt back in
+jq -n --arg prompt "$PROMPT_TEXT" \
+  '{"decision": "block", "reason": $prompt}'
+
+# The AI can't claim it's done unless it
+# actually is. The loop is inescapable.</pre>
 </div>
 
-<!-- ═══════ QUOTING ENGINE ═══════ -->
+<!-- ═══════ THE QUOTING ENGINE ═══════ -->
 
 <div class="asset">
-  <h2>Quoting Engine</h2>
-  <p>AI trained on 180,000+ SKUs for commercial electrical distribution. Roughly 90% accuracy on quote generation. Includes a CRM built from mining 4,298 email threads — 657 net-new contacts extracted and organized without anyone doing data entry. The system that made me realize every quoting desk is the same problem.</p>
-
-  <svg viewBox="0 0 680 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0 1rem;">
-    <rect x="10" y="30" width="130" height="50" rx="3" class="box-active"/>
-    <text x="75" y="52" text-anchor="middle" class="label">Quote Request</text>
-    <text x="75" y="68" text-anchor="middle" class="label-sm">Email / form</text>
-
-    <line x1="140" y1="55" x2="175" y2="55" class="line"/>
-
-    <rect x="175" y="30" width="140" height="50" rx="3" class="box-active"/>
-    <text x="245" y="52" text-anchor="middle" class="label">SKU Matcher</text>
-    <text x="245" y="68" text-anchor="middle" class="label-sm">180K+ products</text>
-
-    <line x1="315" y1="55" x2="350" y2="55" class="line"/>
-
-    <rect x="350" y="30" width="130" height="50" rx="3" class="box-active"/>
-    <text x="415" y="52" text-anchor="middle" class="label">Price Engine</text>
-    <text x="415" y="68" text-anchor="middle" class="label-sm">~90% accuracy</text>
-
-    <line x1="480" y1="55" x2="515" y2="55" class="line"/>
-
-    <rect x="515" y="30" width="145" height="50" rx="3" class="box-active"/>
-    <text x="587" y="52" text-anchor="middle" class="label">Quote + CRM</text>
-    <text x="587" y="68" text-anchor="middle" class="label-sm">657 contacts mined</text>
-
-    <text x="10" y="115" class="label-sm">CRM built by mining 4,298 email threads. Zero manual data entry. Contact extraction, relationship mapping, quote history — all automated.</text>
-    <text x="10" y="132" class="label-sm">This is the proof-of-concept for the thesis: every quoting desk is the same pattern. Different SKUs, same architecture.</text>
-  </svg>
+  <h2>The Quoting Engine (PE-Backed Portfolio Company)</h2>
+  <p>Before HomeEasy, I deployed this same architecture into a PE-backed portfolio company — commercial electrical distribution. AI trained on 180,000+ SKUs. Roughly 90% accuracy on quote generation. Built a CRM by mining 4,298 email threads — 657 net-new contacts extracted without anyone doing data entry.</p>
+  <p>The system found a $2.2M SUSOL arbitrage opportunity by identifying imported circuit breakers that could be sourced at 40% below the manufacturer's price. The AI read the emails. The AI found the pattern. The margin was sitting in the inbox for years.</p>
+  <p>This is the proof that the architecture works across industries. Different SKUs, same pattern. Same decomposition. Same onion layers. The apartment locating machine and the quoting engine are structurally identical — conversational intake, inventory match, qualification, fulfillment. The interface stays the same. The executors swap out.</p>
 </div>
 
-<!-- ═══════ DECOMPOSITION ═══════ -->
+<!-- ═══════ THE DECOMPOSITION ═══════ -->
 
 <div class="asset" style="margin-top:4rem; border-top:1px solid #333; padding-top:3rem;">
   <h2>The Decomposition</h2>
-  <p>Alex Rampell at a16z wrote an investment memo about Fly Homes that broke a real estate transaction into its component services. I read that and thought: he's describing what I already built. But I took it further — decompose the agent into special teams, then decompose the special teams into atomic tasks, then route those tasks through a ticketing architecture where every unit of work is a replaceable, measurable primitive.</p>
-  <p>This mirrors Amazon's internal architecture. Bezos mandated that every team expose its functionality as a service. I did the same thing with the sales process. The result: any piece can be replaced, measured, or scaled independently. A human can be swapped for an AI. An AI can be swapped for a better AI. The interface stays the same.</p>
+  <p>Alex Rampell at a16z wrote an investment memo about Fly Homes that broke a real estate transaction into its component services. I went three levels deeper.</p>
 
-  <svg viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
-    <!-- Level 1: Monolith -->
-    <text x="10" y="20" class="label-sm" style="fill:#666; text-transform:uppercase; letter-spacing:0.1em;">Level 0: The Monolith</text>
-    <rect x="10" y="30" width="660" height="40" rx="3" class="box-active"/>
-    <text x="340" y="55" text-anchor="middle" class="label">Sales Agent (one person does everything)</text>
+  <svg viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
+    <style>
+      .dc-box { fill:#111; stroke:#444; stroke-width:1; rx:3; }
+      .dc-accent { fill:#0a1a0a; stroke:#363; stroke-width:1; rx:3; }
+      .dc-label { fill:#e8e4de; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px; text-anchor:middle; }
+      .dc-sm { fill:#666; font-family:'Cormorant Garamond',Georgia,serif; font-size:8px; text-anchor:middle; }
+      .dc-level { fill:#555; font-family:'Cormorant Garamond',Georgia,serif; font-size:9px; text-transform:uppercase; letter-spacing:0.1em; }
+    </style>
 
-    <!-- Arrow down -->
-    <line x1="340" y1="70" x2="340" y2="90" class="line-data"/>
-    <text x="360" y="85" class="label-sm" style="fill:#555;">decompose</text>
+    <text x="10" y="15" class="dc-level">Level 0: Monolith</text>
+    <rect x="60" y="25" width="560" height="30" rx="3" class="dc-box"/>
+    <text x="340" y="45" class="dc-label">One human does everything</text>
 
-    <!-- Level 2: Special Teams -->
-    <text x="10" y="105" class="label-sm" style="fill:#666; text-transform:uppercase; letter-spacing:0.1em;">Level 1: Special Teams</text>
-    <rect x="10" y="115" width="125" height="40" rx="3" class="box-active"/>
-    <text x="72" y="139" text-anchor="middle" class="label-sm">Lead Qualification</text>
-    <rect x="145" y="115" width="115" height="40" rx="3" class="box-active"/>
-    <text x="202" y="139" text-anchor="middle" class="label-sm">Inventory Match</text>
-    <rect x="270" y="115" width="100" height="40" rx="3" class="box-active"/>
-    <text x="320" y="139" text-anchor="middle" class="label-sm">Tour Booking</text>
-    <rect x="380" y="115" width="100" height="40" rx="3" class="box-active"/>
-    <text x="430" y="139" text-anchor="middle" class="label-sm">Doc Collection</text>
-    <rect x="490" y="115" width="85" height="40" rx="3" class="box-active"/>
-    <text x="532" y="139" text-anchor="middle" class="label-sm">Application</text>
-    <rect x="585" y="115" width="85" height="40" rx="3" class="box-active"/>
-    <text x="627" y="139" text-anchor="middle" class="label-sm">Follow-up</text>
+    <line x1="340" y1="55" x2="340" y2="70" stroke="#444" stroke-width="1"/>
 
-    <!-- Arrow down -->
-    <line x1="340" y1="155" x2="340" y2="175" class="line-data"/>
-    <text x="360" y="170" class="label-sm" style="fill:#555;">decompose further</text>
+    <text x="10" y="80" class="dc-level">Level 1: Special Teams</text>
+    <rect x="10" y="90" width="105" height="28" rx="2" class="dc-box"/>
+    <text x="62" y="108" class="dc-sm">Qualify</text>
+    <rect x="122" y="90" width="105" height="28" rx="2" class="dc-box"/>
+    <text x="174" y="108" class="dc-sm">Match</text>
+    <rect x="234" y="90" width="80" height="28" rx="2" class="dc-box"/>
+    <text x="274" y="108" class="dc-sm">Tour</text>
+    <rect x="321" y="90" width="80" height="28" rx="2" class="dc-box"/>
+    <text x="361" y="108" class="dc-sm">Docs</text>
+    <rect x="408" y="90" width="80" height="28" rx="2" class="dc-box"/>
+    <text x="448" y="108" class="dc-sm">Apply</text>
+    <rect x="495" y="90" width="85" height="28" rx="2" class="dc-box"/>
+    <text x="537" y="108" class="dc-sm">Follow-up</text>
+    <rect x="587" y="90" width="85" height="28" rx="2" class="dc-box"/>
+    <text x="629" y="108" class="dc-sm">Compliance</text>
 
-    <!-- Level 3: Atomic Tasks -->
-    <text x="10" y="190" class="label-sm" style="fill:#666; text-transform:uppercase; letter-spacing:0.1em;">Level 2: Atomic Tasks (Tickets)</text>
-    <g>
-      <rect x="10" y="200" width="75" height="30" rx="2" class="box"/>
-      <text x="47" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">parse intent</text>
-      <rect x="92" y="200" width="75" height="30" rx="2" class="box"/>
-      <text x="129" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">check budget</text>
-      <rect x="174" y="200" width="75" height="30" rx="2" class="box"/>
-      <text x="211" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">query DB</text>
-      <rect x="256" y="200" width="75" height="30" rx="2" class="box"/>
-      <text x="293" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">rank results</text>
-      <rect x="338" y="200" width="75" height="30" rx="2" class="box"/>
-      <text x="375" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">draft message</text>
-      <rect x="420" y="200" width="75" height="30" rx="2" class="box"/>
-      <text x="457" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">check TCPA</text>
-      <rect x="502" y="200" width="75" height="30" rx="2" class="box"/>
-      <text x="539" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">send SMS</text>
-      <rect x="584" y="200" width="86" height="30" rx="2" class="box"/>
-      <text x="627" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">log + measure</text>
-    </g>
+    <line x1="340" y1="118" x2="340" y2="133" stroke="#444" stroke-width="1"/>
 
-    <!-- Arrow down -->
-    <line x1="340" y1="230" x2="340" y2="250" class="line-data"/>
-    <text x="360" y="245" class="label-sm" style="fill:#555;">route to executor</text>
+    <text x="10" y="143" class="dc-level">Level 2: Atomic Tasks</text>
+    <rect x="10" y="153" width="68" height="22" rx="2" class="dc-box"/>
+    <text x="44" y="168" class="dc-sm">parse intent</text>
+    <rect x="84" y="153" width="68" height="22" rx="2" class="dc-box"/>
+    <text x="118" y="168" class="dc-sm">check budget</text>
+    <rect x="158" y="153" width="60" height="22" rx="2" class="dc-box"/>
+    <text x="188" y="168" class="dc-sm">query DB</text>
+    <rect x="224" y="153" width="68" height="22" rx="2" class="dc-box"/>
+    <text x="258" y="168" class="dc-sm">rank results</text>
+    <rect x="298" y="153" width="68" height="22" rx="2" class="dc-box"/>
+    <text x="332" y="168" class="dc-sm">draft msg</text>
+    <rect x="372" y="153" width="68" height="22" rx="2" class="dc-box"/>
+    <text x="406" y="168" class="dc-sm">check TCPA</text>
+    <rect x="446" y="153" width="48" height="22" rx="2" class="dc-box"/>
+    <text x="470" y="168" class="dc-sm">send</text>
+    <rect x="500" y="153" width="48" height="22" rx="2" class="dc-box"/>
+    <text x="524" y="168" class="dc-sm">log</text>
+    <rect x="554" y="153" width="55" height="22" rx="2" class="dc-box"/>
+    <text x="581" y="168" class="dc-sm">score</text>
+    <rect x="615" y="153" width="55" height="22" rx="2" class="dc-box"/>
+    <text x="642" y="168" class="dc-sm">escalate</text>
 
-    <!-- Level 4: Executors -->
-    <text x="10" y="265" class="label-sm" style="fill:#666; text-transform:uppercase; letter-spacing:0.1em;">Level 3: Replaceable Executors</text>
-    <rect x="10" y="275" width="155" height="35" rx="3" class="box-active"/>
-    <text x="87" y="292" text-anchor="middle" class="label-sm" style="fill:#e8e4de;">LLM Agent (Claude/Gemini)</text>
-    <text x="87" y="304" text-anchor="middle" class="label-sm" style="fill:#555;">$0.003/task</text>
+    <line x1="340" y1="175" x2="340" y2="190" stroke="#444" stroke-width="1"/>
 
-    <rect x="178" y="275" width="155" height="35" rx="3" class="box-active"/>
-    <text x="255" y="292" text-anchor="middle" class="label-sm" style="fill:#e8e4de;">Voice AI (Bland)</text>
-    <text x="255" y="304" text-anchor="middle" class="label-sm" style="fill:#555;">$0.09/min</text>
+    <text x="10" y="200" class="dc-level">Level 3: Replaceable Executors</text>
+    <rect x="30" y="210" width="140" height="35" rx="3" class="dc-accent"/>
+    <text x="100" y="225" class="dc-label" style="fill:#6b6;">LLM (Claude/Gemini)</text>
+    <text x="100" y="238" class="dc-sm" style="fill:#4a4;">$0.003/task</text>
 
-    <rect x="346" y="275" width="155" height="35" rx="3" class="box-active"/>
-    <text x="423" y="292" text-anchor="middle" class="label-sm" style="fill:#e8e4de;">Human (FancyHands)</text>
-    <text x="423" y="304" text-anchor="middle" class="label-sm" style="fill:#555;">$3-7/task</text>
+    <rect x="185" y="210" width="120" height="35" rx="3" class="dc-box"/>
+    <text x="245" y="225" class="dc-label">Voice AI (Bland)</text>
+    <text x="245" y="238" class="dc-sm">$0.09/min</text>
 
-    <rect x="514" y="275" width="156" height="35" rx="3" class="box-active"/>
-    <text x="592" y="292" text-anchor="middle" class="label-sm" style="fill:#e8e4de;">Deterministic Code</text>
-    <text x="592" y="304" text-anchor="middle" class="label-sm" style="fill:#555;">$0/task</text>
+    <rect x="320" y="210" width="120" height="35" rx="3" class="dc-box"/>
+    <text x="380" y="225" class="dc-label">Human (FancyHands)</text>
+    <text x="380" y="238" class="dc-sm">$3-7/task</text>
 
-    <!-- Principles -->
-    <text x="10" y="340" class="label-sm">Four principles: Modularization (every function is a service). Replaceability (any executor can be swapped).</text>
-    <text x="10" y="356" class="label-sm">Sanctity (each module owns its data and contracts). Operating leverage (cost per task approaches zero as volume scales).</text>
-    <text x="10" y="372" class="label-sm">The same architecture that makes Amazon work at planetary scale. Applied to a leasing office.</text>
+    <rect x="455" y="210" width="120" height="35" rx="3" class="dc-accent"/>
+    <text x="515" y="225" class="dc-label" style="fill:#6b6;">Deterministic Code</text>
+    <text x="515" y="238" class="dc-sm" style="fill:#4a4;">$0/task</text>
+
+    <line x1="30" y1="265" x2="650" y2="265" stroke="#222" stroke-width="1"/>
+    <text x="340" y="285" class="dc-sm">Four principles: Modularization. Replaceability. Sanctity. Operating leverage.</text>
+    <text x="340" y="300" class="dc-sm" style="fill:#555;">The executor is interchangeable. The interface is sacred.</text>
+    <text x="340" y="315" class="dc-sm" style="fill:#555;">Same architecture as Amazon's internal services. Applied to a leasing office.</text>
   </svg>
 </div>
 
-<!-- ═══════ ENGINEERING PRACTICES ═══════ -->
+<!-- ═══════ STATS ═══════ -->
 
 <div class="asset" style="margin-top:4rem; border-top:1px solid #333; padding-top:3rem;">
-  <h2>How It's Built</h2>
-  <p>This isn't a startup engineering org. It's one person with AI as the engineering team. The practices that make that work are themselves part of the asset.</p>
+  <h2>By the Numbers</h2>
 
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-top:2rem;">
-    <div>
-      <h2 style="font-size:1rem; margin-top:0; color:#999;">Adversarial Testing</h2>
-      <p style="font-size:0.95rem; color:#888;">Red team agents that attack production systems. Every conversation agent has an adversary trying to break it — prompt injection, edge cases, compliance violations. Bugs found by machines before customers hit them.</p>
-    </div>
-    <div>
-      <h2 style="font-size:1rem; margin-top:0; color:#999;">CI/CD for AI Agents</h2>
-      <p style="font-size:0.95rem; color:#888;">Cloud Build → Docker → GKE with rollback. Not just code deployment — conversation quality regression tests, guardrail validation, shadow mode for new agent versions running alongside production.</p>
-    </div>
-    <div>
-      <h2 style="font-size:1rem; margin-top:0; color:#999;">Retro → Macro → Meta Loops</h2>
-      <p style="font-size:0.95rem; color:#888;">Three feedback layers. Retro: what happened in this conversation. Macro: patterns across thousands of conversations this week. Meta: is the system that generates the system improving. Most teams never get past retro.</p>
-    </div>
-    <div>
-      <h2 style="font-size:1rem; margin-top:0; color:#999;">The Overnight Machine</h2>
-      <p style="font-size:0.95rem; color:#888;">Systems that run while I sleep. Nightly inventory refresh, lead scoring recalculation, stale data detection, automated outreach cadences. Wake up to a dashboard, not a backlog.</p>
-    </div>
-  </div>
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.85rem; line-height:1.7; color:#888; overflow-x:auto; margin:2rem 0;">
+531 commits in 15 months (one person)
+1,004,287 lines of Python
+7 CLAUDE.md governance files (1,334 lines)
+8 deterministic hooks (4 event types)
+12 reusable skills
+7 slash commands
+119 session memory files
+4 business units
+3 AI agents in production
+30,000 leads/month
+97% contribution margins
+$0.003 cost per conversation
+0 human engineers</pre>
 </div>
