@@ -6,7 +6,30 @@ navActive: assets
 
 <h1>Assets</h1>
 
-<p style="color:#999; font-size:1.05rem; margin-bottom:3rem;">Seven years of production infrastructure. No prototypes. No demos. Each system handles real volume every day. This page peels back the layers — from the surface-level architecture down to the code that runs at 3 AM.</p>
+<p style="color:#999; font-size:1.05rem; margin-bottom:1.5rem;">Seven years of production infrastructure across four business units. No prototypes. No demos. Each system handles real volume every day.</p>
+
+<div style="margin-bottom:3rem; padding:1.5rem; border:1px solid #222; background:#0a0a0a;">
+  <div style="color:#666; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem;">Four Business Units &middot; Three Distinct Codebases</div>
+  <div style="margin-bottom:0.8rem;">
+    <span style="color:#88cc88; font-weight:600;">Apartment Locator</span> <span style="color:#555;">&middot; agent-v4/</span><br>
+    <span style="color:#888; font-size:0.95rem;">Middleman — remarket inbound leads (Zillow, Apartments.com, Craigslist) to cooperating buildings that pay commission. Dallas, Houston, Austin, Denver, Chicago.</span>
+  </div>
+  <div style="margin-bottom:0.8rem;">
+    <span style="color:#88cc88; font-weight:600;">Landlord Rep (Blue Lake)</span> <span style="color:#555;">&middot; Agentic-Client-Service/</span><br>
+    <span style="color:#888; font-size:0.95rem;">We ARE the leasing office. Operate via YouGotListings. Docs, screening, vouchers, applications — first contact through lease signing.</span>
+  </div>
+  <div style="margin-bottom:0.8rem;">
+    <span style="color:#88cc88; font-weight:600;">Insurance Agent (Ken)</span> <span style="color:#555;">&middot; Workflows/ken-insurance/</span><br>
+    <span style="color:#888; font-size:0.95rem;">SMS renters insurance sales via Assurant (Fortune 500). Outbound-first. Separate vertical, separate codebase, separate business model.</span>
+  </div>
+  <div>
+    <span style="color:#88cc88; font-weight:600;">Financial Analysis</span> <span style="color:#555;">&middot; Workflows/financial-analysis/</span><br>
+    <span style="color:#888; font-size:0.95rem;">P&L, payment reconciliation, revenue tracking, commission verification. Scripts + automations against 7 years of data.</span>
+  </div>
+  <div style="margin-top:1.2rem; padding-top:1rem; border-top:1px solid #222;">
+    <span style="color:#666; font-size:0.85rem;">Shared infrastructure: Cloud SQL Postgres, Celery/Redis, GKE cluster, Twilio SMS, Claude Opus, Gemini (bulk only). All owned and operated by HomeEasy / agent-ic. This site is open source: <a href="https://github.com/mchopra88/agent-ic" style="color:#888;">github.com/mchopra88/agent-ic</a></span>
+  </div>
+</div>
 
 <!-- ═══════ THE ONION: OVERVIEW ═══════ -->
 
@@ -181,63 +204,41 @@ navActive: assets
   </svg>
 </div>
 
-<!-- ═══════ THE CONVERSATION ENGINE IN DETAIL ═══════ -->
+<!-- ═══════ THE CONVERSATION ENGINE — LOCATOR ═══════ -->
 
 <div class="asset">
-  <h2>The Conversation Engine: How the Agent Brain Works</h2>
-  <p>The agent is not a chatbot. It's a tool-use LLM orchestrator with a sales doctrine encoded in its system prompt. It doesn't follow decision trees — it reasons about each message, calls tools to look things up, and generates responses calibrated to the conversation state. Here's the actual code that handles an inbound message:</p>
+  <h2 style="margin-bottom:0.3rem;">The Conversation Engine</h2>
+  <div style="color:#555; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.5rem;">Apartment Locator &middot; agent-v4/</div>
+  <p>The Locator Agent is a tool-use LLM orchestrator. No decision trees. It reasons about each inbound message, calls tools to search inventory and check commissions, and generates responses calibrated to the conversation state. The agent decides <em>what</em> to do; external services execute the action. This separation means the agent can be tested without live API calls, and integrations can change without touching agent logic.</p>
 
   <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# From ken.py — the actual production insurance agent
+# From the Locator Agent CLAUDE.md — the operating doctrine
 
-class KenAgent:
-    """
-    Ken - The Jamboree Insurance SMS Agent
+## Core Philosophy: DRIVERS, NOT ORDER TAKERS
 
-    Handles:
-    - Initial outreach (WE message THEM)
-    - Response classification (20+ intents)
-    - Info gathering (address, move-in, email)
-    - Quote delivery (ONLY after Assurant API)
-    - Follow-up sequencing
-    - Objection handling
-    """
+WE DO NOT TAKE ORDERS. WE DRIVE DEALS.
 
-    def handle_inbound(self, lead, message):
-        """
-        Handle an inbound message from a lead.
+When client says "I want X" - we don't just find X. We:
+1. Find the VULNERABILITY (their pain point)
+2. Find the FLEX (where they can bend)
+3. DRIVE them to a property that PAYS US
 
-        Returns: (response, event, action_needed)
+## Tools the agent calls:
+  inventory_search(city, budget, beds)
+  building_lookup(name | address)
+  schedule_tour(building_id, date)
+  web_search(renter query)
+  commission_check(building_id)
+  escalate_to_human(reason)
 
-        action_needed can be:
-        - {"action": "generate_quote",
-           "address": "...", "city": "..."}
-        - {"action": "escalate_to_human",
-           "reason": "..."}
-        - None
-        """
-        # Classify the message
-        classification = classify_message(message)
+## Socratic Framework:
+  Each question has only one honest answer.
+  The logical conclusion is inescapable.
+  "At a minimum, could you make this work?"
+  "I've got a renter ready. Want the commission
+   or should I send them across the street?"</pre>
 
-        # ALWAYS extract statements for later
-        # urgency building
-        self._extract_statements(lead, message)
-
-        # Handle by intent
-        response, event, action = \
-            self._handle_intent(
-                lead, classification, message
-            )
-
-        # Process state transition
-        if event:
-            self.state_machine.process_event(
-                lead, event
-            )
-
-        return response, event, action</pre>
-
-  <p>The key design decision: <code>action_needed</code>. The agent brain decides <em>what</em> to do, but external services execute the action. When the agent needs a quote, it doesn't call Assurant directly — it returns <code>{"action": "generate_quote"}</code> and the orchestrator handles the API call. This separation means the agent can be tested without live API calls, and the Assurant integration can change without touching the agent logic.</p>
+  <p>The key design pattern: the agent brain returns actions (<code>schedule_tour</code>, <code>escalate_to_human</code>), and the orchestrator executes them. Same pattern across all three agents — Locator, Landlord Rep, and Ken. The interface stays the same. The executors swap out.</p>
 
   <h2 style="font-size:1.1rem; margin-top:3rem;">The Tonality System</h2>
   <p>The agent doesn't just generate text — it calibrates tone based on the conversation state and the lead's profile. The CLAUDE.md encodes the doctrine:</p>

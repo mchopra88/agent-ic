@@ -3,17 +3,50 @@ layout: base.njk
 title: ""
 ---
 
+<div class="pulse" id="pulse">
+  <span>531+ commits</span>
+  <span class="sep">&middot;</span>
+  <span>{{ collections.essays | length }} essays</span>
+  <span class="sep">&middot;</span>
+  <span>4 AI agents</span>
+  <span class="sep">&middot;</span>
+  <span id="last-push">loading...</span>
+</div>
+
 <div class="thesis">
   <p>
-    A realtor is a conversational agent with a database. Take requirements, query inventory, present options, close. Strip away the business cards and the open houses and that's what's left — a system. The same is true for an insurance broker. A quoting desk. A physician dispatch service. Any role where a human sits between a customer and a catalog.
+    Private technology studio. We build AI-native operations for real estate brokerage — apartment locating, landlord representation, renters insurance, financial analysis. Four business units. 30,000 leads a month. Zero engineers.
   </p>
   <p>
-    I've spent seven years proving this. Two IPOs, a Slack liquidity event, a decade of global corporate and venture work — then I walked away from all of it to build one of the largest apartment locating operations in the US. 30,000 leads a day, processed largely by AI systems I built solo. No engineering team. We hit 97% contribution margins in an industry where 20% is considered good. The humans who remain handle phone calls and apartment tours. Everything else is machine.
+    The essays are about what that looks like from the inside. The <a href="/essays/scar-tissue/">hooks written at 2 AM</a> that stop the AI from deleting the database. The <a href="/essays/the-hardware-thesis/">$4,000 Mac Studio</a> that replaced the engineering team. The <a href="/essays/the-twilio-incident/">million-message Twilio incident</a> that started it all. The <a href="/essays/deployment-manifests/">8-day doom loop</a> that nearly killed the business. How the whole thing gets built in a <a href="/essays/why-i-work-in-the-terminal/">terminal window</a> with <a href="/essays/my-claude-md/">seven governance files</a> and a lot of scar tissue.
   </p>
-  <p>
-    Ben Thompson wrote about Amazon building logistics infrastructure for itself, then opening it to the world. That's the path I'm on. After years of saying no to inbound inquiries about our technology, I'm opening it up for conversation. I don't have a pitch deck. I don't have a pricing page. I have seven years of production systems that work, and I'm curious what happens when other people see them.
-  </p>
-  <p>
-    I don't know where this leads. That's the point.
+  <p style="color:#666; font-style:italic; margin-top:2rem;">
+    Mukund Chopra. Chicago. Formerly Citibank, Groupon (through the IPO), Panache Ventures.
   </p>
 </div>
+
+<script>
+(function() {
+  fetch('https://api.github.com/repos/mchopra88/agent-ic')
+    .then(r => r.json())
+    .then(data => {
+      if (data.pushed_at) {
+        const pushed = new Date(data.pushed_at);
+        const now = new Date();
+        const diffMs = now - pushed;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHrs = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHrs / 24);
+        let ago;
+        if (diffMins < 60) ago = diffMins + 'm ago';
+        else if (diffHrs < 24) ago = diffHrs + 'h ago';
+        else ago = diffDays + 'd ago';
+        document.getElementById('last-push').textContent = 'last push ' + ago;
+        document.getElementById('last-push').classList.add('live');
+      }
+    })
+    .catch(function() {
+      document.getElementById('last-push').textContent = 'building';
+    });
+})();
+</script>

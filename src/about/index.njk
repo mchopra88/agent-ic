@@ -8,37 +8,43 @@ navActive: about
 
 <div class="about">
   <p>
-    I'm Mukund Chopra. I've had two careers and they happened in sequence, not in parallel.
+    agent-ic is a private technology studio. We build AI-native operations for real estate brokerage — apartment locating, landlord representation, renters insurance, financial analysis.
   </p>
   <p>
-    The first career was global corporate and venture. Queen's Commerce, HEC Paris for strategic management, then a run through Citibank, Tata Steel, Olam, and Millicom across multiple countries. I was senior leadership at Groupon through the IPO. I was employee number three at Granify, where I architected revenue from scratch. I ran MD HomeCall as CEO — Canada's largest physician home visits provider — until it was acquired. I led North America for Universal Avenue. I was an early investor in Slack through Spaces before the acquisition and the liquidity event. I became a venture partner at Panache Ventures and a principal at Chopra Ventures.
+    Four business units. 30,000 leads a month. Zero human engineers. Everything built and operated by one person in a terminal.
+  </p>
+
+  <h2>What We Operate</h2>
+
+  <p>
+    <strong>Apartment Locator</strong> — AI agent that takes inbound leads from Zillow, Apartments.com, Craigslist. Qualifies, matches to inventory, drives to tours and lease signings. We're the middleman — we remarket leads to cooperating buildings that pay us commission. 50% to 100%+ of first month's rent per conversion.
   </p>
   <p>
-    I've been a CXO of venture-backed startups that raised money and went nowhere. I've been inside two IPOs. I know what the inside of a scaled organization looks like. I also know what the inside of a startup that doesn't survive looks like. The pattern recognition from that decade is the foundation for everything I build now.
+    <strong>Landlord Rep (Blue Lake)</strong> — We operate as the actual leasing office for a portfolio of multifamily properties through YouGotListings. Document collection, tenant screening, voucher processing, application management. First contact through lease signing, fully automated.
   </p>
   <p>
-    The second career started around 2017 when I founded what became HomeEasy. I looked at the apartment locating business — one of the largest offline brokerage categories in the US — and saw a system hiding inside a sales process. A realtor takes requirements, queries inventory, presents options, closes. That's an agent with a database. I built the machine to prove it.
+    <strong>Insurance Agent (Ken)</strong> — SMS-based renters insurance sales. HO4 policies via Assurant, a Fortune 500 carrier. Outbound-first. The agent collects address and move-in details through conversation, quotes via the Assurant API, and closes. Separate codebase, separate business model, separate vertical.
   </p>
   <p>
-    Today HomeEasy processes 30,000 leads a day across multiple metro areas — Dallas, Houston, Austin, Denver, Chicago. Most of that volume is handled by AI systems I designed and built myself. We hit 97% contribution margins in an industry where 20% is considered good. The humans who remain in the operation exist for exactly two things: phone calls and apartment tours. Everything else is automated.
+    <strong>Financial Analysis</strong> — Automated P&L, payment reconciliation, revenue tracking, commission verification. Scripts and automations that run against seven years of transaction data.
+  </p>
+
+  <h2>The Stack</h2>
+
+  <p>
+    Shared infrastructure across all four units: Cloud SQL Postgres (production + legacy read replicas going back to 2021), Celery/Redis task queues, GKE cluster, Twilio for SMS, Bland AI for automated voice calls. Claude Opus as the primary LLM for all conversation and reasoning. Gemini for bulk mechanical work only — embeddings, entity extraction. Eight deterministic hooks enforce safety rules that can't be skipped or overridden. Seven CLAUDE.md governance files — 1,334 lines — encode every operational lesson from seven years of production incidents.
   </p>
   <p>
-    I didn't start as an engineer. I became one because the engineers I hired couldn't build what I saw. I taught myself to code, then machine learning, then — when LLMs became production-ready — I replaced the engineering team entirely and started building solo with AI as my collaborator. Not as a novelty. As the actual operating model.
+    This isn't a prototype. These systems have been in production for years, processing real volume, generating real revenue, every day.
+  </p>
+
+  <h2>Who</h2>
+
+  <p>
+    Mukund Chopra. Chicago. Queen's Commerce and HEC Paris. Previously Citibank, Tata Steel, Groupon (through the IPO), CEO of MD HomeCall (acquired), venture partner at Panache Ventures. Two IPOs. One real estate company that turned into an AI company.
   </p>
   <p>
-    For most of the last few years, I thought I was unemployable. Not in the self-deprecating way — in the genuine "I've been in a bunker building weird things and I have no idea if anyone values this" way. The volatility of building alone is real. It's not just financial. It's the doubt, the isolation, the stretches where the systems break at 2 AM and there's no one to call.
-  </p>
-  <p>
-    About three months ago, something shifted. I realized the skills I'd built — orchestrating AI agents at production scale, building autonomous systems that run overnight, collapsing entire business functions into code — aren't niche. They're exactly what every company is trying to figure out. The death of doubt wasn't sudden. It was looking at the architecture I'd built and realizing: this is what the future of operations looks like, and I've been living in it for years.
-  </p>
-  <p>
-    I've deployed versions of this technology into private equity portfolio companies — quoting engines, CRM systems built from email mining, AI-powered sales operations. The pattern is always the same: take a human-intensive process, decompose it into primitives, automate the primitives, keep the humans only where presence or judgment is irreplaceable.
-  </p>
-  <p>
-    agent-ic is not a company. It's not a fund. It's a place to think about what I've built, what it means, and what happens when the same architecture gets applied to other industries. After years of saying no to inbound inquiries about our technology, I'm open to conversation. I don't have a pitch deck. I have seven years of production systems that work.
-  </p>
-  <p>
-    I don't know where this leads. That's the point.
+    The essays on this site are about what it actually takes to build and operate production AI systems alone. The <a href="/assets/">assets page</a> shows the technology. The <a href="/essays/">essays</a> show the thinking.
   </p>
 
   <div class="contact">

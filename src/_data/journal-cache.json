@@ -1,0 +1,556 @@
+[
+  {
+    "date": "2026-03-12",
+    "displayDate": "March 12, 2026",
+    "commits": [
+      {
+        "hash": "2c917d4",
+        "message": "fix: resolve mypy type errors in forensic_db and replay_harness",
+        "tag": "fix"
+      },
+      {
+        "hash": "de80da3",
+        "message": "Implement inventory forensic remediation pipeline",
+        "tag": "feature"
+      },
+      {
+        "hash": "445599d",
+        "message": "Rewrite inventory forensic audit and Opus execution package",
+        "tag": "build"
+      }
+    ],
+    "commitCount": 3,
+    "tags": [
+      "fix",
+      "feature",
+      "build"
+    ],
+    "summary": "1 feature, 1 fix"
+  },
+  {
+    "date": "2026-02-24",
+    "displayDate": "February 24, 2026",
+    "commits": [
+      {
+        "hash": "4ee99c8",
+        "message": "add architecture map, deployment state, update CLAUDE.md with mandatory session workflow",
+        "tag": "deploy"
+      }
+    ],
+    "commitCount": 1,
+    "tags": [
+      "deploy"
+    ],
+    "summary": "1 deploy"
+  },
+  {
+    "date": "2026-02-20",
+    "displayDate": "February 20, 2026",
+    "commits": [
+      {
+        "hash": "ad5e7e9",
+        "message": "prd: CRM three-feature design — notes layers, ticketing, inventory intel",
+        "tag": "feature"
+      }
+    ],
+    "commitCount": 1,
+    "tags": [
+      "feature"
+    ],
+    "summary": "1 feature"
+  },
+  {
+    "date": "2026-02-19",
+    "displayDate": "February 19, 2026",
+    "commits": [
+      {
+        "hash": "072971b",
+        "message": "index on fix/ygl-pipeline-zero-message-recovery: a516edb fix: add type ignore for requests import to pass CI mypy check",
+        "tag": "fix"
+      },
+      {
+        "hash": "81a30f3",
+        "message": "fix: YGL pipeline — recover 17 zero-message leads + prevent future drops (#18)",
+        "tag": "fix"
+      },
+      {
+        "hash": "a516edb",
+        "message": "fix: add type ignore for requests import to pass CI mypy check",
+        "tag": "fix"
+      },
+      {
+        "hash": "9dfdef7",
+        "message": "fix",
+        "tag": "fix"
+      },
+      {
+        "hash": "8c9479a",
+        "message": "refactor: simplify CI workflow by  main branch restrictions",
+        "tag": "build"
+      },
+      {
+        "hash": "a9243dd",
+        "message": " lint fix",
+        "tag": "fix"
+      }
+    ],
+    "commitCount": 6,
+    "tags": [
+      "fix",
+      "build"
+    ],
+    "summary": "5 fixes"
+  },
+  {
+    "date": "2026-02-18",
+    "displayDate": "February 18, 2026",
+    "commits": [
+      {
+        "hash": "1510a76",
+        "message": "fix: initial_outreach picks most recent YGL inquiry, uses correct unit type",
+        "tag": "fix"
+      },
+      {
+        "hash": "1f4534e",
+        "message": "docs: session memory — 17 lead recovery + V2 agent PYTHONPATH fix",
+        "tag": "fix"
+      },
+      {
+        "hash": "882cf2a",
+        "message": "fix: initial_outreach dedup + lookback + mark recovery as executed",
+        "tag": "fix"
+      },
+      {
+        "hash": "d1e15dc",
+        "message": "docs: four business units — Locator, Landlord Rep, Ken, Financial",
+        "tag": "build"
+      },
+      {
+        "hash": "35781f6",
+        "message": "docs: fix agent naming — Locator Agent vX.Y / Landlord Rep Agent vX.Y",
+        "tag": "fix"
+      },
+      {
+        "hash": "f1609d2",
+        "message": "docs: update Landlord Rep status — V2 deployed, discussed_topics wired",
+        "tag": "deploy"
+      },
+      {
+        "hash": "004632c",
+        "message": "fix: YGL pipeline — recover 17 zero-message leads + prevent future drops",
+        "tag": "fix"
+      }
+    ],
+    "commitCount": 7,
+    "tags": [
+      "fix",
+      "build",
+      "deploy"
+    ],
+    "summary": "5 fixes, 1 deploy"
+  },
+  {
+    "date": "2026-02-17",
+    "displayDate": "February 17, 2026",
+    "commits": [
+      {
+        "hash": "6874ed4",
+        "message": "feat: headless CEO operating system — 14 automated reports + bottom-up enforcement",
+        "tag": "feature"
+      }
+    ],
+    "commitCount": 1,
+    "tags": [
+      "feature"
+    ],
+    "summary": "1 feature"
+  },
+  {
+    "date": "2026-02-16",
+    "displayDate": "February 16, 2026",
+    "commits": [
+      {
+        "hash": "d8a6a8f",
+        "message": "feat: headless CEO operating system — 14 automated reports + bottom-up analysis enforcement",
+        "tag": "feature"
+      },
+      {
+        "hash": "4011eb3",
+        "message": "feat: add deploy health monitor — auto-checks GKE deployments every 30 min",
+        "tag": "deploy"
+      },
+      {
+        "hash": "44852c9",
+        "message": "docs: rewrite engineering workflow as reviewer guide, not contributor guide",
+        "tag": "build"
+      },
+      {
+        "hash": "91166b5",
+        "message": "docs: add engineering workflow explainer + fix auto-PR and secret scan triggers",
+        "tag": "fix"
+      },
+      {
+        "hash": "4ddb4bb",
+        "message": "fix: unblock CI pipeline — remove gitflow branch gate, graceful secret fallbacks",
+        "tag": "fix"
+      }
+    ],
+    "commitCount": 5,
+    "tags": [
+      "feature",
+      "deploy",
+      "build",
+      "fix"
+    ],
+    "summary": "1 feature, 2 fixes, 1 deploy"
+  },
+  {
+    "date": "2026-02-15",
+    "displayDate": "February 15, 2026",
+    "commits": [
+      {
+        "hash": "5ac2c20",
+        "message": "fix: correct Bland AI voice ID to a48e579c-cbf9-40c2-a1ef-9cce44a51ad9",
+        "tag": "fix"
+      }
+    ],
+    "commitCount": 1,
+    "tags": [
+      "fix"
+    ],
+    "summary": "1 fix"
+  },
+  {
+    "date": "2026-02-14",
+    "displayDate": "February 14, 2026",
+    "commits": [
+      {
+        "hash": "5d70a11",
+        "message": "fix: CI lint/typecheck skip deleted files via --diff-filter=d",
+        "tag": "fix"
+      },
+      {
+        "hash": "72a9cc1",
+        "message": "fix: un-track accidentally added untracked files",
+        "tag": "fix"
+      },
+      {
+        "hash": "dd6c6ea",
+        "message": "fix: remove f-string placeholderless warnings (F541) caught by CI",
+        "tag": "fix"
+      },
+      {
+        "hash": "5b8c9b7",
+        "message": "fix: resolve 92 lint errors + harden nightly cleanup workflow",
+        "tag": "fix"
+      },
+      {
+        "hash": "fb3641d",
+        "message": "feat: centralized nightly scanner — audits all production repos",
+        "tag": "feature"
+      },
+      {
+        "hash": "79304ae",
+        "message": "docs: add teaching mode",
+        "tag": "feature"
+      },
+      {
+        "hash": "6aecf05",
+        "message": "feat: nightly AI slop scanner + fix cost review schedule",
+        "tag": "fix"
+      },
+      {
+        "hash": "8a2d02c",
+        "message": "perf: comprehensive .gitignore — cut untracked files from 500+ to ~330",
+        "tag": "build"
+      },
+      {
+        "hash": "1aee266",
+        "message": "law: file and credential integrity — never delete, redact, or empty tracked files",
+        "tag": "build"
+      }
+    ],
+    "commitCount": 9,
+    "tags": [
+      "fix",
+      "feature",
+      "build"
+    ],
+    "summary": "2 features, 5 fixes"
+  },
+  {
+    "date": "2026-02-13",
+    "displayDate": "February 13, 2026",
+    "commits": [
+      {
+        "hash": "31ef6c2",
+        "message": "Promote develop -> main",
+        "tag": "build"
+      },
+      {
+        "hash": "649430b",
+        "message": "ci: pass Gemini secrets explicitly",
+        "tag": "build"
+      },
+      {
+        "hash": "cbe82f5",
+        "message": "ci: robust PRD reviewer JSON",
+        "tag": "build"
+      },
+      {
+        "hash": "f410754",
+        "message": "ci: make PRD reviewer rigorous",
+        "tag": "build"
+      },
+      {
+        "hash": "f719e30",
+        "message": "ci: fix PRD reviewer mypy",
+        "tag": "fix"
+      },
+      {
+        "hash": "40d2ed7",
+        "message": "ci: auto-select highest Gemini Pro",
+        "tag": "build"
+      },
+      {
+        "hash": "3ef82bc",
+        "message": "ci: run on pull_request_target",
+        "tag": "build"
+      },
+      {
+        "hash": "6184e72",
+        "message": "ci: fix trufflehog args",
+        "tag": "fix"
+      },
+      {
+        "hash": "a82fbba",
+        "message": "ci: fix trufflehog action ref",
+        "tag": "fix"
+      },
+      {
+        "hash": "c081f31",
+        "message": "ci: secret scan via trufflehog",
+        "tag": "build"
+      },
+      {
+        "hash": "86d7224",
+        "message": "ci: fix CI workflow YAML",
+        "tag": "fix"
+      },
+      {
+        "hash": "3140c8e",
+        "message": "ci: automation gates",
+        "tag": "build"
+      }
+    ],
+    "commitCount": 12,
+    "tags": [
+      "build",
+      "fix"
+    ],
+    "summary": "4 fixes"
+  },
+  {
+    "date": "2026-02-12",
+    "displayDate": "February 12, 2026",
+    "commits": [
+      {
+        "hash": "d5b5bd9",
+        "message": "feat(ken): LTV lifecycle module, Apple Pay/Google Pay checkout, email validation",
+        "tag": "feature"
+      },
+      {
+        "hash": "c1b3868",
+        "message": "update brand identity: three brands, review monitoring loop",
+        "tag": "build"
+      },
+      {
+        "hash": "dbcc583",
+        "message": "add brand identity law: never say HomeEasy in first contact",
+        "tag": "feature"
+      },
+      {
+        "hash": "28bc32a",
+        "message": "feat(ken): P0 TCPA compliance layer — atomic opt-out, DNC, send window, AI disclosure",
+        "tag": "feature"
+      },
+      {
+        "hash": "f3e6096",
+        "message": "feat(ken): 84-scenario adversarial simulation + hardened guardrails",
+        "tag": "feature"
+      }
+    ],
+    "commitCount": 5,
+    "tags": [
+      "feature",
+      "build"
+    ],
+    "summary": "4 features"
+  },
+  {
+    "date": "2026-02-11",
+    "displayDate": "February 11, 2026",
+    "commits": [
+      {
+        "hash": "dbb87c6",
+        "message": "feat(ken): PARKING mechanism + post-conversion inbound handler",
+        "tag": "feature"
+      },
+      {
+        "hash": "b3f957c",
+        "message": "fix(ken): harden fallback classifier from 3 cosplay analyses (hostile, edge, post-sale)",
+        "tag": "fix"
+      },
+      {
+        "hash": "08e8649",
+        "message": "feat(ygl): 300 adversarial scenario cosplay docs + updated CLAUDE.md",
+        "tag": "feature"
+      },
+      {
+        "hash": "a77fbcd",
+        "message": "fix(ken): remove ^ anchors from YES_PATTERNS in fallback classifier",
+        "tag": "fix"
+      },
+      {
+        "hash": "9b5aed8",
+        "message": "fix(ken): 7 systemic bugs from cosplay analysis",
+        "tag": "fix"
+      },
+      {
+        "hash": "4b31457",
+        "message": "deploy(ken): add Dockerfile, cloudbuild, k8s deployment for GKE",
+        "tag": "deploy"
+      },
+      {
+        "hash": "6f06027",
+        "message": "feat(ken): wire email service, landing page, cost-guided channel selection",
+        "tag": "feature"
+      },
+      {
+        "hash": "209d838",
+        "message": "feat(ken): LLM-native classification + response replaces regex classifier",
+        "tag": "feature"
+      },
+      {
+        "hash": "fa5559a",
+        "message": "fix: enrichment worker deployment uses sparkapt-secrets, right-sized for idle state",
+        "tag": "fix"
+      },
+      {
+        "hash": "cfe5850",
+        "message": "fix: deal agent deployment uses sparkapt-secrets, reduced resources for shadow mode",
+        "tag": "fix"
+      },
+      {
+        "hash": "20c5910",
+        "message": "analysis: 82-scenario Ken insurance cosplay — 66% fail rate, 12 systemic bugs",
+        "tag": "fix"
+      },
+      {
+        "hash": "466ee77",
+        "message": "docs: comprehensive edge case simulation matrix (52 scenarios)",
+        "tag": "build"
+      },
+      {
+        "hash": "2e40365",
+        "message": "deploy: V5 event-driven platform on GKE (7 services)",
+        "tag": "deploy"
+      },
+      {
+        "hash": "055d243",
+        "message": "feat(ken-insurance): implement full brain architecture (7 phases)",
+        "tag": "feature"
+      },
+      {
+        "hash": "903cc0a",
+        "message": "docs(ops): add mandatory post-deployment verification rules",
+        "tag": "deploy"
+      },
+      {
+        "hash": "39fae36",
+        "message": "2026.02.11-8: add Persistent State Memory architectural law (OpenClaw pattern)",
+        "tag": "feature"
+      },
+      {
+        "hash": "621d4a9",
+        "message": "feat: add anti-determinism law + agent core session memory",
+        "tag": "feature"
+      },
+      {
+        "hash": "87ab3d9",
+        "message": "2026.02.11-7: session memory — LangGraph Phase 1 implementation",
+        "tag": "feature"
+      },
+      {
+        "hash": "c011767",
+        "message": "2026.02.11-5: add session context recovery rules, automation tools, FancyHands status",
+        "tag": "feature"
+      },
+      {
+        "hash": "7949ffb",
+        "message": "2026.02.11-6: add Carl OS folder structure",
+        "tag": "feature"
+      },
+      {
+        "hash": "e2ebe13",
+        "message": "2026.02.11-5: refactor CLAUDE.md to Carl OS pattern (1365 to 72 lines)",
+        "tag": "build"
+      },
+      {
+        "hash": "8b6cc49",
+        "message": "2026.02.11-4: add burden-of-proof inversion doctrine + paranoia principle",
+        "tag": "feature"
+      },
+      {
+        "hash": "bf78836",
+        "message": "2026.02.11-3: micro-close sales methodology + Adam Kent analysis",
+        "tag": "build"
+      },
+      {
+        "hash": "b3fd81c",
+        "message": "2026.02.11-1: versioning convention, field coaching details, programmatic agent oversight",
+        "tag": "build"
+      }
+    ],
+    "commitCount": 24,
+    "tags": [
+      "feature",
+      "fix",
+      "deploy",
+      "build"
+    ],
+    "summary": "11 features, 6 fixes, 3 deploys"
+  },
+  {
+    "date": "2026-02-10",
+    "displayDate": "February 10, 2026",
+    "commits": [
+      {
+        "hash": "d2bdd17",
+        "message": "add Where You At field tracking, building enrichment schema, relationship management specs",
+        "tag": "feature"
+      },
+      {
+        "hash": "a47f2c8",
+        "message": "add SLM training pipeline, architecture principles, roadmap",
+        "tag": "feature"
+      },
+      {
+        "hash": "8c30c0b",
+        "message": "purge disqualification poison across entire codebase",
+        "tag": "build"
+      },
+      {
+        "hash": "85e62e4",
+        "message": "Initial commit: CLAUDE.md restructured + session memory archive",
+        "tag": "build"
+      }
+    ],
+    "commitCount": 4,
+    "tags": [
+      "feature",
+      "build"
+    ],
+    "summary": "2 features"
+  }
+]
