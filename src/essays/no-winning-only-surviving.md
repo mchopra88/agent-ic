@@ -104,7 +104,7 @@ My cost-cutting looks like strategic genius now. But if the BPO experiment had w
 
 Andy Grove — Intel's CEO during the processor wars — wrote a book called *Only the Paranoid Survive*. His thesis: in technology businesses, there are "strategic inflection points" where the competitive landscape shifts so dramatically that companies either adapt or die. The companies that survive are the ones run by people who are paranoid enough to see the inflection point coming.
 
-Grove was talking about industry transitions — the shift from memory chips to microprocessors, the emergence of the internet, the move to mobile. But the principle applies at every scale. For a company processing 30,000 leads a month with zero human engineers, the inflection points are constant and personal:
+Grove was talking about industry transitions — the shift from memory chips to microprocessors, the emergence of the internet, the move to mobile. But the principle applies at every scale. For a company processing 30,000 leads a day with zero human engineers, the inflection points are constant and personal:
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 Things that could kill the business RIGHT NOW:

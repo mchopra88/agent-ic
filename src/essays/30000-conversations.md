@@ -5,7 +5,7 @@ order: 19
 date: 2025-11-25
 ---
 
-Everyone quotes the number. 30,000 leads a month. It sounds impressive in a pitch. It means nothing without the data underneath.
+Everyone quotes the number. 30,000 leads a day. It sounds impressive in a pitch. It means nothing without the data underneath.
 
 But before the data underneath, the number itself has a story. It didn't start at 30,000. It started at zero and grew in a way that's hard to explain to anyone who hasn't watched a lead pipeline compound over years.
 
@@ -22,9 +22,10 @@ Lead volume by year (approximate):
   2022:    ~12,000/month  Early automation scaling
   2023:    ~18,000/month  AI conversation engine live
   2024:    ~25,000/month  Full automation, multi-vertical
-  2025:    ~30,000/month  Current steady state
+  2025:    ~30,000/day    BlueLake purchasing intent platform live
+  2026:    ~30,000/day    Current steady state
 
-  Cumulative leads processed: hundreds of thousands
+  Cumulative leads processed: millions
   Cumulative conversations: millions
   Cumulative text messages: tens of millions
 </pre>
@@ -215,7 +216,7 @@ Then there was the PR reviewer experiment. After the Twilio incident but before 
 
 It lasted about two months.
 
-The reviews were perfunctory. "LGTM" with no comments. Or nitpicks on formatting while missing actual logic bugs. Or — the worst — disagreements about architecture that would hold up a deploy for days while we argued about patterns that didn't matter for a system processing 30,000 leads a month. The team was demoralized. They went from building things to rubber-stamping things someone else built, and the resentment was palpable.
+The reviews were perfunctory. "LGTM" with no comments. Or nitpicks on formatting while missing actual logic bugs. Or — the worst — disagreements about architecture that would hold up a deploy for days while we argued about patterns that didn't matter for a system processing 30,000 leads a day. The team was demoralized. They went from building things to rubber-stamping things someone else built, and the resentment was palpable.
 
 The screaming matches were about accountability. I'd find a bug in production. I'd ask why the PR review didn't catch it. The answer was always some variation of "the code was complex" or "we were focused on the architecture, not the logic" or "that edge case wasn't in the test suite." All true. All irrelevant. The question wasn't why they missed it. The question was why I was paying $4,350 a month for reviews that didn't catch anything.
 

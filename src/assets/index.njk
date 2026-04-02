@@ -6,28 +6,28 @@ navActive: assets
 
 <h1>Assets</h1>
 
-<p style="color:#999; font-size:1.05rem; margin-bottom:1.5rem;">Seven years of production infrastructure across four business units. No prototypes. No demos. Each system handles real volume every day.</p>
+<p style="color:#999; font-size:1.05rem; margin-bottom:1.5rem;">Seven years of production infrastructure across four business units. Every system processes real volume every day. This page shows what's inside — actual production code, actual algorithms, actual business logic.</p>
 
 <div style="margin-bottom:3rem; padding:1.5rem; border:1px solid #222; background:#0a0a0a;">
-  <div style="color:#666; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem;">Four Business Units &middot; Three Distinct Codebases</div>
+  <div style="color:#666; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem;">Four Business Units &middot; Three AI Agents &middot; Separate Codebases</div>
   <div style="margin-bottom:0.8rem;">
-    <span style="color:#88cc88; font-weight:600;">Apartment Locator</span> <span style="color:#555;">&middot; agent-v4/</span><br>
-    <span style="color:#888; font-size:0.95rem;">Middleman — remarket inbound leads (Zillow, Apartments.com, Craigslist) to cooperating buildings that pay commission. Dallas, Houston, Austin, Denver, Chicago.</span>
+    <span style="color:#88cc88; font-weight:600;">Apartment Locator</span> <span style="color:#555;">&middot; agent-v4/ &middot; Agentic-Client-Service/</span><br>
+    <span style="color:#888; font-size:0.95rem;">Middleman model. Inbound leads from Zillow, Apartments.com, Craigslist, YouGotListings, Google Ads, building partners. We remarket to cooperating buildings that pay 50-100%+ of first month's rent per conversion. Dallas, Houston, Austin, Denver, Chicago.</span>
   </div>
   <div style="margin-bottom:0.8rem;">
-    <span style="color:#88cc88; font-weight:600;">Landlord Rep (Blue Lake)</span> <span style="color:#555;">&middot; Agentic-Client-Service/</span><br>
-    <span style="color:#888; font-size:0.95rem;">We ARE the leasing office. Operate via YouGotListings. Docs, screening, vouchers, applications — first contact through lease signing.</span>
+    <span style="color:#88cc88; font-weight:600;">Landlord Rep (Blue Lake / YNY Realty)</span> <span style="color:#555;">&middot; Agentic-Client-Service/</span><br>
+    <span style="color:#888; font-size:0.95rem;">We ARE the leasing office. 36 units across 8 buildings in South Shore, Chatham, and Chicago Heights. Full pipeline: first contact through lease signing via YouGotListings. Dual pricing — market rate and Section 8. 75% commission on market, 100% on voucher tenants.</span>
   </div>
   <div style="margin-bottom:0.8rem;">
-    <span style="color:#88cc88; font-weight:600;">Insurance Agent (Ken)</span> <span style="color:#555;">&middot; Workflows/ken-insurance/</span><br>
-    <span style="color:#888; font-size:0.95rem;">SMS renters insurance sales via Assurant (Fortune 500). Outbound-first. Separate vertical, separate codebase, separate business model.</span>
+    <span style="color:#88cc88; font-weight:600;">Insurance Agent (Ken / Jamboree Insurance)</span> <span style="color:#555;">&middot; Workflows/ken-insurance/</span><br>
+    <span style="color:#888; font-size:0.95rem;">SMS renters insurance sales. HO4 policies via Assurant (Fortune 500 carrier). Outbound-first. Payment via Stripe checkout with personalized landing pages. Separate entity, separate codebase, separate compliance structure.</span>
   </div>
   <div>
     <span style="color:#88cc88; font-weight:600;">Financial Analysis</span> <span style="color:#555;">&middot; Workflows/financial-analysis/</span><br>
-    <span style="color:#888; font-size:0.95rem;">P&L, payment reconciliation, revenue tracking, commission verification. Scripts + automations against 7 years of data.</span>
+    <span style="color:#888; font-size:0.95rem;">P&L, payment reconciliation, revenue tracking, commission verification. PDF-based bank statement analysis across 367 PDFs and 6 accounts. Seven years of transaction data.</span>
   </div>
   <div style="margin-top:1.2rem; padding-top:1rem; border-top:1px solid #222;">
-    <span style="color:#666; font-size:0.85rem;">Shared infrastructure: Cloud SQL Postgres, Celery/Redis, GKE cluster, Twilio SMS, Claude Opus, Gemini (bulk only). All owned and operated by HomeEasy / agent-ic. This site is open source: <a href="https://github.com/mchopra88/agent-ic" style="color:#888;">github.com/mchopra88/agent-ic</a></span>
+    <span style="color:#666; font-size:0.85rem;">Shared infrastructure: Cloud SQL Postgres (production + legacy replicas back to 2021), Celery/Redis, GKE, Twilio SMS, Bland AI voice, Claude Opus 4.6 (all reasoning), Gemini (bulk mechanical only). Site source: <a href="https://github.com/mchopra88/agent-ic" style="color:#888;">github.com/mchopra88/agent-ic</a></span>
   </div>
 </div>
 
@@ -35,7 +35,7 @@ navActive: assets
 
 <div class="asset" style="margin-bottom:4rem;">
   <h2>The Onion: System Architecture</h2>
-  <p>Four business units. Three AI agents. Dozens of background services. The architecture looks simple from the outside — leads come in, conversations happen, deals close. But each layer you peel back reveals another system: background research agents, tonality calibration, customer profiling, inventory polling, compliance gates, ILS integrations, and the governance layer that keeps it all from exploding.</p>
+  <p>Four business units. Three AI agents. Dozens of background services. The architecture looks simple from the outside — leads come in, conversations happen, deals close. But each layer you peel back reveals another system: lead intelligence agents that research every inbound renter, inventory matching algorithms that calculate geodesic distance, cooperativeness scoring that decides how hard to push, and eight deterministic hooks that prevent the AI from destroying the business.</p>
 
   <svg viewBox="0 0 680 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
     <style>
@@ -88,60 +88,65 @@ navActive: assets
     <line x1="340" y1="60" x2="340" y2="80" class="line" marker-end="url(#arr)"/>
 
     <!-- LAYER 2: Intake + Qualification -->
-    <text x="10" y="90" class="section">Layer 2: Lead Intake + Qualification</text>
+    <text x="10" y="90" class="section">Layer 2: Lead Intelligence (5-Signal Synthesis)</text>
 
-    <rect x="10" y="100" width="160" height="55" rx="3" class="box-accent"/>
-    <text x="90" y="117" class="label" style="fill:#6b6;">Sniff Test</text>
-    <text x="90" y="130" class="label-xs" style="fill:#4a4;">8 qualification checks</text>
-    <text x="90" y="142" class="label-xs" style="fill:#4a4;">ZIP demographics • credit estimate</text>
+    <rect x="10" y="100" width="130" height="55" rx="3" class="box-accent"/>
+    <text x="75" y="117" class="label" style="fill:#6b6;">Financial Capacity</text>
+    <text x="75" y="130" class="label-xs" style="fill:#4a4;">5-source income estimate</text>
+    <text x="75" y="142" class="label-xs" style="fill:#4a4;">income/36 = max rent (33%)</text>
 
-    <rect x="185" y="100" width="155" height="55" rx="3" class="box-active"/>
-    <text x="262" y="117" class="label">Customer Profiler</text>
-    <text x="262" y="130" class="label-xs">Google the lead (2-3 signals)</text>
-    <text x="262" y="142" class="label-xs">income estimate • household size</text>
+    <rect x="150" y="100" width="130" height="55" rx="3" class="box-active"/>
+    <text x="215" y="117" class="label">Employer Extraction</text>
+    <text x="215" y="130" class="label-xs">regex + Gemini fallback</text>
+    <text x="215" y="142" class="label-xs">income category mapping</text>
 
-    <rect x="355" y="100" width="155" height="55" rx="3" class="box-active"/>
-    <text x="432" y="117" class="label">Background Agent</text>
-    <text x="432" y="130" class="label-xs">web search on renter</text>
-    <text x="432" y="142" class="label-xs">LinkedIn • public records • news</text>
+    <rect x="290" y="100" width="115" height="55" rx="3" class="box-active"/>
+    <text x="347" y="117" class="label">Credit Estimation</text>
+    <text x="347" y="130" class="label-xs">self-report + ZIP demo</text>
+    <text x="347" y="142" class="label-xs">confident asserter detect</text>
 
-    <rect x="525" y="100" width="145" height="55" rx="3" class="box-warn"/>
-    <text x="597" y="117" class="label" style="fill:#c66;">TCPA Gate</text>
-    <text x="597" y="130" class="label-xs" style="fill:#966;">DNC registry check</text>
-    <text x="597" y="142" class="label-xs" style="fill:#966;">opt-out suppression list</text>
+    <rect x="415" y="100" width="115" height="55" rx="3" class="box-active"/>
+    <text x="472" y="117" class="label">Phone Analysis</text>
+    <text x="472" y="130" class="label-xs">area code → state</text>
+    <text x="472" y="142" class="label-xs">ZIP demographics</text>
+
+    <rect x="540" y="100" width="130" height="55" rx="3" class="box-warn"/>
+    <text x="605" y="117" class="label" style="fill:#c66;">TCPA Gate</text>
+    <text x="605" y="130" class="label-xs" style="fill:#966;">DNC registry check</text>
+    <text x="605" y="142" class="label-xs" style="fill:#966;">opt-out suppression list</text>
 
     <line x1="340" y1="155" x2="340" y2="175" class="line" marker-end="url(#arr)"/>
 
     <!-- LAYER 3: The Conversation Engine -->
-    <text x="10" y="185" class="section">Layer 3: Conversation Engine (The Agent Brain)</text>
+    <text x="10" y="185" class="section">Layer 3: Conversation Engine (Tool-Use LLM)</text>
 
     <rect x="10" y="195" width="320" height="85" rx="3" class="box-accent" style="stroke:#464;"/>
-    <text x="170" y="212" class="label" style="fill:#6b6; font-size:13px;">Agent Brain (Tool-Use LLM)</text>
-    <text x="170" y="228" class="label-xs" style="fill:#4a4;">Claude Opus primary • Gemini fallback</text>
-    <text x="170" y="242" class="label-xs" style="fill:#4a4;">No decision trees. Full context window per turn.</text>
-    <text x="170" y="256" class="label-xs" style="fill:#4a4;">Post-generation guardrails. Tonality calibration.</text>
-    <text x="170" y="270" class="label-xs" style="fill:#4a4;">Socratic question framework in all sales conversations.</text>
+    <text x="170" y="212" class="label" style="fill:#6b6; font-size:13px;">Agent Brain (Gemini Tool-Use)</text>
+    <text x="170" y="228" class="label-xs" style="fill:#4a4;">No decision trees. LLM chooses tools per turn.</text>
+    <text x="170" y="242" class="label-xs" style="fill:#4a4;">Post-generation guardrails block unsafe output.</text>
+    <text x="170" y="256" class="label-xs" style="fill:#4a4;">Tonality calibration: low-end/mid/high-end.</text>
+    <text x="170" y="270" class="label-xs" style="fill:#4a4;">Socratic framework in all sales conversations.</text>
 
     <!-- Tools the brain calls -->
     <text x="350" y="198" class="label-xs" style="text-anchor:start; fill:#555;">Tools the brain calls:</text>
 
     <rect x="345" y="205" width="155" height="25" rx="2" class="box"/>
-    <text x="422" y="222" class="label-xs">inventory_search(city, budget, beds)</text>
+    <text x="422" y="222" class="label-xs">update_requirements(budget, beds...)</text>
 
     <rect x="345" y="235" width="155" height="25" rx="2" class="box"/>
-    <text x="422" y="252" class="label-xs">building_lookup(name | address)</text>
+    <text x="422" y="252" class="label-xs">search_inventory(city, budget, beds)</text>
 
     <rect x="345" y="265" width="155" height="25" rx="2" class="box"/>
-    <text x="422" y="282" class="label-xs">schedule_tour(building_id, date)</text>
+    <text x="422" y="282" class="label-xs">escalate_to_human(reason)</text>
 
     <rect x="515" y="205" width="155" height="25" rx="2" class="box"/>
-    <text x="592" y="222" class="label-xs">web_search(renter query)</text>
+    <text x="592" y="222" class="label-xs">mark_dead(reason: opted_out)</text>
 
     <rect x="515" y="235" width="155" height="25" rx="2" class="box"/>
     <text x="592" y="252" class="label-xs">commission_check(building_id)</text>
 
     <rect x="515" y="265" width="155" height="25" rx="2" class="box"/>
-    <text x="592" y="282" class="label-xs">escalate_to_human(reason)</text>
+    <text x="592" y="282" class="label-xs">schedule_tour(building_id, date)</text>
 
     <line x1="340" y1="295" x2="340" y2="310" class="line" marker-end="url(#arr)"/>
 
@@ -150,8 +155,8 @@ navActive: assets
 
     <rect x="10" y="330" width="105" height="50" rx="3" class="box-active"/>
     <text x="62" y="347" class="label-xs">Inventory Poller</text>
-    <text x="62" y="359" class="label-xs">10K+ buildings/day</text>
-    <text x="62" y="371" class="label-xs">voice calls + API</text>
+    <text x="62" y="359" class="label-xs">Bland AI voice calls</text>
+    <text x="62" y="371" class="label-xs">$0.09/min per call</text>
 
     <rect x="125" y="330" width="105" height="50" rx="3" class="box-active"/>
     <text x="177" y="347" class="label-xs">Follow-up Engine</text>
@@ -159,14 +164,14 @@ navActive: assets
     <text x="177" y="371" class="label-xs">drip cadences</text>
 
     <rect x="240" y="330" width="105" height="50" rx="3" class="box-active"/>
-    <text x="292" y="347" class="label-xs">Stale Data Detector</text>
-    <text x="292" y="359" class="label-xs">72-hour threshold</text>
-    <text x="292" y="371" class="label-xs">priority re-call</text>
+    <text x="292" y="347" class="label-xs">Doc Pipeline</text>
+    <text x="292" y="359" class="label-xs">Gmail API → classify</text>
+    <text x="292" y="371" class="label-xs">→ approve → Asana</text>
 
     <rect x="355" y="330" width="105" height="50" rx="3" class="box-active"/>
     <text x="407" y="347" class="label-xs">Lead Scoring</text>
-    <text x="407" y="359" class="label-xs">recalc vs fresh</text>
-    <text x="407" y="371" class="label-xs">inventory nightly</text>
+    <text x="407" y="359" class="label-xs">cooperativeness 0-100</text>
+    <text x="407" y="371" class="label-xs">close probability</text>
 
     <rect x="470" y="330" width="100" height="50" rx="3" class="box-active"/>
     <text x="520" y="347" class="label-xs">Compliance Audit</text>
@@ -174,9 +179,9 @@ navActive: assets
     <text x="520" y="371" class="label-xs">TCPA + DNC</text>
 
     <rect x="580" y="330" width="90" height="50" rx="3" class="box-active"/>
-    <text x="625" y="347" class="label-xs">Red Team Agent</text>
-    <text x="625" y="359" class="label-xs">adversarial tests</text>
-    <text x="625" y="371" class="label-xs">continuous</text>
+    <text x="625" y="347" class="label-xs">FancyHands</text>
+    <text x="625" y="359" class="label-xs">human escalation</text>
+    <text x="625" y="371" class="label-xs">$3-7/task</text>
 
     <line x1="340" y1="380" x2="340" y2="395" class="line" marker-end="url(#arr)"/>
 
@@ -186,7 +191,7 @@ navActive: assets
     <rect x="10" y="415" width="660" height="35" rx="3" class="box"/>
     <text x="60" y="437" class="label-xs">PostgreSQL</text>
     <text x="145" y="437" class="label-xs">Redis</text>
-    <text x="220" y="437" class="label-xs">RabbitMQ</text>
+    <text x="220" y="437" class="label-xs">Celery</text>
     <text x="310" y="437" class="label-xs">GKE Cluster</text>
     <text x="400" y="437" class="label-xs">Cloud Build</text>
     <text x="490" y="437" class="label-xs">Mutagen Sync</text>
@@ -204,95 +209,260 @@ navActive: assets
   </svg>
 </div>
 
-<!-- ═══════ THE CONVERSATION ENGINE — LOCATOR ═══════ -->
+<!-- ═══════ LOCATOR AGENT: LEAD INTELLIGENCE ═══════ -->
 
 <div class="asset">
-  <h2 style="margin-bottom:0.3rem;">The Conversation Engine</h2>
-  <div style="color:#555; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.5rem;">Apartment Locator &middot; agent-v4/</div>
-  <p>The Locator Agent is a tool-use LLM orchestrator. No decision trees. It reasons about each inbound message, calls tools to search inventory and check commissions, and generates responses calibrated to the conversation state. The agent decides <em>what</em> to do; external services execute the action. This separation means the agent can be tested without live API calls, and integrations can change without touching agent logic.</p>
+  <h2 style="margin-bottom:0.3rem;">Lead Intelligence: The 5-Signal Synthesis</h2>
+  <div style="color:#555; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.5rem;">Apartment Locator &middot; lead_intelligence.py</div>
+
+  <p>Every inbound lead gets profiled before the agent sends a single message. Not from a credit bureau. Not from a background check service. From five independent signals extracted from whatever data we have: the inquiry itself, the conversation, the renter's employer, the phone number's area code, and the ZIP code's demographics. The system builds a financial picture from fragments.</p>
 
   <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# From the Locator Agent CLAUDE.md — the operating doctrine
+# From lead_intelligence.py — income estimation by category
 
-## Core Philosophy: DRIVERS, NOT ORDER TAKERS
+JOB_INCOME_ESTIMATES: dict[str, tuple[int, int]] = {
+    "section8_voucher": (15000, 30000),
+    "employed_stable":  (35000, 65000),
+    "professional":     (55000, 120000),
+    "self_employed":    (25000, 60000),
+    "disability":       (12000, 24000),
+    "cash_worker":      (20000, 35000),
+    "student":          (8000, 25000),
+    "gig_worker":       (20000, 45000),
+    "retired":          (18000, 40000),
+}
 
-WE DO NOT TAKE ORDERS. WE DRIVE DEALS.
+# Employer extraction — regex first, Gemini fallback
+_EMPLOYER_RE = [
+    re.compile(r"i (?:work|am|been) (?:at|for|with)\s+(.+?)(?:\.|\n|$)", re.I),
+    re.compile(r"(?:employed|working) (?:at|for|with|by)\s+(.+?)(?:\.|\n|$)", re.I),
+    re.compile(r"my (?:job|employer|company) (?:is|at)\s+(.+?)(?:\.|\n|$)", re.I),
+    re.compile(r"(?:i do|i drive for|i deliver for)\s+(.+?)(?:\.|\n|$)", re.I),
+]
+# If regex finds "Walmart" → employed_stable → ($35K, $65K)
+# If regex finds "attorney at Jones Day" → professional → ($55K, $120K)
+# If regex finds nothing → Gemini extracts from full chat context</pre>
 
-When client says "I want X" - we don't just find X. We:
-1. Find the VULNERABILITY (their pain point)
-2. Find the FLEX (where they can bend)
-3. DRIVE them to a property that PAYS US
-
-## Tools the agent calls:
-  inventory_search(city, budget, beds)
-  building_lookup(name | address)
-  schedule_tour(building_id, date)
-  web_search(renter query)
-  commission_check(building_id)
-  escalate_to_human(reason)
-
-## Socratic Framework:
-  Each question has only one honest answer.
-  The logical conclusion is inescapable.
-  "At a minimum, could you make this work?"
-  "I've got a renter ready. Want the commission
-   or should I send them across the street?"</pre>
-
-  <p>The key design pattern: the agent brain returns actions (<code>schedule_tour</code>, <code>escalate_to_human</code>), and the orchestrator executes them. Same pattern across all three agents — Locator, Landlord Rep, and Ken. The interface stays the same. The executors swap out.</p>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">The Tonality System</h2>
-  <p>The agent doesn't just generate text — it calibrates tone based on the conversation state and the lead's profile. The CLAUDE.md encodes the doctrine:</p>
+  <h2 style="font-size:1.1rem; margin-top:3rem;">The Affordability Calculation</h2>
+  <p>The core rule: <code>max_affordable_rent = annual_income / 36</code>. That's the 33% rent-to-income ratio that every property manager uses. We allow 15% wiggle room before flagging risk. When the math doesn't work, the agent knows before the renter does.</p>
 
   <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# From Workflows/ken-insurance/CLAUDE.md
+# Five-signal financial synthesis — actual function signature
 
-## Tone: DIRECT, NOT INQUISITIVE
+def estimate_financial_capacity(
+    inquiry_rent: int = 0,        # Signal 1: what they asked about
+    chat_history: str = "",       # Signal 2+3: stated budget & income
+    renter_profile: dict = None,  # Signal 4: income category
+    phone_state: str = "",        # metadata
+    inquiry_zip: str = "",        # Signal 5: ZIP demographics
+) -> dict:
 
-WRONG: "Hey Sarah, are you moving in Austin soon?
-        Do you need help?"
+# The affordability gate:
+max_affordable_rent = best_income_estimate / 36
+affordable = effective_budget <= max_affordable_rent * 1.15
 
-RIGHT: "Hey Sarah - we got flagged that you're
-        moving into a rental in Austin. I'm reaching
-        out to get you set up with renters insurance
-        — it's required before you can get keys
-        in Texas."
+# When it fails:
+risk_note = (
+    f"Rent ${effective_budget:,}/mo is {rent_to_income_pct}%"
+    f" of estimated income ${best_income_estimate:,}/yr"
+    f" (target: ≤33%). May need cosigner or lower unit."
+)</pre>
 
-Key principles:
-- TELL (with an out if wrong)
-- DRIVE to next action
-- Emphasize REQUIREMENT not optional</pre>
-
-  <p>The tonality isn't random. "Tell, don't ask" converts at 2x the rate of inquisitive opening messages. This was measured across thousands of conversations — the macro loop identified the pattern, and it became a rule in the CLAUDE.md.</p>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">The Socratic Sales Framework</h2>
-  <p>Every sales conversation follows the Socratic pattern: ask questions where the only honest answer moves the deal forward.</p>
+  <h2 style="font-size:1.1rem; margin-top:3rem;">Credit Estimation</h2>
+  <p>We don't pull credit reports. We estimate. Explicit scores mentioned in chat take priority. Self-reported quality ("my credit is great" vs "I have bad credit") is next. ZIP-based inference fills the gap — lower-income ZIPs statistically correlate with lower scores. The system detects "confident asserters" — people who claim good credit with specific language patterns — and weights their self-report higher.</p>
 
   <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# From Workflows/apartment-locator/CLAUDE.md
+# Credit estimation — actual signal priority
 
-## INVERT THE BURDEN OF PROOF
+def estimate_credit(chat_history, renter_profile, financial):
+    # Priority 1: Explicit score in chat ("my credit is 720")
+    score_match = _CREDIT_SCORE.search(chat_lower)
+    if score_match:
+        credit_score = int(score_match.group(1))
+        # 700+ = good, 600-699 = fair, <600 = poor
 
-Constantly lower the bar so saying NO
-becomes the insane option.
+    # Priority 2: Self-reported quality
+    if _CREDIT_POOR.search(chat_lower):  # "bad credit", "my credit sucks"
+        credit_estimate = "poor"
+    elif _CREDIT_GOOD.search(chat_lower):  # "good credit", "no issues"
+        credit_estimate = "good"
 
-With renters:
-  "At a minimum, if nothing else worked out,
-   could you make this work?"
+    # Priority 3: ZIP demographics
+    zip_income = fin.get("zip_median_income", 0)
+    if zip_income < 30000 and credit_estimate == "unknown":
+        credit_estimate = "likely_fair"
 
-With buildings:
-  "I've got a renter ready to sign.
-   Want the commission or should I send
-   them across the street?"
-
-Each question has only one honest answer.
-The logical conclusion is inescapable.</pre>
+    # Confident asserter detection — weights self-report higher
+    confident_asserter = confidence_phrases.search(chat_lower)
+    # Matches: "my credit is good", "I make good money",
+    #          "I got steady income", "no problems there"</pre>
 </div>
 
-<!-- ═══════ THE INVENTORY SYSTEM ═══════ -->
+<!-- ═══════ INVENTORY MATCHING ═══════ -->
 
 <div class="asset">
-  <h2>Inventory Intelligence: How We Know What's Available</h2>
-  <p>The apartment database isn't scraped from listing sites. It's built from three independent data streams that cross-reference each other. Here's how the polling works:</p>
+  <h2 style="margin-bottom:0.3rem;">Inventory Matching: Distance, Budget, and Reasonableness</h2>
+  <div style="color:#555; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.5rem;">Apartment Locator &middot; inventory_agent.py</div>
+
+  <p>The matching algorithm is LLM-driven, not deterministic. We give Gemini the renter's profile, their requirements, and the inventory. The LLM ranks properties using five weighted criteria. Neighborhood proximity is 40% of the score — calculated with geodesic distance, not ZIP codes. Budget compatibility is 25%. The remaining 35% splits across specs, timeline, and special needs.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# Matching criteria priority — from inventory_agent.py
+
+MATCHING CRITERIA:
+  1. NEIGHBORHOOD PROXIMITY (40%)
+     → geodesic distance in miles, not ZIP
+  2. BUDGET COMPATIBILITY (25%)
+     → rent within client's stated range
+  3. UNIT SPECIFICATIONS (20%)
+     → bedrooms, bathrooms, dwelling type
+  4. TIMELINE ALIGNMENT (10%)
+     → move-in date vs vacancy date
+  5. SPECIAL REQUIREMENTS (5%)
+     → parking, pets, amenities
+
+# Geodesic distance — actual production code
+from geopy.distance import geodesic
+
+def calculate_neighborhood_proximity(self, client_addr, property_addr):
+    client_loc = self.geocoder.geocode(client_addr)
+    property_loc = self.geocoder.geocode(property_addr)
+    client_coords = (client_loc.latitude, client_loc.longitude)
+    property_coords = (property_loc.latitude, property_loc.longitude)
+    distance = geodesic(client_coords, property_coords).miles
+    return distance</pre>
+
+  <h2 style="font-size:1.1rem; margin-top:3rem;">The Gap Analysis Framework</h2>
+  <p>When the renter's budget doesn't match what's available, the agent doesn't say "sorry, nothing in your range." It runs gap analysis. Three tiers of response depending on how far the gap stretches.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# Gap analysis — how the agent handles budget mismatches
+
+Gap ≤ $100:
+  → "That's about a coffee a day difference."
+  → Frame as manageable. Push the property.
+
+Gap $100-$300:
+  → Value proposition. Show what they get for the extra.
+  → "For $150 more you're in [neighborhood] with [amenity]."
+  → Compare net effective rent if move-in specials apply.
+
+Gap > $300:
+  → Deep stretch. Don't push. Find alternatives.
+  → Widen geographic search radius.
+  → Drop bedroom count. Suggest roommate scenarios.
+  → "Honest take — $2,200 in Lincoln Park for a 1BR
+     is a stretch at your budget. But I can get you
+     into Ravenswood for $1,700 with the same commute."
+
+# Net effective rent calculation
+# (Monthly Rent × 12 - Move-in Savings) ÷ 12
+# $2000/mo with 1 month free → $1833 net effective</pre>
+
+  <h2 style="font-size:1.1rem; margin-top:3rem;">Budget Floors and Reasonableness</h2>
+  <p>Every market has a floor. Below it, there's nothing to show. The system knows this before the renter does.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# Market budget floors — from locator CLAUDE.md
+
+DFW (Dallas/Fort Worth):
+  Studio: $950    1BR: $1,000    2BR: $1,300
+
+Chicago:
+  Studio: $1,100  1BR: $1,200    2BR: $1,500
+
+# If someone asks for a 1BR in Chicago for $800:
+# The agent doesn't search and return nothing.
+# It tells them the market reality and widens the search.
+# "Studio in Rogers Park might work at that budget."
+
+# Tonality calibration per price tier:
+LOW_END  → AUTHORITATIVE tone. Direct. No hedging.
+MID      → PROFESSIONAL tone. Balanced. Value-oriented.
+HIGH_END → CONSULTATIVE tone. Options. Positioning.</pre>
+</div>
+
+<!-- ═══════ THE AGENT BRAIN ═══════ -->
+
+<div class="asset">
+  <h2 style="margin-bottom:0.3rem;">The Agent Brain: Tool-Use LLM Orchestration</h2>
+  <div style="color:#555; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.5rem;">All Agents &middot; agent_core.py</div>
+
+  <p>Every agent — Locator, Landlord Rep, Ken — runs on the same core loop. The LLM receives the full conversation context, decides whether to call tools, and generates a response. Guardrails run <em>after</em> generation, not before. The LLM is the decision-maker. Tools are optional. The anti-determinism law forbids hardcoded decision trees — the LLM generates every response from scratch, with tools as capabilities it can invoke.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# Universal agent loop — from agent_core.py
+
+def run_agent_turn(config: AgentConfig, context: dict) -> dict:
+
+    # 1. Build system prompt (persona + tools + examples + rules)
+    system_prompt = config.system_prompt_builder(context)
+
+    # 2. Build message history for the LLM
+    messages = [SystemMessage(content=system_prompt)]
+    messages.append(HumanMessage(
+        content=f"CONVERSATION SO FAR:\n{chat_history}"
+    ))
+    messages.append(HumanMessage(
+        content=f"LATEST MESSAGE FROM LEAD:\n{last_message}"
+    ))
+
+    # 3. Bind tools to the LLM (Gemini function calling)
+    llm = ChatGoogleGenerativeAI(model=config.model_name)
+    llm_with_tools = llm.bind_tools(tool_declarations)
+
+    # 4. Multi-round tool execution (up to 3 rounds)
+    for round_idx in range(config.max_tool_rounds + 1):
+        ai_msg = llm_with_tools.invoke(messages)
+
+        if not ai_msg.tool_calls:
+            break  # No tools needed — response is ready
+
+        # Execute each tool call
+        for tc in ai_msg.tool_calls:
+            result = tool_map[tc["name"]].fn(**tc["args"])
+            messages.append(ToolMessage(content=result))
+            # Feed result back → LLM generates next round
+
+    # 5. Post-generation guardrails
+    for guard in config.guardrails:
+        is_safe, reason = guard.check_fn(response_text, context)
+        if not is_safe:
+            return {"blocked": True, "reason": reason}
+
+    return {"response": response_text, "tool_calls": all_tool_calls}</pre>
+
+  <h2 style="font-size:1.1rem; margin-top:3rem;">The Four Locator Tools</h2>
+  <p>The LLM decides when to call these. No orchestrator tells it "now search inventory." The LLM reads the conversation and decides.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# From locator_tools.py — all four tools
+
+update_requirements(client_id, budget, bedrooms,
+    neighborhoods, move_in_date, credit_score,
+    occupant_moving, moving_reason, dwelling,
+    has_pets, cosigner, cosigner_credit_score)
+    → "Extract naturally from conversation, don't interrogate."
+    → "You don't need all fields at once."
+
+search_inventory(client_id, budget, bedrooms, neighborhoods)
+    → "Don't gate this behind collecting ALL info."
+    → "If you have the basics, search."
+
+escalate_to_human(client_id, reason)
+    → "Legal questions, complaints, special accommodations,
+       or lead explicitly asks for a person."
+
+mark_dead(client_id, reason)
+    → "ONLY when lead EXPLICITLY opts out."
+    → "Do NOT mark dead for ghosts or slow responders."</pre>
+</div>
+
+<!-- ═══════ INVENTORY SYSTEM ═══════ -->
+
+<div class="asset">
+  <h2>Inventory Intelligence: Three Data Streams</h2>
+  <p>The apartment database isn't scraped from listing sites. It's built from three independent data streams that cross-reference each other. Voice calls are signal. ILS data is noise. Transaction history is truth.</p>
 
   <svg viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
     <style>
@@ -307,7 +477,7 @@ The logical conclusion is inescapable.</pre>
     <!-- Stream 1: Voice calls -->
     <rect x="10" y="30" width="200" height="80" rx="3" class="i-box"/>
     <text x="110" y="50" class="i-label">Stream 1: Automated Voice Calls</text>
-    <text x="110" y="65" class="i-sm">Bland AI calls 10K+ buildings/day</text>
+    <text x="110" y="65" class="i-sm">Bland AI calls buildings daily</text>
     <text x="110" y="78" class="i-sm">Extracts: vacancy, commission %,</text>
     <text x="110" y="91" class="i-sm">specials, app requirements, contacts</text>
     <text x="110" y="104" class="i-sm" style="fill:#4a4;">$0.09/min per call</text>
@@ -315,8 +485,8 @@ The logical conclusion is inescapable.</pre>
     <!-- Stream 2: ILS APIs -->
     <rect x="240" y="30" width="200" height="80" rx="3" class="i-box"/>
     <text x="340" y="50" class="i-label">Stream 2: ILS Platform APIs</text>
-    <text x="340" y="65" class="i-sm">Zillow API • Apartments.com feed</text>
-    <text x="340" y="78" class="i-sm">YouGotListings • RentPath</text>
+    <text x="340" y="65" class="i-sm">Zillow API + Apartments.com feed</text>
+    <text x="340" y="78" class="i-sm">YouGotListings + RentPath</text>
     <text x="340" y="91" class="i-sm">Listing prices, photos, unit types</text>
     <text x="340" y="104" class="i-sm" style="fill:#aa6;">Often stale ($280 avg delta)</text>
 
@@ -358,180 +528,418 @@ The logical conclusion is inescapable.</pre>
     <text x="340" y="300" class="i-sm">The stale data detector triggers priority re-calls when any building hasn't been reached in 72 hours.</text>
     <text x="340" y="315" class="i-sm" style="fill:#555;">ILS data is noise. Voice calls are signal. Transaction history is truth.</text>
   </svg>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# From the production FastAPI lifecycle — automated jobs
-
-# Follow-up job every 15 minutes, all night
-scheduler.add_job(
-    process_followups,
-    IntervalTrigger(minutes=15),
-    args=[db, sms, ken],
-    id='followup_job',
-)
-
-# Expiration job daily at 6 AM
-scheduler.add_job(
-    expire_past_move_ins,
-    CronTrigger(hour=6, minute=0),
-    args=[db],
-    id='expiration_job',
-)
-
-# TCPA gate: reject leads on suppression list
-if await compliance.is_suppressed(lead.phone):
-    raise HTTPException(
-        status_code=409,
-        detail="Phone is on suppression list"
-    )
-if await compliance.is_on_dnc(lead.phone):
-    raise HTTPException(
-        status_code=409,
-        detail="Phone is on DNC registry"
-    )</pre>
 </div>
 
-<!-- ═══════ THE INSURANCE AGENT ═══════ -->
+<!-- ═══════ LANDLORD REP: YGL / BLUE LAKE ═══════ -->
 
 <div class="asset">
-  <h2>Ken: The Insurance Sales Agent</h2>
-  <p>SMS-based renters insurance sales. HO4 renters insurance via Assurant (Fortune 500 carrier). The key constraint: we outbound to them — they don't come to us. We get leads from partner buildings. We have: first_name, phone, city, state. We don't have: exact address, exact building, move-in date. The agent has to extract all of that through conversation before it can quote.</p>
+  <h2 style="margin-bottom:0.3rem;">Landlord Rep: Operating as the Leasing Office</h2>
+  <div style="color:#555; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.5rem;">Blue Lake / YNY Realty &middot; bluelake_inventory.py + ygl_renter_intel.py + approval_engine.py</div>
+
+  <p>This is not a referral play. We operate as the actual leasing office for a portfolio of multifamily properties through YouGotListings. Eight buildings. 36 units. South Shore, Chatham, and Chicago Heights. Every unit has dual pricing — market rate for walk-in tenants, Section 8 rate for voucher holders. The difference is substantial and the commission structure reflects it.</p>
 
   <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Ken's lead lifecycle state machine
+# From bluelake_inventory.py — actual unit definitions
 
-NEW → CONTACTED → ENGAGED → INFO_GATHERED
-      → QUOTED → PAYMENT_SENT → CONVERTED
-                    │
-              NO_RESPONSE → FOLLOWUP_1 → FOLLOWUP_2
-              → FOLLOWUP_3 → EXPIRED
-                    │
-              OPTED_OUT (terminal)
-              HUMAN_ESCALATION
+DUAL PRICING (YNY Realty):
+  Market Rate (advertised):    Section 8 (CHA voucher):
+  Studio:  $850/mo             Studio:  $1,200/mo
+  1BR:     $1,100/mo           1BR:     $1,500/mo
+  2BR:     $1,250/mo           2BR:     $1,650/mo
+  3BR:     $1,550/mo           3BR:     $1,850/mo
 
-# Drip cadence: 4h → 24h → 48h → 5d → 7d → 14d
+  ALL UNITS: Utilities included (heat, gas, electric, water, trash)
+  Commission: 75% of 1 month (market), 100% (Section 8/CHA)
 
-# Intent classification: 20+ intents
-# Each one forged by the red team
+INVENTORY = {
+    "7450 S Luella #1B": {
+        "type": "Studio", "beds": 0,
+        "rent": 850, "section8_rent": 1200,
+        "building": "Luella", "area": "South Shore",
+    },
+    "7517 S Coles #3B": {
+        "type": "1BR", "beds": 1,
+        "rent": 1100, "section8_rent": 1500,
+        "building": "Coles", "area": "South Shore",
+    },
+    "8044 S Ingleside #2": {
+        "type": "2BR", "beds": 2,
+        "rent": 1250, "section8_rent": 1650,
+        "building": "81st Ingleside", "area": "Chatham",
+    },
+}
 
-STOP           → opt out immediately
-YES_INTERESTED → ask for address
-PRICE_QUESTION → ask address first (NEVER quote before API)
-ALREADY_HAS    → verify $100k liability
-WHO_IS_THIS    → explain we got flagged
-IS_THIS_SCAM   → licensed, Assurant-backed, Fortune 500
-FOXEN_MENTION  → explain waiver vs real insurance
-GAVE_ADDRESS   → trigger Assurant API quote</pre>
+# Building metadata per property
+BUILDING_META = {
+    "Luella": {
+        "pet_deposit": 250,
+        "breed_restrictions": ["pit_bull", "rottweiler", "doberman"],
+        "parking": "street",
+        "laundry": "on_site",
+        "lease_term_months": 12,
+        "income_requirement_multiplier": 2.5,
+        "background_policy": "non_violent_over_3_years_ok",
+        "utilities_included": ["heat", "gas", "electric", "water", "trash"],
+        "renovated": True, "renovation_year": 2025,
+    },
+}</pre>
 
-  <p>The critical rule: <strong>NEVER hardcode prices.</strong> Prices come from the Assurant API based on address, coverage level, and dwelling type. The flow is: Outreach (NO PRICE) → Collect address → Call Assurant API → THEN show price. If the agent quotes before calling the API, the price is a hallucination. If too low, the renter signs, discovers the real price, cancels, and files a complaint. If too high, the renter walks. Either way: legal liability.</p>
+  <h2 style="font-size:1.1rem; margin-top:3rem;">Renter Profiling and Tone Calibration</h2>
+  <p>Every renter gets profiled from their conversation. Type. Urgency. Pain point. Blockers. Household composition. The profile determines the tone of every subsequent message.</p>
 
   <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Lead intake endpoint — actual FastAPI code
+# From ygl_renter_intel.py — renter profiling via Gemini
 
-class LeadCreate(BaseModel):
-    """New lead intake"""
-    first_name: Optional[str] = None
-    phone: str = Field(..., pattern=r'^\+1\d{10}$')
-    city: Optional[str] = None
-    state: str = Field(..., pattern=r'^(TX|IL|MI)$')
-    move_in_date: Optional[date] = None
-    source: Optional[str] = None
-    partner_code: Optional[str] = None
+Profile extraction returns:
+  renter_type:  working_class | professional | section8 | student | crisis
+  urgency:      low | medium | high | critical
+  pain_point:   "eviction next week" | "lease ending" | "just looking"
+  flex_points:  "can go up $100", "open to South Shore"
+  blockers:     "credit_550", "no_income_proof", "eviction_history"
+  household:    "single_mom_2kids" | "couple" | "solo"
+  income_signal: employment type
+  scam_concern: true if lead has expressed distrust
 
-@router.post("/leads")
-async def create_lead(lead: LeadCreate, ...):
-    """
-    Create a new lead and trigger outreach.
+# Tone map — different renter types get different tones
+TONE_MAP = {
+    "working_class": "Be warm, direct, no jargon.
+                      Frame costs as daily amounts.",
+    "professional":  "Be consultative, add value.
+                      They have options and are evaluating us.",
+    "section8":      "Be patient, encouraging.
+                      Voucher paperwork first.",
+    "student":       "Be casual, quick.
+                      Lead with rent and proximity to transit.",
+    "crisis":        "Be compassionate, not clinical.
+                      Focus on solving the housing problem fast.",
+}</pre>
 
-    This endpoint:
-    1. Creates the lead record
-    2. Links to building if found
-    3. Queues initial SMS outreach
-    """
-    # TCPA gate first
-    if await compliance.is_suppressed(lead.phone):
-        raise HTTPException(409, "Opted out")
-    if await compliance.is_on_dnc(lead.phone):
-        raise HTTPException(409, "DNC registry")</pre>
+  <h2 style="font-size:1.1rem; margin-top:3rem;">Cooperativeness Scoring and Confidence Cases</h2>
+  <p>The system scores how cooperative a renter is on a 0-100 scale. Response speed, proactive signals, document submissions, pushback patterns. The score determines the recommended approach — from "direct ask" to "let the cadence handle it."</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# From approval_engine.py — cooperativeness scoring
+
+def score_cooperativeness(chat_messages, deal_stage):
+    score = 50.0  # starts neutral
+
+    # Positive signals:
+    Response < 2 hours:     +15
+    Proactive ("when/ready/send"): +10 to +20
+    Docs sent:              +15
+    Follow-up without prompting: +10
+
+    # Negative signals:
+    Response > 48 hours:    -15
+    Pushback ("why/scam/uncomfortable"): -10 to -25
+    Asked 3x, 0 docs sent: -20
+    Silent after doc request: -15
+    "Looking elsewhere":    -10
+
+    Returns:
+      score:    0-100
+      level:    COOPERATIVE | HESITANT | RESISTANT | EVASIVE
+      recommended_approach:
+        direct_ask | reluctant_concede | back_off | let_cadence_handle
+
+# Confidence case detection
+# employer verified + income aligned + no background flags
+# = RECOMMEND SHOWING even with partial docs
+
+# Income gate: 2.5x monthly rent
+INCOME_MULTIPLIER = 2.5
+required = unit_rent * 2.5
+if monthly_income >= required:  # PASS
+if monthly_income < required:   # Flag: "Income below 2.5x"</pre>
+
+  <h2 style="font-size:1.1rem; margin-top:3rem;">The Document Pipeline</h2>
+  <p>Renters email documents to <code>renterdocs@homeeasy.com</code>. From there it's fully automated: Gmail API monitors every 5 minutes, AI classifies each document, the approval engine scores against criteria, and Asana tickets get created for the building manager.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# Document pipeline — four stages, fully automated
+
+email_monitor.py     Gmail API polls every 5 minutes
+  → extracts attachments (PDF, JPG, PNG)
+  → matches to existing lead by email/phone
+
+doc_interpreter.py   AI classifies each document
+  → pay stubs, bank statements, ID, voucher docs
+  → extracts: employer, income amount, dates
+
+approval_engine.py   Scores against building criteria
+  → income >= 2.5x rent (Section 8 exempt)
+  → background: non-violent, over 3 years OK
+  → generates SMS: "got [docs]. just need [missing]."
+
+asana_ygl.py         Creates tickets for building manager
+  → workspace: yyrealtygroup.com
+  → assignee: building manager
+  → SLA: Section 8 = 24 hours (Lane 00)
+
+# Qualification lanes with SLAs:
+Lane 00: VOUCHER ATTACK     Section 8 + docs. 24hr SLA. 100% commission.
+Lane 01: SLAM DUNK          Strong income, good credit, docs near complete.
+Lane 02: QUALIFIED           Active lead, has some docs, needs specific items.
+Lane 03: WORKS W/ MITIGATION Qualified but complicating factor.
+Lane 04: EDGE CASE           Missing critical docs, uncertain.
+DEAD:    Do Not Contact       Opted out.</pre>
+</div>
+
+<!-- ═══════ KEN: THE INSURANCE AGENT ═══════ -->
+
+<div class="asset">
+  <h2 style="margin-bottom:0.3rem;">Ken: SMS Insurance Sales</h2>
+  <div style="color:#555; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.5rem;">Jamboree Insurance &middot; ken.py + classifier.py + checkout.py + assurant_client.py</div>
+
+  <p>Separate entity. Separate codebase. Separate compliance. Ken sells HO4 renters insurance via Assurant (Fortune 500 carrier) through SMS. Outbound-first — we get leads from partner buildings and initiate contact. We have a name, phone, city, and state. We don't have their address or move-in date. The agent extracts everything through conversation before it can quote.</p>
+
+  <h2 style="font-size:1.1rem; margin-top:3rem;">Intent Classification: 14 Intents with Regex Patterns</h2>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# From classifier.py — intent detection
+
+class IntentClassifier:
+    STOP_WORDS = ['stop', 'unsubscribe', 'cancel', 'quit',
+                  'remove', 'optout', 'opt out', 'opt-out']
+    YES_WORDS  = ['yes', 'yeah', 'yep', 'sure', 'ok', 'okay',
+                  'sounds good', 'interested', "let's do it"]
+    SCAM_WORDS = ['scam', 'spam', 'legit', 'legitimate',
+                  'real', 'fake', 'fraud', 'phishing']
+    FOXEN_WORDS = ['foxen', 'building insurance',
+                   'building requires', 'waiver']
+
+    ADDRESS_PATTERN = re.compile(
+        r'\d+\s+[a-zA-Z].*(?:st|street|ave|avenue|rd|road'
+        r'|dr|drive|blvd|boulevard|ln|lane|way|ct|court)',
+        re.IGNORECASE
+    )
+    EMAIL_PATTERN = re.compile(
+        r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+    )
+
+    def classify(self, message) -> Tuple[str, float, dict]:
+        # Returns: (intent, confidence, extracted_data)
+        # STOP           → opt out immediately, no reply
+        # GAVE_ADDRESS   → trigger Assurant API quote
+        # GAVE_EMAIL     → store for policy delivery
+        # GAVE_DATE      → store move-in date
+        # IS_THIS_SCAM   → "Licensed agent, Assurant-backed"
+        # FOXEN_MENTION  → "Foxen is a waiver, not insurance"
+        # ALREADY_HAS    → verify $100K liability coverage
+        # PRICE_QUESTION → collect address first (NEVER quote)
+        # YES_INTERESTED → ask for address
+        # WILL_DO_LATER  → schedule 24h follow-up
+        # WANT_CALL      → escalate to human
+        # NOT_INTERESTED  → mark opted out
+        # WHO_IS_THIS    → explain how we got flagged
+        # GENERAL_INQUIRY → route to LLM</pre>
+
+  <h2 style="font-size:1.1rem; margin-top:3rem;">The State Machine and Drip Cadence</h2>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# From ken.py — state machine and follow-up schedule
+
+STATUS_FLOW = [
+    'new', 'contacted', 'engaged', 'info_gathered',
+    'quoted', 'payment_sent', 'converted'
+]
+
+FOLLOWUP_SCHEDULE = [4, 24, 48, 120, 168]  # hours
+
+# Drip cadence:
+#   4h after first contact  → "Just checking in"
+#   24h                     → Statement replay + urgency
+#   48h                     → "Your move-in is [date]"
+#   5 days                  → Last chance framing
+#   7 days                  → Final attempt, then expire
+
+# Statement tracking — the agent remembers what you said
+# _extract_statements() stores:
+#   move_date:     "April 15"
+#   contact_name:  "Sarah"
+#   busy:          "at work right now"
+#   concern:       "seems expensive"
+# Each follow-up references their own words back to them.</pre>
+
+  <h2 style="font-size:1.1rem; margin-top:3rem;">Payment: Stripe Checkout with Assurant API</h2>
+  <p>The critical rule: <strong>NEVER hardcode prices.</strong> Prices come from the Assurant API based on address, coverage level, and dwelling type. If the agent quotes before calling the API, the price is a hallucination — legal liability either way.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# Payment flow — Assurant quote → Stripe checkout
+
+# Step 1: Assurant API (OAuth 2.0 + create_quote)
+assurant_client.py:
+    def authenticate(self):
+        # OAuth 2.0 client credentials flow
+        response = requests.post(self.auth_url, data={
+            "grant_type": "client_credentials",
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+        })
+        self.access_token = response.json()["access_token"]
+
+    def create_quote(self, address, coverage, dwelling_type):
+        # Returns actual premium from Assurant's rating engine
+        # Coverage: $100K liability + $10K personal property
+        # Premium varies by address, state, dwelling type
+
+    def issue_policy(self, quote_id, payment_token):
+        # Binds the policy after payment clears
+
+# Step 2: Stripe checkout session
+checkout.py:
+    def checkout_page_html(lead_id, first_name, building_name,
+                           premium, stripe_publishable_key):
+        monthly = int(premium / 12)
+        annual = int(premium)
+        # Personalized landing page:
+        # "Hey {first_name}, you're almost covered!"
+        # Coverage breakdown, trust badges, payment button
+
+# Step 3: SMS delivery
+# Agent sends: "Here's your checkout link: [url]"
+# Personalized page with their name, building, premium
+# Stripe handles PCI compliance — card data never touches us
+
+# AI disclosure (mandatory):
+# "I'm Ken, an AI assistant for Jamboree Insurance"</pre>
+</div>
+
+<!-- ═══════ FINANCIAL ANALYSIS ═══════ -->
+
+<div class="asset">
+  <h2 style="margin-bottom:0.3rem;">Financial Analysis: Horizontal Truths Across APIs</h2>
+  <div style="color:#555; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.5rem;">Financial Analysis &middot; Workflows/financial-analysis/</div>
+
+  <p>The CSV parsers broke. They missed 0-98% of transactions depending on the bank. The fix: stop parsing CSVs. Read the actual bank statement PDFs with pdfplumber. 367 PDFs across 6 accounts. Seven years of transaction data. The real financial picture came from the balance method — opening balance plus deposits minus withdrawals — not from trying to categorize individual transactions.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# PDF-based balance method — why CSVs failed
+
+CSV parser results (actual production test):
+  Chase:     Missed 42% of transactions
+  Wells:     Missed 0% (good format)
+  Wintrust:  Missed 98% of transactions
+  Spirit CU: No CSV export available at all
+
+PDF method (pdfplumber):
+  367 PDFs across 6 accounts
+  Opening balance + deposits - withdrawals = closing balance
+  Cross-verified against statement ending balances
+  100% accuracy on every account
+
+# The real numbers:
+  Total deposits (7 years):    $1.66M
+  Total withdrawals (7 years): $1.67M
+  Lifetime position:           ~($404K-$436K) loss
+  Texas AR write-off rate:     27%</pre>
+
+  <h2 style="font-size:1.1rem; margin-top:3rem;">4-Tier Payment Verification</h2>
+  <p>When a payment is disputed or missing, the system searches four independent sources before concluding anything. Each tier is a different API. The horizontal truth — the consistent story across all four — is what you actually trust.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# 4-tier payment verification
+
+Tier 1: Spirit Portal (bank transaction records)
+  → Direct bank data. ACH timestamps. Check numbers.
+  → "Did the money actually move?"
+
+Tier 2: Invoice + Lease cross-reference
+  → Invoice amount vs lease terms vs actual deposit.
+  → "Was this the right amount for the right unit?"
+
+Tier 3: Zoho Books (accounting system)
+  → Revenue recognition. Categorization. Tax reporting.
+  → "Did we record this correctly?"
+
+Tier 4: Contextual evidence
+  → Email threads. SMS conversations. CRM notes.
+  → "What did we promise vs what did we deliver?"
+
+# The horizontal truth pattern:
+# When Tier 1 says $1,200, Tier 2 says $1,200,
+# Tier 3 says $1,100, and Tier 4 has an email saying
+# "$100 discount for late maintenance" — now you have
+# the real story. No single source tells you that.
+
+# This same pattern — cross-referencing independent APIs
+# to find the consistent truth — applies to every
+# analytical problem in the business:
+#   Lead quality:   Twilio logs × CRM × conversation × outcome
+#   Building value: Voice calls × ILS data × actual commission paid
+#   Agent perf:     Messages sent × responses × conversions × revenue</pre>
+</div>
+
+<!-- ═══════ HUMAN ESCALATION ═══════ -->
+
+<div class="asset">
+  <h2 style="margin-bottom:0.3rem;">Human Escalation: FancyHands and Bland AI</h2>
+  <div style="color:#555; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.5rem;">All Agents &middot; Shared Infrastructure</div>
+
+  <p>Humans are API endpoints. When the AI decides a situation needs a person — legal questions, hostile interactions, complex accommodations — it routes to one of two services. Bland AI handles automated voice calls to buildings: vacancy checks, commission verification, scheduling. FancyHands handles tasks that need a real human: calling a building manager who won't answer AI, resolving a lease dispute, collecting a document that requires a phone conversation.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# The executor spectrum
+
+Deterministic code:  $0/task      Compliance checks, DB queries
+LLM (Claude/Gemini): $0.003/task  Conversation, reasoning, analysis
+Voice AI (Bland):    $0.09/min    Building calls, vacancy checks
+Human (FancyHands):  $3-7/task    Complex escalations, disputes
+
+# The orchestrator decides which executor handles each task.
+# Same interface. Different cost. Different capability.
+# A building call that Bland AI can't close after 2 attempts
+# gets routed to FancyHands. The interface is the same:
+# "Call [building] and confirm [details]."
+# The executor swaps. The interface stays.</pre>
 </div>
 
 <!-- ═══════ GOVERNANCE LAYER ═══════ -->
 
 <div class="asset">
-  <h2>The Governance Layer: Hooks, Rules, and Scars</h2>
-  <p>Eight hooks across four event types. They run deterministically — can't be skipped, can't be overridden. Each one exists because of a production incident. The CLAUDE.md files (1,334 lines across 7 files) encode every rule, every lesson, every scar.</p>
+  <h2>The Governance Layer: 8 Hooks, 7 CLAUDE.md Files, 1,334 Lines</h2>
+  <p>Eight hooks across four event types. They run deterministically — can't be skipped, can't be overridden. Each one exists because of a production incident. The CLAUDE.md files encode every rule, every lesson, every scar from seven years of production.</p>
 
   <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 # Hook architecture — 8 hooks, 4 event types
 
 SessionStart:
   pre-session-read-state.sh
-    → Loads deployment state, last session
-    → Shows what's broken before you start
-    → "READ THE ABOVE. Do NOT start work until
-       you understand what is deployed, what broke,
-       and what the last session did."
+    → Loads DEPLOYMENT_STATE.md, last session, ARCHITECTURE.md
+    → "Do NOT start work until you understand what broke."
 
 PreToolUse (Bash):
   pre-bash-safeguard.sh
     → Blocks DROP TABLE, TRUNCATE, DELETE FROM
     → Cleans stale git locks
-    → "This hook NEVER prints instructions.
-       It either BLOCKS or ALLOWS. That's it."
+    → "Either BLOCKS or ALLOWS. That's it."
 
 PreToolUse (SQL):
   pre-sql-bottomup.sh
-    → Blocks aggregate queries before sampling
-    → Warns on client_stage_progression (garbage)
+    → Blocks aggregate queries before sampling raw records
     → "Classifiers lie. Summary fields are stale."
 
 PostToolUse (Edit/Write):
   post-edit-lint.sh
     → Auto-lints Python after every edit
-    → Blocks on syntax errors
-    → Detects secret leaks
+    → Blocks on syntax errors. Detects secret leaks.
 
 Stop:
   session-end-save.sh (126 lines)
     → Auto-saves session memory + git state
     → Detects deploys automatically
-    → "Exit code: ALWAYS 0. Stop hooks should
-       never block session exit."
 
   stop-fresh-eyes-check.sh
-    → Logs unreviewed changes to debt file
+    → Logs unreviewed changes to fresh_eyes_debt.md
+    → Forces review before next session starts
 
   ralph-wiggum/hooks/stop-hook.sh (178 lines)
     → Autonomous loop controller
-    → Intercepts session exit
     → Reads transcript for completion promise
     → Feeds prompt back in if work isn't done
-    → Named after a Simpsons character because
-      humor in infrastructure is how you stay
-      sane at 2 AM</pre>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# The Ralph Wiggum autonomous loop — actual code
-
-# When you try to exit, it checks: did you
-# actually finish what you promised?
-
-PROMISE_TEXT=$(echo "$LAST_OUTPUT" | \
-  perl -0777 -pe \
-  's/.*?<promise>(.*?)<\/promise>.*/$1/s')
-
-if [[ "$PROMISE_TEXT" = "$COMPLETION_PROMISE" ]]; then
-  echo "Ralph loop: Detected completion."
-  rm "$RALPH_STATE_FILE"
-  exit 0
-fi
-
-# Not complete — feed the prompt back in
-jq -n --arg prompt "$PROMPT_TEXT" \
-  '{"decision": "block", "reason": $prompt}'
-
-# The AI can't claim it's done unless it
-# actually is. The loop is inescapable.</pre>
+    → Named after a Simpsons character
+      because humor in infrastructure
+      is how you stay sane at 2 AM</pre>
 </div>
 
 <!-- ═══════ THE QUOTING ENGINE ═══════ -->
@@ -645,8 +1053,8 @@ jq -n --arg prompt "$PROMPT_TEXT" \
 119 session memory files
 4 business units
 3 AI agents in production
-30,000 leads/month
-97% contribution margins
-$0.003 cost per conversation
+36 units across 8 buildings (Landlord Rep)
+30,000 leads/day
+$0.003 cost per conversation turn
 0 human engineers</pre>
 </div>

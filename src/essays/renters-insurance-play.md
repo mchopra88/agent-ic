@@ -60,12 +60,12 @@ We partnered with a national renters insurance carrier — one of the largest in
 
 Their standard offer was a referral commission — a flat fee per policy sold. This is how most carrier-agent relationships work: the agent refers a customer, the carrier pays a finder's fee, and the agent has no ongoing relationship with the policy.
 
-I pushed for something that reflected the reality of what we were bringing: not just a referral, but an embedded distribution channel with 30,000 warm leads per month, an AI agent that could qualify, quote, and close without human intervention, and a risk pool that was structurally better than their direct-to-consumer channel.
+I pushed for something that reflected the reality of what we were bringing: not just a referral, but an embedded distribution channel with 30,000 warm leads per day, an AI agent that could qualify, quote, and close without human intervention, and a risk pool that was structurally better than their direct-to-consumer channel.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 What we bring to the table:
 
-  Volume:      30,000 leads/month (potential insureds)
+  Volume:      30,000 leads/day (potential insureds)
   Timing:      At the moment of maximum relevance
                (about to sign a lease)
   Conversion:  AI handles the full funnel
