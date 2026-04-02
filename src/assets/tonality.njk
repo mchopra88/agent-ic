@@ -1,0 +1,593 @@
+---
+layout: base.njk
+title: "Tonality Engine"
+navActive: assets
+---
+
+<p style="margin-bottom:0.5rem;"><a href="/assets/" style="color:#666; font-size:0.85rem; text-decoration:none;">&larr; Back to Assets</a></p>
+
+<h1>Tonality Engine</h1>
+
+<p style="color:#999; font-size:1.05rem; margin-bottom:1.5rem; font-style:italic;">How a renter's first text changes everything the agent says next.</p>
+
+<p style="color:#b0aca6; font-size:0.95rem; margin-bottom:3rem;">The same lead intelligence that profiles a renter financially also profiles them conversationally. The tone of the response is not random. It is computed. Not by a decision tree &mdash; by reading the actual messages and detecting patterns that most humans miss. A Section 8 voucher holder who texts "hi i need a place asap" and a tech recruiter who texts "Hello, I'm interested in viewing the 2BR on Lakeshore" both get a response within 90 seconds. But those responses share almost nothing in common.</p>
+
+<!-- ═══════ SECTION 1: RENTER PROFILING ═══════ -->
+
+<div class="asset">
+  <h2>Renter Profiling via Gemini</h2>
+
+  <p>When a new lead sends their first message, Gemini reads the entire thread and extracts a 7-field profile. This is not classification. Classification means picking from a list. This is comprehension &mdash; the LLM reads the words, the syntax, the punctuation, the things they mention and the things they avoid mentioning, and builds a mental model of who this person is and what they need.</p>
+
+  <p>The seven fields:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+{
+  "renter_type":      "working_class | professional | section8 | student | crisis",
+  "urgency":          "immediate | this_month | browsing | unclear",
+  "pain_point":       "what's driving the search — eviction, lease end, relocation, etc.",
+  "flexibility":      "where they can bend — budget, location, move-in date, unit size",
+  "dealbreaker":      "what kills it — pets not allowed, no parking, price above X",
+  "household":        "who's moving — single, couple, family with 3 kids, roommates",
+  "language_notes":   "primary language, fluency signals, code-switching patterns"
+}
+</pre>
+
+  <p><code>renter_type</code> is the field that matters most. It determines the tone of every message the agent sends for the rest of the conversation. Get it wrong, and the renter either feels talked down to or lost in jargon they did not ask for.</p>
+
+  <p><code>language_notes</code> is the field people underestimate. A renter who texts in Spanish with occasional English real estate terms (lease, deposit, application) is telling you they know the process but are more comfortable in Spanish. A renter who texts broken English with autocorrect artifacts needs simpler vocabulary, not a different language. The agent distinguishes between these.</p>
+
+  <p>The profiling happens once, on the first substantive inbound message. It costs one Gemini call. After that, the profile is stored and reused for every subsequent response. If the renter's situation changes &mdash; they mention a voucher they did not mention before, or their timeline shifts from "browsing" to "I need to move by Friday" &mdash; the profile updates on the next inbound.</p>
+</div>
+
+<!-- ═══════ SECTION 2: THE TONE MAP ═══════ -->
+
+<div class="asset">
+  <h2>The TONE_MAP</h2>
+
+  <p>Five renter types. Five guidance strings. This is a dictionary lookup, not an LLM call. Fast. Deterministic. But the output feeds directly into the LLM prompt as system-level guidance, shaping every word the agent generates.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">TONE_MAP</span> = {
+
+    <span style="color:#e8e4de;">"working_class"</span>: (
+        "Be warm, direct, no jargon. Frame costs as daily amounts. "
+        "Don't interrogate — guide. They respect straight talk."
+    ),
+
+    <span style="color:#e8e4de;">"professional"</span>: (
+        "Be consultative, add value. They have options and are evaluating us. "
+        "Curate, don't hard-sell. Anticipate their questions."
+    ),
+
+    <span style="color:#e8e4de;">"section8"</span>: (
+        "Be patient, encouraging. They've dealt with judgment before. "
+        "Explain the process clearly. Voucher paperwork first. "
+        "If new to Section 8: walk them through step by step."
+    ),
+
+    <span style="color:#e8e4de;">"student"</span>: (
+        "Be casual, quick. They want speed and price. "
+        "Lead with rent and proximity to transit."
+    ),
+
+    <span style="color:#e8e4de;">"crisis"</span>: (
+        "Be compassionate, not clinical. They may be homeless, fleeing DV, "
+        "or facing eviction. Do NOT ask why they need to move urgently. "
+        "Focus on solving the housing problem fast. "
+        "Mention Chicago rapid re-housing programs (HPRP, ERA)."
+    ),
+}
+</pre>
+
+  <p>The working_class guidance says "frame costs as daily amounts." Here is why: $1,400/month rent sounds like a wall. $47/day sounds like a decision. The agent does not do this because someone told it to be clever. It does it because the guidance string says to, and the LLM follows the instruction when generating the response.</p>
+
+  <p>The crisis guidance says "do NOT ask why they need to move urgently." This is a guardrail born from real conversations. A renter fleeing domestic violence does not need an AI asking "what's prompting your move?" That question, harmless for a professional relocating for work, becomes a wall for someone in danger. The agent skips it entirely. Solves the housing problem. Nothing else.</p>
+
+  <p>The section8 guidance says "voucher paperwork first." This is operational, not emotional. Section 8 deals die when the voucher expires before the paperwork clears. The agent knows to start with "do you have your voucher packet?" before discussing unit features, because features do not matter if the voucher lapses.</p>
+</div>
+
+<!-- ═══════ SECTION 3: STYLE MODIFIERS ═══════ -->
+
+<div class="asset">
+  <h2>STYLE_MODIFIERS</h2>
+
+  <p>Tone tells the agent what to say. Style tells it how to say it. Four overlays detected from message patterns, applied on top of the tone map:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">STYLE_MODIFIERS</span> = {
+
+    <span style="color:#e8e4de;">"terse"</span>: {
+        "detect":    <span style="color:#cc8888;">avg_message_length < 10</span>,
+        "guidance":  "Match their brevity. Short sentences. No fluff. "
+                     "If they text 'ok' you text 'Got it.'"
+    },
+
+    <span style="color:#e8e4de;">"emoji_heavy"</span>: {
+        "detect":    <span style="color:#cc8888;">emoji_ratio > 0.50</span>,
+        "guidance":  "Mirror their emoji style. Not excessive — proportional. "
+                     "They send a thumbs up, you send a thumbs up."
+    },
+
+    <span style="color:#e8e4de;">"formal"</span>: {
+        "detect":    <span style="color:#cc8888;">formal_signals > 0.60 AND avg_message_length > 50</span>,
+        "guidance":  "Proper sentences. No abbreviations. No emoji. "
+                     "They wrote 'Good afternoon' — you write 'Good afternoon.'"
+    },
+
+    <span style="color:#e8e4de;">"language_barrier"</span>: {
+        "detect":    <span style="color:#cc8888;">non_native_patterns detected</span>,
+        "guidance":  "Simplify vocabulary. Avoid idioms. Shorter sentences. "
+                     "No 'in the ballpark' — say 'around $1,200.'"
+    },
+}
+</pre>
+
+  <p>The detection logic:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">def detect_style_modifiers</span>(messages: list[dict]) -> list[str]:
+    """Analyze inbound messages to detect communication style."""
+    modifiers = []
+
+    inbound = [m for m in messages if m["direction"] == "inbound"]
+    if not inbound:
+        return modifiers
+
+    <span style="color:#666;"># Calculate metrics</span>
+    avg_len = sum(len(m["body"]) for m in inbound) / len(inbound)
+    emoji_count = sum(
+        1 for m in inbound
+        for c in m["body"]
+        if ord(c) > 0x1F600
+    )
+    total_chars = sum(len(m["body"]) for m in inbound)
+    emoji_ratio = emoji_count / max(total_chars, 1)
+
+    <span style="color:#666;"># Formal signals: capitalized first word, periods at end,</span>
+    <span style="color:#666;"># no abbreviations (u, ur, thx, pls)</span>
+    informal_words = {"u", "ur", "thx", "pls", "gonna", "wanna", "lol", "omg"}
+    formal_score = 0
+    for m in inbound:
+        body = m["body"].strip()
+        if body and body[0].isupper():
+            formal_score += 0.3
+        if body.endswith((".","!","?")):
+            formal_score += 0.3
+        words = set(body.lower().split())
+        if not words & informal_words:
+            formal_score += 0.4
+    formal_ratio = formal_score / len(inbound)
+
+    <span style="color:#666;"># Non-native patterns: missing articles, unusual prepositions,</span>
+    <span style="color:#666;"># inconsistent tense, mixed-language words</span>
+    non_native_signals = 0
+    for m in inbound:
+        body = m["body"].lower()
+        if re.search(r"\b(i am need|i am want|is possible|please to)\b", body):
+            non_native_signals += 1
+        if re.search(r"\b(necesito|busco|cuanto|disponible)\b", body):
+            non_native_signals += 1
+
+    <span style="color:#666;"># Apply thresholds</span>
+    if avg_len < 10:
+        modifiers.append("terse")
+    if emoji_ratio > 0.50:
+        modifiers.append("emoji_heavy")
+    if formal_ratio > 0.60 and avg_len > 50:
+        modifiers.append("formal")
+    if non_native_signals >= 2:
+        modifiers.append("language_barrier")
+
+    return modifiers
+</pre>
+
+  <p>A renter who texts "k" and "yes" and "how much" gets short replies. A renter who texts "Good afternoon, I'm writing to inquire about the two-bedroom unit listed on Zillow" gets complete sentences with proper punctuation. The agent mirrors. It does not decide what style is "best" &mdash; it observes what style the renter uses and matches it.</p>
+
+  <p>When style detection fails, nothing bad happens. The agent falls back to the tone map guidance without any style overlay. The message is still appropriate for the renter type. It just is not mirrored. This is intentional. A wrong style match &mdash; sending emoji to a formal renter &mdash; is worse than no style match at all.</p>
+</div>
+
+<!-- ═══════ SECTION 4: GHOST NUDGE STRATEGIES ═══════ -->
+
+<div class="asset">
+  <h2>Ghost Nudge Strategies</h2>
+
+  <p>Every lead goes silent eventually. The question is what you say to bring them back. The wrong nudge kills the deal permanently.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">GHOST_NUDGE</span> = {
+
+    <span style="color:#e8e4de;">"working_class"</span>: {
+        "strategy":  "time-pressure + practical consequence",
+        "example":   "Hey — that 2BR on 79th won't last past Friday. "
+                     "Want me to hold it?",
+        "tone":      "direct, not aggressive"
+    },
+
+    <span style="color:#e8e4de;">"professional"</span>: {
+        "strategy":  "value-add + new information",
+        "example":   "Found a unit that actually fits better than the first one — "
+                     "newer build, same price, 10 min closer to the Loop.",
+        "tone":      "consultative, providing new value"
+    },
+
+    <span style="color:#e8e4de;">"section8"</span>: {
+        "strategy":  "reassurance + process update",
+        "example":   "Just wanted to check in on your voucher timeline. "
+                     "The unit on Stony Island is still available and "
+                     "the landlord accepts HCV.",
+        "tone":      "patient, encouraging"
+    },
+
+    <span style="color:#e8e4de;">"student"</span>: {
+        "strategy":  "casual check-in + keep it light",
+        "example":   "Still looking? That studio near the Red Line "
+                     "dropped to $975.",
+        "tone":      "brief, no pressure"
+    },
+
+    <span style="color:#e8e4de;">"crisis"</span>: {
+        "strategy":  "gentle presence + resource mention",
+        "example":   "Just checking in, no pressure. If your situation "
+                     "has changed, I can also connect you with HPRP for "
+                     "emergency housing assistance.",
+        "tone":      "compassionate, zero urgency language"
+    },
+}
+</pre>
+
+  <p>What happens when you use the wrong strategy: A crisis renter &mdash; someone who may be homeless, fleeing violence, facing eviction &mdash; gets a time-pressure message like "this unit won't last." They shut down. Not because they are uninterested, but because urgency language sounds like pressure, and pressure is what they are trying to escape. They stop responding. Permanently. A $22,000 lifetime value walks away because the nudge strategy did not account for who was reading it.</p>
+
+  <p>Conversely, a professional getting "just checking in, no pressure" reads it as passive. They have six other locators texting them. The one who says "I found something better" is the one who gets the reply. Different renter, different nudge, different outcome. Same lead, same unit &mdash; the only variable is the words.</p>
+
+  <p>The ghost nudge fires after 48 hours of silence. Not 24 &mdash; some people are busy. Not 72 &mdash; by then they have found someone else. 48 hours is the window where the renter still remembers the conversation but has not committed elsewhere.</p>
+</div>
+
+<!-- ═══════ SECTION 5: COMMITMENT TRACKING ═══════ -->
+
+<div class="asset">
+  <h2>Commitment Tracking</h2>
+
+  <p>The agent listens for trigger phrases that signal the renter is ready to move forward. Not sentiment analysis. Not keyword matching. Pattern recognition on phrases that mean "yes, I want this."</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">COMMITMENT_TRIGGERS</span> = [
+    <span style="color:#666;"># Direct intent</span>
+    r"i want to apply",
+    r"i('ll|'d like to|wanna) (apply|sign|take it)",
+    r"can i (see|visit|tour|view) it",
+    r"when can i move in",
+    r"i('ll| will) take it",
+    r"send me the (app|application|link)",
+    r"how do i (apply|sign|get started)",
+
+    <span style="color:#666;"># Deadline signals</span>
+    r"i need to (move|be out|be in) by",
+    r"my lease (ends|is up|expires) (on|in|by)",
+    r"i have (to|until) (the )?\d{1,2}(st|nd|rd|th)?",
+    r"my voucher expires",
+
+    <span style="color:#666;"># Financial readiness</span>
+    r"i have (the )?deposit ready",
+    r"i can (pay|put down) (first|the deposit)",
+    r"when is (rent|the first payment) due",
+]
+</pre>
+
+  <p>When the agent detects a deadline &mdash; "I need to move by the 15th" &mdash; it stores that date and references it in every followup. Not as a reminder. As an anchor.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">def extract_deadline</span>(messages: list[dict], urgency: str) -> dict | None:
+    """Extract move-in deadline from conversation."""
+
+    deadline_patterns = [
+        (r"(?:move|be (?:out|in)|need .+ by) (?:the )?(\w+ \d{1,2})", "explicit"),
+        (r"lease (?:ends|up|expires) (?:on |in |by )?(\w+ \d{1,2})", "lease_end"),
+        (r"voucher expires (?:on |in |by )?(\w+ \d{1,2})", "voucher"),
+        (r"(?:have|only have) (\d+) (?:days|weeks)", "countdown"),
+    ]
+
+    for msg in reversed(messages):
+        if msg["direction"] != "inbound":
+            continue
+        for pattern, source in deadline_patterns:
+            match = re.search(pattern, msg["body"], re.IGNORECASE)
+            if match:
+                return {
+                    "raw":       match.group(1),
+                    "source":    source,
+                    "message_id": msg["id"],
+                    "urgency":   urgency,
+                }
+
+    <span style="color:#666;"># No explicit deadline — infer from urgency</span>
+    urgency_defaults = {
+        "immediate":  7,   <span style="color:#666;"># 7 days</span>
+        "this_month": 30,  <span style="color:#666;"># 30 days</span>
+        "browsing":   90,  <span style="color:#666;"># 90 days</span>
+        "unclear":    60,  <span style="color:#666;"># 60 days</span>
+    }
+    days = urgency_defaults.get(urgency, 60)
+    return {
+        "raw":       f"{days} days (inferred)",
+        "source":    "urgency_inference",
+        "urgency":   urgency,
+    }
+</pre>
+
+  <p>The deadline anchoring changes how the agent talks. Without a deadline, the agent says "let me know when you'd like to see it." With a deadline of March 15th, the agent says "to get you in by the 15th, we'd need to submit the application by Monday." The renter hears their own words reflected back. That is not a sales technique. It is listening.</p>
+
+  <p>Voucher deadlines are treated differently from lease-end deadlines. A voucher expiration is an immovable wall &mdash; if it passes, the renter loses their housing subsidy entirely. The agent escalates voucher deadlines above all others, regardless of the renter's stated urgency level.</p>
+</div>
+
+<!-- ═══════ SECTION 6: CHANNEL DECISION LOGIC ═══════ -->
+
+<div class="asset">
+  <h2>Channel Decision Logic</h2>
+
+  <p>SMS handles 95% of interactions. The system decides when to escalate.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">CHANNEL RULES</span>
+
+Default:    SMS  (95% of all interactions)
+
+Escalate to voice call when:
+  1. 3+ unanswered SMS over 48 hours
+  2. Lead explicitly requests a call
+  3. Deal stage == SHOWING_SCHEDULED and needs confirmation
+  4. Client tier == HIGH_END (voice builds trust with luxury clients)
+
+Escalate to email when:
+  1. Document exchange needed (application, lease, voucher packet)
+  2. Message exceeds 1,000 characters
+  3. 2+ SMS with no response AND no voice attempted
+
+De-escalate to SMS when:
+  1. Voice call went unanswered 2+ times
+  2. Renter responded to SMS after voice failed
+</pre>
+
+  <p>The dangerous edge case is over-messaging. A lead who is not responding does not need more messages &mdash; they need silence.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">OVER_SPAM_DETECTION</span>
+
+threshold:
+  messages_sent     >= 20
+  response_rate     <  0.10    <span style="color:#666;"># less than 10% of outbounds got a reply</span>
+  window            =  14 days
+
+action:
+  1. STOP sending immediately
+  2. Flag for human review
+  3. Set next_contact_at = NULL   <span style="color:#666;"># no automated followup</span>
+  4. Log to discord #spam-alerts
+
+<span style="color:#666;"># The math: 20 messages sent, fewer than 2 responses.</span>
+<span style="color:#666;"># This person either lost the phone, blocked the number,</span>
+<span style="color:#666;"># or was never interested. More messages make it worse.</span>
+</pre>
+
+  <p>The channel selector uses a weighted scoring system. Client preference gets a weight of 50 &mdash; the strongest signal by far. Previous successful channel gets 20. Stage-appropriate channel gets 15. Urgency match gets 15. Cost efficiency gets 5. If a channel is disabled or the contact info is missing, it gets a penalty of -100, removing it from consideration entirely.</p>
+
+  <p>When everything is disabled &mdash; no phone, no email, voice not configured &mdash; the system does not retry endlessly. It returns a decision with score -1.0 and reason "no_viable_channel." The orchestrator catches this and parks the lead instead of sending into the void.</p>
+</div>
+
+<!-- ═══════ SECTION 7: STAKEHOLDER DETECTION ═══════ -->
+
+<div class="asset">
+  <h2>Stakeholder Detection</h2>
+
+  <p>Not every conversation is between the agent and the renter. Sometimes someone else is involved. The agent detects this and adjusts.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">STAKEHOLDER_PATTERNS</span> = {
+
+    <span style="color:#e8e4de;">"case_worker"</span>: [
+        r"my (case|social) worker",
+        r"my counselor",
+        r"CHA office",
+        r"housing authority",
+        r"my advocate",
+    ],
+
+    <span style="color:#e8e4de;">"family"</span>: [
+        r"my (mom|mother|dad|father|sister|brother) is helping",
+        r"my (mom|dad|parent|sister|brother) will (co-?sign|pay|call)",
+        r"we need",
+        r"my family",
+        r"(wife|husband|partner) and (i|me)",
+    ],
+
+    <span style="color:#e8e4de;">"legal_system"</span>: [
+        r"my (PO|parole officer|probation officer)",
+        r"(halfway|transitional) (house|housing|program)",
+        r"my lawyer",
+        r"court (order|date|requirement)",
+    ],
+}
+</pre>
+
+  <p>When a stakeholder is detected, three things change:</p>
+
+  <p>First, the agent references the stakeholder in conversation. If the renter said "my case worker is helping me with the paperwork," the agent's next message might say "once your case worker sends over the voucher documents, I can get the application started." It does not pretend the case worker does not exist.</p>
+
+  <p>Second, the agent adjusts expectations on response time. A renter working through a case worker responds slower &mdash; they are coordinating across multiple people. The ghost nudge timer extends from 48 hours to 72 hours. The agent does not interpret the silence as disinterest.</p>
+
+  <p>Third, the agent never goes around the stakeholder. If a renter says "my mom is handling the deposit," the agent does not text the renter asking about the deposit. It waits. Going around a stakeholder &mdash; especially a case worker or parole officer &mdash; destroys trust instantly. The renter feels managed instead of helped.</p>
+
+  <p>The legal_system patterns deserve their own note. A renter mentioning a parole officer or halfway house is not a red flag for the agent. It is information. These renters face the most barriers to housing and are the most likely to be rejected by other locators. The agent does not judge. It asks what the renter needs and starts matching units with landlords who accept their situation.</p>
+</div>
+
+<!-- ═══════ SECTION 8: PREFERRED CONTACT HOURS ═══════ -->
+
+<div class="asset">
+  <h2>Preferred Contact Hours</h2>
+
+  <p>The system tracks when a renter actually responds. Not when they say they are available. When they actually pick up the phone and text back.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">def calculate_preferred_hours</span>(messages: list[dict]) -> tuple[int, int]:
+    """
+    Analyze inbound message timestamps to find the renter's
+    active response window.
+
+    Returns (start_hour, end_hour) in CT.
+    """
+    inbound = [m for m in messages if m["direction"] == "inbound"]
+    if len(inbound) < 3:
+        return (9, 20)  <span style="color:#666;"># Default: business hours</span>
+
+    <span style="color:#666;"># Bucket responses by hour</span>
+    hour_counts = defaultdict(int)
+    for m in inbound:
+        hour_ct = m["created_at"].astimezone(CT).hour
+        hour_counts[hour_ct] += 1
+
+    <span style="color:#666;"># Find the 3-hour window with the most responses</span>
+    best_window = None
+    best_count = 0
+    for start in range(6, 22):  <span style="color:#666;"># Only consider 6 AM - 10 PM</span>
+        window_count = sum(
+            hour_counts.get(h % 24, 0)
+            for h in range(start, start + 3)
+        )
+        if window_count > best_count:
+            best_count = window_count
+            best_window = (start, start + 3)
+
+    return best_window or (9, 20)
+</pre>
+
+  <p>If a renter only responds between 6 PM and 9 PM, the agent learns to message at 6 PM. Not 10 AM when the message gets buried under a day of notifications. Not 11 PM when it wakes them up. During the window when they are actually looking at their phone.</p>
+
+  <p>But there is a hard guardrail that overrides everything:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">CONTACT_GUARDRAILS</span>
+
+never_before:   9:00 AM CT
+never_after:    8:00 PM CT
+
+<span style="color:#666;"># Even if the renter responds at 2 AM, we do not text at 2 AM.</span>
+<span style="color:#666;"># Even if the renter responds at 6 AM, we wait until 9 AM.</span>
+<span style="color:#666;"># The learned preference only operates within the guardrail window.</span>
+
+<span style="color:#666;"># If the preferred window falls entirely outside guardrails</span>
+<span style="color:#666;"># (e.g., renter only responds midnight-3 AM),</span>
+<span style="color:#666;"># the agent clamps to the nearest guardrail edge: 8:00 PM CT.</span>
+</pre>
+
+  <p>This is a legal guardrail as much as a UX one. TCPA compliance requires reasonable contact hours. 9 AM to 8 PM Central Time. The learned preference optimizes within that window, but it never expands past it. A renter who only texts at midnight still gets their messages at 8 PM &mdash; as close to their natural window as the law allows.</p>
+</div>
+
+<!-- ═══════ SECTION 9: THREE TONALITY TIERS ═══════ -->
+
+<div class="asset">
+  <h2>Three Tonality Tiers (Locator)</h2>
+
+  <p>The renter profiling system (5 types, style modifiers, ghost nudges) handles the conversational surface. Underneath it, the locator agent operates three positioning tiers based on the renter's financial profile. These tiers change not just tone but posture &mdash; how the agent stands relative to the renter.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">POSITIONING</span> = {
+
+    <span style="color:#e8e4de;">ClientTier.LOW_END</span>: {
+        "opener":            "Before I process your application, "
+                             "I need to verify a few things.",
+        "stance":            <span style="color:#cc8888;">"authoritative"</span>,
+        "questions":         "direct",
+        "pushback_allowed":  True,
+    },
+
+    <span style="color:#e8e4de;">ClientTier.MID_MARKET</span>: {
+        "opener":            "I can help you find something that works. "
+                             "Let me get some info.",
+        "stance":            <span style="color:#cc8888;">"professional"</span>,
+        "questions":         "direct",
+        "pushback_allowed":  True,
+    },
+
+    <span style="color:#e8e4de;">ClientTier.HIGH_END</span>: {
+        "opener":            "I'd love to help you find the perfect place.",
+        "stance":            <span style="color:#cc8888;">"consultative"</span>,
+        "questions":         "narrative",
+        "pushback_allowed":  False,
+    },
+}
+</pre>
+
+  <p>LOW-END does not mean low quality. It means the renter is in a budget market &mdash; ZIP code median income below the 25th percentile nationally, or credit challenges detected. The agent takes an authoritative posture: "Before I process your application, I need to verify a few things." It positions itself as the gatekeeper. This is not disrespect. In low-income housing, the renter expects to be screened. An agent that does not ask about credit and income sounds unserious. The direct approach builds trust faster than consultative politeness.</p>
+
+  <p>HIGH-END is the opposite. The renter has options. Multiple locators are texting them. The agent that interrogates them &mdash; "What's your credit score?" &mdash; loses immediately. Instead: "Tell me what you're looking for." Narrative questions. No pushback. The agent serves, it does not screen.</p>
+
+  <p>The complete intelligence block the agent receives before generating a response:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">INTELLIGENCE BLOCK</span> (injected into LLM system prompt)
+
+=== RENTER PROFILE ===
+renter_type:     section8
+urgency:         immediate
+pain_point:      voucher expiring in 19 days
+flexibility:     can extend to South Shore or Chatham
+dealbreaker:     needs 3BR, no exceptions
+household:       single mother, 2 children (ages 4, 7)
+language_notes:  native English, some AAVE patterns
+
+=== TONE GUIDANCE ===
+Be patient, encouraging. They've dealt with judgment before.
+Explain the process clearly. Voucher paperwork first.
+If new to Section 8: walk them through step by step.
+
+=== STYLE MODIFIERS ===
+terse — match brevity, short sentences
+
+=== POSITIONING ===
+tier:              LOW_END
+stance:            authoritative
+pushback_allowed:  true
+
+=== DEADLINE ===
+voucher expires in 19 days
+source: explicit ("my voucher expires march 20")
+priority: CRITICAL — voucher deadlines override all other urgency
+
+=== STAKEHOLDERS ===
+case_worker detected — "my case worker at CHA"
+→ extend ghost_nudge timer to 72 hours
+→ reference case worker in process updates
+
+=== CONTACT WINDOW ===
+preferred: 6:00 PM – 9:00 PM CT (learned from 7 inbound messages)
+guardrail: 9:00 AM – 8:00 PM CT
+
+=== GHOST NUDGE STRATEGY ===
+strategy: reassurance + process update
+tone: patient, encouraging
+</pre>
+
+  <p>That is what the LLM sees before it writes a single word. Not a generic "be helpful" instruction. A specific, computed, evidence-based profile of who this person is, what they need, how they communicate, and what will happen if the conversation stalls. The agent does not guess. It reads.</p>
+</div>
+
+<!-- ═══════ SECTION 10: THE COST OF GETTING IT WRONG ═══════ -->
+
+<div class="asset">
+  <h2>The Cost of Getting It Wrong</h2>
+
+  <p>Every component described above exists because at some point, the agent got it wrong.</p>
+
+  <p>The tone map exists because a crisis renter received a consultative opener &mdash; "Tell me what you're looking for!" &mdash; and never responded. She needed housing that night. She did not need someone to curate options for her. She needed someone to say "I have a unit available now. Can you get there by 6 PM?"</p>
+
+  <p>The style modifiers exist because a formal renter &mdash; a corporate relocation, $180,000 income &mdash; received a message with emoji and an abbreviation. She responded with "I'd prefer to communicate with a human agent." We do not have human agents. We have an AI that now knows to write in complete sentences when someone else does.</p>
+
+  <p>The ghost nudge strategies exist because the same nudge was being sent to every lead. Working-class renters got "just checking in" (too passive, they want directness). Crisis renters got "this unit won't last" (too aggressive, they are already under pressure). The one-size-fits-all message had a 4% response rate. The type-specific nudges brought it to 18%.</p>
+
+  <p>The stakeholder detection exists because the agent once texted a renter directly about their deposit, after the renter had said their mother was handling it. The mother called our number &mdash; confused, annoyed &mdash; and we lost the deal. A $1,350/month unit. $16,200 in annual rent. Because the agent did not listen to who was actually making the decisions.</p>
+
+  <p>None of this is theory. Every threshold, every pattern, every guardrail is scar tissue from a real conversation that went wrong. The tonality engine does not predict what might work. It remembers what did not.</p>
+</div>
+
+<div class="asset" style="border-bottom:none; margin-top:2rem;">
+  <p style="color:#555; font-size:0.85rem; font-style:italic;">Source: ygl_renter_intel.py (510 lines), channel_selector.py, lead_agent.py, models.py. Production code, running now.</p>
+</div>

@@ -1,0 +1,447 @@
+---
+layout: base.njk
+title: "The Cooperating Network"
+navActive: assets
+---
+
+<p style="margin-bottom:0.5rem;"><a href="/assets/" style="color:#666; font-size:0.85rem; text-decoration:none;">&larr; Back to Assets</a></p>
+
+<h1>The Cooperating Network</h1>
+<p style="color:#999; font-size:1.05rem; margin-bottom:3rem;">83,191 buildings tracked. 33,861 cooperating. Three markets. The infrastructure that powers the Apartment Locator business.</p>
+
+
+<!-- ═══════ OPENING ═══════ -->
+
+<div class="asset">
+
+  <p>The Apartment Locator is a middleman. It owns no buildings. It owns a network &mdash; every rental property in three metropolitan areas, tracked, scored, and decaying at different rates depending on how old the data is.</p>
+
+  <p>A building enters the network because a lead asked about it, or a phone call confirmed vacancy, or a commission check arrived. Once it exists, it stays forever. But its usefulness decays. A building with a confirmed commission rate from Tuesday is worth more than one with a Zillow scrape from November. The system encodes that difference in every fact about every building.</p>
+
+  <p>This page covers only the Apartment Locator business unit. The <a href="/assets/inventory/" style="color:#888;">Managed Portfolio</a> covers the 35 units I operate directly for the Landlord Rep business.</p>
+
+</div>
+
+
+<!-- ═══════ THE COOPERATING NETWORK ═══════ -->
+
+<div class="asset">
+  <h2>83,191 Buildings</h2>
+
+  <p>Every building the system has ever encountered goes into the master database. A lead inquires about a building we have never heard of &mdash; it gets created. Bland AI calls a leasing office to check vacancy &mdash; the transcript gets parsed and the building record gets updated. A commission payment arrives from a property manager &mdash; the building's commission confidence score goes to 0.95.</p>
+
+  <p>The numbers:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+Total buildings tracked:             83,191
+Buildings with commission rates:     33,861  (40.7%)
+Buildings with placement history:    24,622  (29.6%)
+Buildings with recent contact:       ~8,000  (last 90 days)
+
+Markets:
+  Chicago:         ~15,000 buildings    44% match rate
+  Dallas-Fort Worth: ~45,000 buildings    68% match rate
+  Denver:          ~23,000 buildings    68% match rate
+
+Commission types:
+  50% of first month:   low incentive, fallback option
+  75% of first month:   common, good return
+  100% of first month:  standard cooperating rate
+  150%+:                red flag &mdash; verify with phone call
+</pre>
+
+  <p>Chicago's 44% match rate is the problem that keeps me up at night. For every 100 leads in Chicago, 56 cannot be matched to a cooperating building in their budget and preferred neighborhood. DFW and Denver run at 68% &mdash; not great, but survivable. The gap in Chicago is structural: the South Side has inventory but low budgets, the North Side has budgets but few cooperating buildings, and the 2BR+ segment is chronically short everywhere.</p>
+
+</div>
+
+
+<!-- ═══════ BUILDING KNOWLEDGE DATABASE ═══════ -->
+
+<div class="asset">
+  <h2>The Building Knowledge Database</h2>
+
+  <p>Every building is a JSONB document in Postgres. Not a row with 50 columns. A knowledge store where every fact has its own provenance: when it was observed, who observed it, how confident we are, and how fast it decays.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;"># building_knowledge table (PostgreSQL)</span>
+
+CREATE TABLE building_knowledge (
+    id                  UUID PRIMARY KEY,
+    canonical_name      TEXT,
+    canonical_address   TEXT,
+    city                TEXT,
+    state               TEXT,
+    zip_code            TEXT,
+    lat                 DOUBLE PRECISION,
+    lng                 DOUBLE PRECISION,
+
+    <span style="color:#e8e4de;">-- Every fact carries metadata</span>
+    knowledge           JSONB,
+    <span style="color:#e8e4de;">-- Example:</span>
+    <span style="color:#e8e4de;">-- {</span>
+    <span style="color:#e8e4de;">--   "commission_rate": {</span>
+    <span style="color:#e8e4de;">--     "value": 100,</span>
+    <span style="color:#e8e4de;">--     "unit": "percent_monthly",</span>
+    <span style="color:#e8e4de;">--     "observed_at": "2026-02-01T14:30:00Z",</span>
+    <span style="color:#e8e4de;">--     "source": "phone_call",</span>
+    <span style="color:#e8e4de;">--     "confidence": 0.95,</span>
+    <span style="color:#e8e4de;">--     "decay_class": "fast"</span>
+    <span style="color:#e8e4de;">--   },</span>
+    <span style="color:#e8e4de;">--   "min_rent": {"value": 1200, ...},</span>
+    <span style="color:#e8e4de;">--   "pet_policy": {"value": "case_by_case", ...}</span>
+    <span style="color:#e8e4de;">-- }</span>
+
+    sources             JSONB,      <span style="color:#e8e4de;">-- provenance per data source</span>
+    management_company  TEXT,
+    legacy_inventory_id INT,
+    deal_count          INT,
+    last_deal_at        TIMESTAMPTZ,
+    active_matches      INT,
+    created_at          TIMESTAMPTZ,
+    updated_at          TIMESTAMPTZ
+);
+</pre>
+
+  <p>The JSONB structure is the key architectural decision. A traditional schema would have <code>commission_rate DECIMAL</code> as a column. But that tells you nothing about when the rate was verified, where the data came from, or whether you should trust it. A commission rate from a phone call last Tuesday is worth more than one scraped from Zillow six months ago. The JSONB structure encodes that difference.</p>
+
+  <h2 style="font-size:1.1rem; margin-top:2.5rem;">Decay Classes</h2>
+
+  <p>Not all facts age at the same speed. The system tracks five decay classes:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;"># How fast knowledge goes stale</span>
+
+VOLATILE    changes daily      showing requirements, current availability
+FAST        changes weekly     commission rate, specials, available units
+MODERATE    changes quarterly  credit policy, income requirements
+SLOW        changes yearly     management company, pet policy type
+PERMANENT   never changes      physical features: balcony, pool, parking garage
+</pre>
+
+  <p>Commission rates are FAST decay. A building that paid 100% last month might be at 75% this month &mdash; market conditions shift, management companies renegotiate, new ownership takes over. If the commission data is older than 30 days, the system marks it as aging. Older than 90 days, stale. A stale commission rate triggers a Bland AI verification call before the agent promises the lead anything about that building.</p>
+
+  <p>Pet policy is SLOW decay. Buildings do not change their pet policy every quarter. If they allowed dogs last year, they almost certainly still allow dogs. But a physical feature like a parking garage is PERMANENT &mdash; you cannot un-build a parking garage.</p>
+
+</div>
+
+
+<!-- ═══════ SOURCE LANES ═══════ -->
+
+<div class="asset">
+  <h2>Seven Source Lanes</h2>
+
+  <p>Seven independent data sources feed the building knowledge database. Each source has a different confidence level, and the system tracks which sources contributed to each fact.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+Source                Confidence    What It Tells You
+──────────────────────────────────────────────────────────────
+Phone call (Bland)    0.95         Fresh: commission, availability, policies
+Field visit           0.95         First-hand: condition, neighborhood, parking
+ILS scrape (Zillow)   0.70         Listings, prices, photos (may be stale)
+ILS scrape (Apts.com) 0.70         Same as Zillow, different coverage
+YouGotListings        0.90         Our own listings (Landlord Rep units)
+Building website      0.75         Official but rarely updated
+Revenue history       0.98         Commission actually paid = ground truth
+</pre>
+
+  <p>Revenue history has the highest confidence. If a building paid us $1,100 in commission last month, we know for certain they cooperate and we know the exact rate. A phone call is the second-best source &mdash; a human (or Bland AI) spoke to the leasing office and confirmed the details. Zillow is the weakest because listings go stale: the unit that was available when the page was scraped might have been leased three weeks ago.</p>
+
+  <p>The search function prioritizes cooperating buildings &mdash; buildings that pay us commission:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;"># knowledge_db.py</span>
+
+async def search_buildings(city, state, min_rent=None,
+                           max_rent=None, cooperating_only=False,
+                           limit=50):
+    """
+    Search the building knowledge database.
+    cooperating_only=True filters to buildings that pay commission.
+    """
+    query = """
+        SELECT * FROM building_knowledge
+        WHERE city = $1 AND state = $2
+        AND (knowledge->>'cooperating_percentage')::float > 0
+    """
+    if min_rent:
+        query += f" AND (knowledge->>'min_rent')::float >= {min_rent}"
+    if max_rent:
+        query += f" AND (knowledge->>'max_rent')::float <= {max_rent}"
+    query += f" ORDER BY deal_count DESC LIMIT {limit}"
+
+    return await conn.fetch(query, city, state)
+</pre>
+
+  <p>The <code>ORDER BY deal_count DESC</code> matters. Buildings where we have successfully placed tenants before get priority over buildings we have never worked with. Proven relationships close faster than cold outreach.</p>
+
+</div>
+
+
+<!-- ═══════ COMMISSION VERIFICATION ═══════ -->
+
+<div class="asset">
+  <h2>Commission Verification</h2>
+
+  <p>A building says it pays 100% commission. That information is worth different amounts depending on when and how we got it.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;"># Commission freshness tiers</span>
+
+&lt; 7 days:     FRESH     Phone call confirmed. Trust it.
+7-30 days:    RECENT    Building website or ILS. Probably accurate.
+30-90 days:   AGING     May have changed. Verify before promising.
+&gt; 90 days:    STALE     Rebuild from scratch. Call the building.
+
+<span style="color:#e8e4de;"># Red flags:</span>
+Commission &gt; 150%:   Suspicious. Usually a data entry error.
+Commission &gt; 200%:   Almost certainly wrong. Do not use.
+Commission = 0 but marked "cooperating":   Verify immediately.
+</pre>
+
+  <p>When a lead asks about a building with stale commission data, the agent does not refuse to engage. It continues the conversation, qualifies the lead, and queues a Bland AI call to the leasing office in the background. By the time the lead is ready to tour, the commission data has been refreshed. The renter never sees the verification happening.</p>
+
+  <p>The 150% red flag exists because of a real incident. A data import mapped a building's yearly commission to the monthly field. The system showed 1200% commission &mdash; $14,400 on a $1,200 unit. Nobody caught it for three weeks because the building never came up in a match. When it finally did, the agent promised the lead a building where we had no actual agreement. Three days of cleanup.</p>
+
+</div>
+
+
+<!-- ═══════ THE MATCHING PIPELINE ═══════ -->
+
+<div class="asset">
+  <h2>The Matching Pipeline</h2>
+
+  <p>Every search is forensically tracked. Not just the result &mdash; the entire decision process. What was searched, what was found, what was excluded, and why.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;"># The matching pipeline (forensic_db.py)</span>
+
+Step 1: LEAD HYPOTHESIS SNAPSHOT
+  Versioned renter requirements.
+  Budget, beds, location, move-in date.
+  Each field has a confidence score + source.
+  Updated every time the renter says something new.
+
+Step 2: MATCH RUN
+  Every search execution is persisted.
+  query_payload:   exact search params sent
+  source_lanes:    ["cooperating", "zillow", "apartments_com"]
+  candidate_count: buildings returned (before filtering)
+
+Step 3: MATCH CANDIDATES
+  Every candidate building per search run.
+  score:            0.0 - 1.0
+  score_breakdown:  per-dimension (budget: 0.9, location: 0.7, beds: 0.8)
+  source_lane:      which source produced this candidate
+  exclusion_reason: if filtered out (budget_over, budget_under,
+                    location_too_far, stale_data, no_commission)
+
+Step 4: MATCH DECISION
+  Final pick per search run.
+  decision_type:  matched | no_coverage | deferred | manual_review
+  selected building + confidence
+  alternatives_count
+
+Step 5: REVENUE INVARIANT LOG
+  Audit trail for every match that could produce revenue.
+  Tracks: was commission set? Did stage progress?
+  Catches orphan matches (matched but never followed up).
+</pre>
+
+  <p>Why track all this? Because when the match rate in Chicago drops from 44% to 38% in a single week, you need to know whether it is a demand shift (leads wanting cheaper units), a supply problem (buildings leaving the network), or a data freshness issue (commission rates going stale). The forensic tables answer that question in minutes instead of days.</p>
+
+  <p>The exclusion reasons are the most valuable field. If 200 candidates were excluded for <code>budget_under</code> in a week &mdash; meaning the cheapest cooperating unit in the lead's preferred neighborhood is above their budget &mdash; that tells you the gap is structural, not fixable by better matching algorithms.</p>
+
+</div>
+
+
+<!-- ═══════ FIVE WEIGHTED CRITERIA ═══════ -->
+
+<div class="asset">
+  <h2>Five Weighted Matching Criteria</h2>
+
+  <p>The Locator Agent sends the renter profile and cooperating inventory to Gemini. Five weighted criteria determine the ranking:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+1. NEIGHBORHOOD PROXIMITY  (40%)  geodesic distance via geopy, not ZIP codes
+2. BUDGET COMPATIBILITY     (25%)  rent within stated range, net effective if specials
+3. UNIT SPECIFICATIONS      (20%)  bedrooms, bathrooms, dwelling type
+4. TIMELINE ALIGNMENT       (10%)  move-in date vs vacancy date
+5. SPECIAL REQUIREMENTS      (5%)  parking, pets, amenities
+</pre>
+
+  <p>Neighborhood proximity is 40% because it is the number one reason people reject a unit. Nobody moves to a neighborhood they do not know. And the distance is geodesic &mdash; actual miles on the surface of the earth, calculated with geopy's haversine formula, not ZIP code approximations that put two sides of a highway in different worlds.</p>
+
+  <p>The LLM returns a JSON object with a thinking_process, a ranked list of matches, a selected property, and a ready-to-send SMS message. The thinking process is logged to Discord for audit. The message goes to the renter. Three alternatives maximum &mdash; more than three and people bookmark the list and never come back.</p>
+
+</div>
+
+
+<!-- ═══════ MARKET GAPS ═══════ -->
+
+<div class="asset">
+  <h2>Market Gaps</h2>
+
+  <p>The matching pipeline exposes where the system cannot help. These are structural gaps &mdash; no algorithm can fix a market that does not have what people need.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;"># Known market gaps</span>
+
+Chicago 2BR:
+  Minimum available (cooperating):  $1,780/mo
+  Median lead budget:               $1,500/mo
+  Gap:                              $280/mo
+  This gap kills 30-40% of Chicago 2BR inquiries.
+
+Chicago 3BR:
+  Total cooperating units:          27
+  Monthly 3BR inquiries:            ~200
+  Coverage:                         13.5%
+  The hardest segment to serve.
+
+North Side cooperating:
+  Lead demand:                      high (Lincoln Park, Lakeview, Logan Square)
+  Cooperating buildings:            sparse
+  Why: luxury buildings have their own leasing staff.
+  They do not need a middleman.
+
+South Side supply/demand mismatch:
+  Building inventory:               deep
+  Lead budgets:                     low
+  Section 8 acceptance:             high
+  Commission per deal:              high ($1,500+ on voucher placements)
+  This is where the Landlord Rep model thrives.
+</pre>
+
+  <p>The South Side supply/demand dynamic is why the <a href="/assets/landlord-rep/" style="color:#888;">Landlord Rep business</a> exists. North Side buildings do not need us &mdash; they have internal leasing teams and charge enough rent to afford them. South Side buildings need tenants. They accept Section 8. They pay full-month commission. They cooperate because they have to. The Landlord Rep model takes that cooperation a step further: I do not just refer tenants to these buildings. I <a href="/assets/inventory/" style="color:#888;">operate them</a>.</p>
+
+</div>
+
+
+<!-- ═══════ BUILDING CALLS ═══════ -->
+
+<div class="asset">
+  <h2>Building Calls: Bland AI</h2>
+
+  <p>When the system needs fresh data &mdash; vacancy check, commission confirmation, application requirements &mdash; it dispatches a Bland AI voice call to the building's leasing office.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;"># Bland AI call dispatch</span>
+
+POST https://api.bland.ai/v1/calls
+{
+    "phone_number": building_leasing_phone,
+    "task": "Check if there are any 1-bedroom apartments
+             available, what the rent is, whether they
+             accept locator referrals, and what commission
+             they pay.",
+    "max_duration": 180
+}
+
+Cost:     $0.09/minute
+Use case: Simple info retrieval (vacancy, pricing, policies)
+Fallback: FancyHands ($3-7/task) for relationship-building calls
+
+<span style="color:#e8e4de;"># Callback webhook returns:</span>
+{
+    "call_id": "...",
+    "status": "completed",
+    "transcript": "...",
+    "recording_url": "...",
+    "duration_seconds": 47
+}
+</pre>
+
+  <p>The transcript gets parsed by Gemini to extract structured facts: commission rate, available units, application fees, credit requirements. Those facts update the building_knowledge table with source="phone_call" and confidence=0.95. The call recording is stored for audit.</p>
+
+  <p>If Bland cannot close the conversation after 2 attempts &mdash; the leasing agent wants to speak to a person, the voicemail is full, the number is disconnected &mdash; the task escalates to FancyHands. Same interface: "Call [building] and confirm [details]." The executor swaps. The data pipeline stays the same.</p>
+
+</div>
+
+
+<!-- ═══════ GAP ANALYSIS ═══════ -->
+
+<div class="asset">
+  <h2>Budget Gap Handling</h2>
+
+  <p>When the lead's budget does not reach the cheapest available unit, the agent measures the gap and responds differently:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+Gap &lt;= $100:    "That's about a coffee a day difference."
+                Reframe as manageable. Push for a showing.
+
+Gap $100-$300:  Value proposition.
+                "For $150 more you get in-unit laundry."
+                Calculate net effective if specials apply.
+
+Gap &gt; $300:     Deep stretch. Do not push.
+                Be honest. Widen geographic search.
+                Drop a bedroom count. Suggest roommates.
+</pre>
+
+  <p>Net effective rent matters here. A unit at $2,000/mo with one month free is $1,833 net effective. That changes a $200 gap to a $33 gap. The agent knows to lead with net effective when the budget is tight.</p>
+
+  <p>Budget floors by market &mdash; below these, the agent shifts strategy from matching units to exploring flexibility:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+DFW:       Studio $950   |  1BR $1,000  |  2BR $1,300
+Houston:   Studio $900   |  1BR $950    |  2BR $1,200
+Chicago:   Studio $1,100 |  1BR $1,200  |  2BR $1,600
+</pre>
+
+</div>
+
+
+<!-- ═══════ WHAT FAILS ═══════ -->
+
+<div class="asset">
+  <h2>What Fails</h2>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#cc8888;">Stale commission data</span>
+  Building changed rates 3 months ago. System still shows 100%.
+  Agent promises the lead a building where we now earn 50%.
+  Half the expected revenue on a closed deal.
+  Fix: decay class triggers verification call at 30 days.
+
+<span style="color:#cc8888;">Geocoder timeout</span>
+  Nominatim rate-limits during burst matching.
+  Half the candidates get float('inf') proximity scores.
+  They drop to bottom of ranking but are not excluded.
+  Known debt: should cache coordinates per address.
+
+<span style="color:#cc8888;">Chicago 2BR structural gap</span>
+  $280/mo between median budget and cheapest cooperating unit.
+  No algorithm fixes this. Need more cooperating buildings
+  in the $1,400-$1,600 range, or lead budgets need to rise.
+
+<span style="color:#cc8888;">Commission > 150% data error</span>
+  Yearly rate mapped to monthly field during import.
+  System showed 1200% commission on a $1,200 unit.
+  Ran for three weeks before a match surfaced it.
+</pre>
+
+  <p>The structural gap in Chicago 2BR is the one that cannot be fixed with code. The others are data freshness problems with technical solutions. The 2BR gap is a market problem &mdash; it takes new building partnerships or rising renter budgets to close it. Every month the forensic pipeline quantifies exactly how many deals that gap cost. The number is the argument for expanding the cooperating network.</p>
+
+</div>
+
+
+<!-- ═══════ STATS ═══════ -->
+
+<div class="asset" style="margin-top:3rem; border-top:1px solid #333; padding-top:2rem;">
+  <h2>By the Numbers</h2>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.85rem; line-height:1.7; color:#888; overflow-x:auto; margin:2rem 0;">
+83,191 buildings in master database
+33,861 cooperating (pay commission)
+24,622 with placement history
+3 markets (Chicago, DFW, Denver)
+7 data source lanes
+5 decay classes for knowledge freshness
+44% match rate in Chicago (the problem)
+68% match rate in DFW and Denver (survivable)
+$0.09/minute for Bland AI verification calls
+3 maximum alternatives shown per match
+5 weighted matching criteria
+$280/mo Chicago 2BR structural gap</pre>
+
+</div>

@@ -1,0 +1,750 @@
+---
+layout: base.njk
+title: "Landlord Rep"
+navActive: assets
+---
+
+<p style="margin-bottom:0.5rem;"><a href="/assets/" style="color:#666; font-size:0.85rem; text-decoration:none;">&larr; Back to Assets</a></p>
+
+<h1>Landlord Rep</h1>
+<p style="color:#999; font-size:1.05rem; margin-bottom:1.5rem; font-style:italic;">Operating as the leasing office for 8 buildings with zero staff.</p>
+
+<!-- ═══════ OPENING ═══════ -->
+
+<div class="asset">
+  <p>This is not a referral play. I am not sending leads to someone else's leasing office. I AM the leasing office.</p>
+
+  <p>When a renter texts about an apartment at 7450 S Luella Ave, they are talking to my agent. When they submit documents, my system processes them. When they get approved, my system tells them. The building owner never talks to the tenant. That is the whole point. YNY Realty owns the buildings. I operate them. The only human in the loop is Zalmy Vidal, the building manager, who handles physical showings and key handoffs. Everything else &mdash; first contact, qualification, document collection, approval, followup, lease coordination &mdash; is my agent.</p>
+
+  <p>35 units across 8 buildings in South Shore, Chatham, and Chicago Heights. Studios at $850/mo. 1-bedrooms at $1,100. 2-bedrooms at $1,250. 3-bedrooms at $1,550. All utilities included: heat, cooking gas, electric, water, trash. That last part is the number one selling point and the agent knows to mention it every time.</p>
+
+  <p>Commission structure: 75% of first month's rent on market-rate tenants. 100% on Section 8. A Section 8 voucher holder paying $1,650/mo for a 2-bedroom generates $1,650 in commission. A market-rate tenant paying $1,250 for the same unit generates $937.50. The math makes voucher leads the highest-priority leads in the system. The code knows this.</p>
+
+</div>
+
+<!-- ═══════ COOPERATIVENESS SCORING ═══════ -->
+
+<div class="asset">
+  <h2>Cooperativeness Scoring</h2>
+
+  <p>You cannot treat every lead the same way. A lead who responds in 45 minutes and says "when can I see it?" is not the same as a lead who takes 3 days to respond and says "why do you need my ID?" One wants you to move fast. The other wants you to back off. Sending the same followup cadence to both is a guaranteed way to lose both &mdash; too slow for the first, too aggressive for the second.</p>
+
+  <p>Every lead gets a cooperativeness score. It starts at 50 (neutral) and moves on a 0&ndash;100 scale based on 8 behavioral signals extracted from the actual conversation.</p>
+
+  <p>Positive signals push the score up:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+Response within 2 hours:                  +15
+Proactive initiative:                     +10 to +20
+  ("when can i", "i'm ready", "i can send",
+   "what's next", "how do i", "send me")
+Docs sent without asking twice:           +15
+Excitement signals:                       +10
+  ("love", "perfect", "can't wait",
+   "exactly what", "amazing", "let's go")</pre>
+
+  <p>Negative signals pull it down:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+Response > 48 hours:                      -15
+Pushback:                                 -10 to -25
+  ("why do you need", "not comfortable",
+   "scam", "sketchy", "that's a lot")
+Asked 3x, sent 0 docs:                   -20
+Silent after doc request:                 -15
+Looking elsewhere:                        -10
+  ("other place", "found something",
+   "another apartment", "going with")</pre>
+
+  <p>The scoring function reads every message in the thread. It counts proactive phrases in inbound messages, measures average response time, tracks how many times we asked for docs versus how many times the lead actually sent something. The ratio between doc asks and doc sends is the most predictive signal. A lead who has been asked 3 times and sent nothing is not going to send on the 4th ask. The system knows this and stops pushing.</p>
+
+  <p>From <code>approval_engine.py</code>, the actual function:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">def</span> score_cooperativeness(chat_messages, deal_stage=<span style="color:#cc8888;">"DOCS_REQUESTED"</span>):
+    <span style="color:#666;"># Start neutral</span>
+    score = <span style="color:#cccc88;">50.0</span>
+    signals = []
+    incoming = [m <span style="color:#88cc88;">for</span> m <span style="color:#88cc88;">in</span> chat_messages <span style="color:#88cc88;">if</span> m.get(<span style="color:#cc8888;">"is_incoming"</span>)]
+    outgoing = [m <span style="color:#88cc88;">for</span> m <span style="color:#88cc88;">in</span> chat_messages <span style="color:#88cc88;">if not</span> m.get(<span style="color:#cc8888;">"is_incoming"</span>)]
+
+    <span style="color:#666;"># Response speed</span>
+    response_times = _calc_response_times(chat_messages)
+    avg_hours = sum(response_times) / max(len(response_times), <span style="color:#cccc88;">1</span>)
+    <span style="color:#88cc88;">if</span> avg_hours < <span style="color:#cccc88;">2</span>:
+        score += <span style="color:#cccc88;">15</span>; signals.append(f<span style="color:#cc8888;">"fast responder ({avg_hours:.1f}h)"</span>)
+    <span style="color:#88cc88;">elif</span> avg_hours > <span style="color:#cccc88;">48</span>:
+        score -= <span style="color:#cccc88;">15</span>; signals.append(f<span style="color:#cc8888;">"very slow ({avg_hours:.1f}h)"</span>)
+
+    <span style="color:#666;"># Doc asks vs sends — the killer signal</span>
+    doc_ask_phrases = [<span style="color:#cc8888;">"need from u"</span>, <span style="color:#cc8888;">"send me"</span>, <span style="color:#cc8888;">"documents"</span>,
+                       <span style="color:#cc8888;">"pay stub"</span>, <span style="color:#cc8888;">"photo id"</span>, <span style="color:#cc8888;">"bank statement"</span>]
+    dac = sum(<span style="color:#cccc88;">1</span> <span style="color:#88cc88;">for</span> m <span style="color:#88cc88;">in</span> outgoing
+              <span style="color:#88cc88;">if</span> any(p <span style="color:#88cc88;">in</span> (m.get(<span style="color:#cc8888;">"message"</span>) or <span style="color:#cc8888;">""</span>).lower()
+                      <span style="color:#88cc88;">for</span> p <span style="color:#88cc88;">in</span> doc_ask_phrases))
+
+    doc_sent_phrases = [<span style="color:#cc8888;">"sent"</span>, <span style="color:#cc8888;">"emailed"</span>, <span style="color:#cc8888;">"attached"</span>,
+                        <span style="color:#cc8888;">"here's my"</span>, <span style="color:#cc8888;">"sending now"</span>]
+    ds = sum(<span style="color:#cccc88;">1</span> <span style="color:#88cc88;">for</span> m <span style="color:#88cc88;">in</span> incoming
+             <span style="color:#88cc88;">if</span> any(p <span style="color:#88cc88;">in</span> (m.get(<span style="color:#cc8888;">"message"</span>) or <span style="color:#cc8888;">""</span>).lower()
+                     <span style="color:#88cc88;">for</span> p <span style="color:#88cc88;">in</span> doc_sent_phrases))
+
+    <span style="color:#88cc88;">if</span> dac >= <span style="color:#cccc88;">3</span> <span style="color:#88cc88;">and</span> ds == <span style="color:#cccc88;">0</span>:
+        score -= <span style="color:#cccc88;">20</span>; signals.append(f<span style="color:#cc8888;">"asked {dac}x, no docs"</span>)
+
+    <span style="color:#666;"># Clamp and classify</span>
+    score = max(<span style="color:#cccc88;">0</span>, min(<span style="color:#cccc88;">100</span>, score))
+    levels = [(<span style="color:#cccc88;">70</span>, <span style="color:#cc8888;">"COOPERATIVE"</span>,  <span style="color:#cc8888;">"direct_ask"</span>),
+              (<span style="color:#cccc88;">45</span>, <span style="color:#cc8888;">"HESITANT"</span>,     <span style="color:#cc8888;">"reluctant_concede"</span>),
+              (<span style="color:#cccc88;">25</span>, <span style="color:#cc8888;">"RESISTANT"</span>,    <span style="color:#cc8888;">"back_off"</span>),
+              (<span style="color:#cccc88;"> 0</span>, <span style="color:#cc8888;">"EVASIVE"</span>,      <span style="color:#cc8888;">"let_cadence_handle"</span>)]
+    level, approach = next(
+        (l, a) <span style="color:#88cc88;">for</span> thresh, l, a <span style="color:#88cc88;">in</span> levels <span style="color:#88cc88;">if</span> score >= thresh
+    )
+    <span style="color:#88cc88;">return</span> {<span style="color:#cc8888;">"score"</span>: round(score, <span style="color:#cccc88;">1</span>), <span style="color:#cc8888;">"level"</span>: level,
+            <span style="color:#cc8888;">"recommended_approach"</span>: approach}</pre>
+
+  <p>The four levels and what they mean in practice:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">75&ndash;100  COOPERATIVE    direct_ask</span>
+  Just tell them what you need next.
+  "just need your ID and we're all set."
+
+<span style="color:#cccc88;">50&ndash;74   HESITANT       reluctant_concede</span>
+  Explain WHY docs are needed. Build trust.
+  "the building needs these to process your app &mdash;
+   once i have them, i can get you approved fast."
+
+<span style="color:#cc8888;">25&ndash;49   RESISTANT      back_off</span>
+  Reduce pressure. Let the automated cadence work.
+  Don't mention docs in every message.
+
+<span style="color:#666;">0&ndash;24    EVASIVE        let_cadence_handle</span>
+  Stop pushing entirely. Automated followups only.
+  If they re-engage, recalculate.</pre>
+
+  <p>When the scoring function receives an empty chat history (database timeout, thread corrupted), it returns 50 with a signal of "no chat history." The system does not guess. It falls back to neutral and waits for data.</p>
+</div>
+
+<!-- ═══════ THE DOCUMENT PIPELINE ═══════ -->
+
+<div class="asset">
+  <h2>The Document Pipeline</h2>
+
+  <p>Four files. Four stages. A document enters as a Gmail attachment and exits as an Asana ticket on Zalmy's board with a full AI review attached.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">Stage 1: email_monitor.py</span>
+  Gmail API polls every 5 minutes (Celery periodic task)
+  Watches: renterdocs@homeeasy.com,
+           ralph.peterson@homeeasy.com,
+           andrew.miller@homeeasy.com
+  Extracts attachments: .pdf, .jpg, .png, .heic, .doc, .docx
+  Matches sender email/phone to client in DB
+  Marks email with YGL_PROCESSED label so it doesn't re-process
+
+<span style="color:#e8e4de;">Stage 2: doc_interpreter.py</span>
+  Gemini Vision classifies each document
+  12 document types recognized (see below)
+  Extracts: name, income, credit score, employer, dates
+  Confidence score on every extraction
+  Falls back to filename-pattern matching if Gemini fails
+
+<span style="color:#e8e4de;">Stage 3: approval_engine.py</span>
+  Scores against building criteria
+  Income >= 2.5x monthly rent?
+  All required docs present?
+  Any flags (expired ID, low credit, eviction)?
+  Outputs one of 4 statuses (see below)
+
+<span style="color:#e8e4de;">Stage 4: asana_ygl.py</span>
+  Creates Asana ticket with full AI review attached
+  Assignee: Zalmy Vidal (building manager)
+  SLA tracking starts immediately
+  Nag at 50% SLA, escalate at 100%, critical at 150%</pre>
+
+  <p>The doc interpreter knows 12 document types. This is the actual classification prompt sent to Gemini:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+DOC_TYPES = {
+    <span style="color:#cc8888;">"government_id"</span>:       <span style="color:#666;"># driver's license, state ID, passport</span>
+    <span style="color:#cc8888;">"pay_stub"</span>:            <span style="color:#666;"># earnings statement showing income</span>
+    <span style="color:#cc8888;">"bank_statement"</span>:      <span style="color:#666;"># account activity and balances</span>
+    <span style="color:#cc8888;">"w2"</span>:                  <span style="color:#666;"># W-2 annual wages</span>
+    <span style="color:#cc8888;">"tax_return"</span>:          <span style="color:#666;"># 1040 or similar</span>
+    <span style="color:#cc8888;">"voucher"</span>:             <span style="color:#666;"># Section 8 / CHA housing voucher</span>
+    <span style="color:#cc8888;">"rta_packet"</span>:          <span style="color:#666;"># Request for Tenancy Approval (Section 8)</span>
+    <span style="color:#cc8888;">"credit_report"</span>:       <span style="color:#666;"># credit report or score document</span>
+    <span style="color:#cc8888;">"lease"</span>:               <span style="color:#666;"># existing lease agreement</span>
+    <span style="color:#cc8888;">"employment_letter"</span>:   <span style="color:#666;"># employment verification</span>
+    <span style="color:#cc8888;">"utility_bill"</span>:        <span style="color:#666;"># proof of address</span>
+    <span style="color:#cc8888;">"social_security"</span>:     <span style="color:#666;"># SSN card or benefit letter</span>
+}</pre>
+
+  <p>When Gemini is unavailable &mdash; rate limited, API key rotated, network blip &mdash; the system falls back to filename-pattern matching. A file named <code>chase_statement_jan.pdf</code> gets classified as <code>bank_statement</code> with 0.3 confidence. A file named <code>IMG_4729.jpg</code> gets classified as <code>other</code>. Low confidence, but the pipeline doesn't stop. A 30% confidence classification that keeps the lead moving beats a 0% classification that blocks the pipeline for hours until Gemini comes back.</p>
+
+  <p>Income estimation: pay stubs are the cleanest signal (Gemini extracts gross pay and pay period, code converts to monthly &mdash; weekly times 4.33, biweekly times 2.167). Bank statement deposits carry a 0.6 confidence multiplier because deposits include transfers and refunds. W-2 annual wages divided by 12 carry 0.9 confidence because they are last year's income, not current.</p>
+
+</div>
+
+<!-- ═══════ DOC APPROVAL CRITERIA ═══════ -->
+
+<div class="asset">
+  <h2>Doc Approval Criteria</h2>
+
+  <p>These are not guidelines. These are the exact conditionals that determine whether a lead's package goes to the building or bounces back for more docs.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">INCOME</span>
+  Market rate: monthly income >= 2.5x monthly rent
+    $1,250/mo unit requires $3,125/mo income
+    $1,550/mo unit requires $3,875/mo income
+  Section 8 voucher: <span style="color:#88cc88;">exempt from income requirement</span>
+    Housing authority verified their ability to pay
+
+<span style="color:#e8e4de;">CREDIT</span>
+  No hard minimum. No auto-reject threshold.
+  Below 500: flagged for building manager review
+    result["flags"].append(
+      f"Credit score {score} - may need larger deposit")
+  The flag does not block submission. Zalmy decides.
+
+<span style="color:#e8e4de;">BACKGROUND</span>
+  Non-violent offenses, over 3 years ago: OK
+  Violent felonies: building manager decision
+  Sex offenses: hard reject (legal requirement)
+
+<span style="color:#e8e4de;">EVICTION</span>
+  Case-by-case. Over 3 years generally OK.
+  Recent eviction: flagged, not auto-rejected.
+
+<span style="color:#e8e4de;">REQUIRED DOCS</span>
+  Market rate: government ID + income proof
+  Section 8:   government ID + voucher + signed RTA form</pre>
+
+  <p>The approval engine, from <code>approval_engine.py</code>:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+INCOME_MULTIPLIER = <span style="color:#cccc88;">2.5</span>
+
+<span style="color:#88cc88;">def</span> check_approval_criteria(doc_summary, unit_rent, is_section8=<span style="color:#cccc88;">False</span>):
+    result = {
+        <span style="color:#cc8888;">"status"</span>: ApprovalStatus.READY_TO_SUBMIT,
+        <span style="color:#cc8888;">"missing_docs"</span>: [], <span style="color:#cc8888;">"flags"</span>: [],
+    }
+
+    <span style="color:#666;"># ID check</span>
+    <span style="color:#88cc88;">if not</span> doc_summary.get(<span style="color:#cc8888;">"has_id"</span>):
+        result[<span style="color:#cc8888;">"missing_docs"</span>].append(<span style="color:#cc8888;">"government_id"</span>)
+
+    <span style="color:#666;"># Income / Voucher — the fork</span>
+    <span style="color:#88cc88;">if</span> is_section8 <span style="color:#88cc88;">or</span> doc_summary.get(<span style="color:#cc8888;">"has_voucher"</span>):
+        <span style="color:#666;"># Section 8: skip income, check voucher docs</span>
+        <span style="color:#88cc88;">if not</span> doc_summary.get(<span style="color:#cc8888;">"has_voucher"</span>):
+            result[<span style="color:#cc8888;">"missing_docs"</span>].append(<span style="color:#cc8888;">"voucher"</span>)
+        <span style="color:#88cc88;">if not</span> doc_summary.get(<span style="color:#cc8888;">"has_rta_packet"</span>):
+            result[<span style="color:#cc8888;">"missing_docs"</span>].append(<span style="color:#cc8888;">"rta_packet"</span>)
+    <span style="color:#88cc88;">else</span>:
+        <span style="color:#666;"># Market rate: check income</span>
+        <span style="color:#88cc88;">if not</span> doc_summary.get(<span style="color:#cc8888;">"has_income_proof"</span>):
+            result[<span style="color:#cc8888;">"missing_docs"</span>].append(<span style="color:#cc8888;">"income_proof"</span>)
+        <span style="color:#88cc88;">else</span>:
+            income = doc_summary.get(<span style="color:#cc8888;">"income_estimate"</span>)
+            <span style="color:#88cc88;">if</span> income <span style="color:#88cc88;">and</span> income.get(<span style="color:#cc8888;">"monthly_income"</span>):
+                monthly = income[<span style="color:#cc8888;">"monthly_income"</span>]
+                required = unit_rent * INCOME_MULTIPLIER
+                <span style="color:#88cc88;">if</span> monthly < required:
+                    result[<span style="color:#cc8888;">"flags"</span>].append(
+                        f<span style="color:#cc8888;">"Income below 2.5x: ${monthly:,.0f} vs ${required:,.0f}"</span>)
+
+    <span style="color:#666;"># Credit</span>
+    <span style="color:#88cc88;">if</span> doc_summary.get(<span style="color:#cc8888;">"credit_score"</span>) <span style="color:#88cc88;">and</span> doc_summary[<span style="color:#cc8888;">"credit_score"</span>] < <span style="color:#cccc88;">500</span>:
+        result[<span style="color:#cc8888;">"flags"</span>].append(
+            f<span style="color:#cc8888;">"Credit score {doc_summary['credit_score']} - may need larger deposit"</span>)
+
+    <span style="color:#666;"># Status determination</span>
+    <span style="color:#88cc88;">if</span> result[<span style="color:#cc8888;">"missing_docs"</span>]:
+        result[<span style="color:#cc8888;">"status"</span>] = ApprovalStatus.NEEDS_MORE_DOCS
+    <span style="color:#88cc88;">elif</span> len(result[<span style="color:#cc8888;">"flags"</span>]) >= <span style="color:#cccc88;">3</span>:
+        result[<span style="color:#cc8888;">"status"</span>] = ApprovalStatus.LIKELY_DENIED
+    <span style="color:#88cc88;">elif</span> result[<span style="color:#cc8888;">"flags"</span>]:
+        result[<span style="color:#cc8888;">"status"</span>] = ApprovalStatus.FLAGS_FOUND
+
+    <span style="color:#88cc88;">return</span> result</pre>
+
+  <p>Four statuses. Four SMS responses. The templates from the actual codebase:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">READY_TO_SUBMIT</span>
+  "hey {name}! got {received}. everything looks good -
+   submitting ur application now. ill let u know
+   as soon as i hear back!"
+
+<span style="color:#cccc88;">NEEDS_MORE_DOCS</span>
+  "hey {name}! got {received} - appreciate u sending
+   those over. just need {missing} and we're all set
+   to submit ur app. can u send that over?"
+
+<span style="color:#cc8888;">FLAGS_FOUND</span>
+  "hey {name}! got {received}. reviewing everything
+   now - i have a couple questions ill hit u up
+   about shortly"
+
+<span style="color:#666;">LIKELY_DENIED</span>
+  "hey {name}! got {received}. going through it now -
+   ill follow up once ive reviewed everything"</pre>
+
+  <p>Notice the tone gradient. READY_TO_SUBMIT is enthusiastic &mdash; "everything looks good." FLAGS_FOUND is cautious &mdash; "i have a couple questions." LIKELY_DENIED says nothing about the outcome &mdash; just "reviewing." The lead should never learn they're likely denied from an automated text. That conversation happens later, and it always pivots to alternatives: "this particular unit didn't work out. but ive got other options."</p>
+
+</div>
+
+<!-- ═══════ DEAL STATE MACHINE ═══════ -->
+
+<div class="asset">
+  <h2>14-Stage Deal State Machine</h2>
+
+  <p>Every deal is in exactly one stage at any moment. Transitions between stages are validated. You cannot jump from NEW to APPROVED. You cannot go from DEAD to DOCS_REQUESTED. The state machine enforces the river &mdash; water flows downstream, and if you want to go back upstream, there are only specific channels cut into the rock.</p>
+
+  <p>The stages and every valid transition, from <code>ygl_deal_state.py</code>:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">class</span> DealStage(str, Enum):
+    NEW            = <span style="color:#cc8888;">"NEW"</span>
+    CONTACTED      = <span style="color:#cc8888;">"CONTACTED"</span>
+    ENGAGED        = <span style="color:#cc8888;">"ENGAGED"</span>
+    TOUR_OFFERED   = <span style="color:#cc8888;">"TOUR_OFFERED"</span>
+    TOUR_SCHEDULED = <span style="color:#cc8888;">"TOUR_SCHEDULED"</span>
+    TOURED         = <span style="color:#cc8888;">"TOURED"</span>
+    DOCS_REQUESTED = <span style="color:#cc8888;">"DOCS_REQUESTED"</span>
+    DOCS_RECEIVED  = <span style="color:#cc8888;">"DOCS_RECEIVED"</span>
+    DOCS_REVIEWED  = <span style="color:#cc8888;">"DOCS_REVIEWED"</span>
+    APPLIED        = <span style="color:#cc8888;">"APPLIED"</span>
+    APPROVED       = <span style="color:#cc8888;">"APPROVED"</span>
+    MOVED_IN       = <span style="color:#cc8888;">"MOVED_IN"</span>
+    DEAD           = <span style="color:#cc8888;">"DEAD"</span>
+    STALLED        = <span style="color:#cc8888;">"STALLED"</span>
+    COOLING_OFF    = <span style="color:#cc8888;">"COOLING_OFF"</span></pre>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+VALID_TRANSITIONS = {
+  <span style="color:#e8e4de;">NEW</span>            &rarr; CONTACTED, DEAD
+  <span style="color:#e8e4de;">CONTACTED</span>      &rarr; ENGAGED, DEAD, STALLED
+  <span style="color:#e8e4de;">ENGAGED</span>        &rarr; TOUR_OFFERED, DOCS_REQUESTED, DEAD, STALLED
+  <span style="color:#e8e4de;">TOUR_OFFERED</span>   &rarr; TOUR_SCHEDULED, ENGAGED, DEAD, STALLED
+  <span style="color:#e8e4de;">TOUR_SCHEDULED</span> &rarr; TOURED, TOUR_OFFERED, DEAD, STALLED
+  <span style="color:#e8e4de;">TOURED</span>         &rarr; DOCS_REQUESTED, ENGAGED, DEAD, STALLED
+  <span style="color:#e8e4de;">DOCS_REQUESTED</span> &rarr; DOCS_RECEIVED, APPLIED, DEAD, STALLED
+  <span style="color:#e8e4de;">DOCS_RECEIVED</span>  &rarr; DOCS_REVIEWED, DOCS_REQUESTED, DEAD
+  <span style="color:#e8e4de;">DOCS_REVIEWED</span>  &rarr; APPLIED, DOCS_REQUESTED, DEAD
+  <span style="color:#e8e4de;">APPLIED</span>        &rarr; APPROVED, DOCS_REQUESTED, DEAD
+  <span style="color:#e8e4de;">APPROVED</span>       &rarr; MOVED_IN, STALLED, DEAD
+  <span style="color:#e8e4de;">MOVED_IN</span>       &rarr; <span style="color:#666;">(terminal &mdash; nowhere)</span>
+  <span style="color:#e8e4de;">DEAD</span>           &rarr; ENGAGED <span style="color:#666;">(resurrection only)</span>
+  <span style="color:#e8e4de;">STALLED</span>        &rarr; ENGAGED, DEAD, COOLING_OFF
+  <span style="color:#e8e4de;">COOLING_OFF</span>    &rarr; STALLED, ENGAGED, DEAD
+}</pre>
+
+  <p>Three things worth noting. First: DEAD is not terminal. A dead lead can come back to ENGAGED if they text again. We never delete leads. Second: DOCS_REQUESTED can jump directly to APPLIED, skipping DOCS_RECEIVED and DOCS_REVIEWED, for cases where docs were submitted through a non-email channel and Zalmy manually approves. Third: the backward transition from APPLIED back to DOCS_REQUESTED exists because the building sometimes rejects an application and asks for additional documentation.</p>
+
+  <p>The transition validator:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">def</span> transition_stage(current_stage, new_stage, context=<span style="color:#cccc88;">None</span>):
+    valid = VALID_TRANSITIONS.get(current_stage, [])
+    <span style="color:#88cc88;">if</span> new_stage <span style="color:#88cc88;">not in</span> valid:
+        logger.warning(
+            f<span style="color:#cc8888;">"Invalid transition: {current_stage.value} -> {new_stage.value}"</span>
+        )
+    <span style="color:#88cc88;">return</span> format_deal_state(new_stage, context)</pre>
+
+  <p>An invalid transition gets logged as a warning but does not get blocked. This is a deliberate decision. In the early days I had hard blocking &mdash; invalid transitions would raise an exception and the lead would get stuck in whatever stage it was in. That turned out to be worse than allowing the bad transition, because a stuck lead gets no followup at all. Now the system logs the violation, lets the transition happen, and I review the warnings in Discord. The scar tissue from the first approach is still visible in the warning message format.</p>
+
+  <p>Deal state is stored in <code>lead_memory.agent_next_action</code> as JSON. But legacy data predates the state machine and uses three different formats:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#666;"># New format (JSON):</span>
+  {<span style="color:#cc8888;">"stage"</span>: <span style="color:#cc8888;">"DOCS_REQUESTED"</span>, <span style="color:#cc8888;">"escalation_step"</span>: <span style="color:#cc8888;">"2"</span>}
+
+<span style="color:#666;"># Legacy format (pipe-delimited):</span>
+  STAGE:TOUR_OFFERED|key:val|key:val
+
+<span style="color:#666;"># Oldest format (free text):</span>
+  "collect_documents"
+  "follow up based on call outcome"
+  "review documents and follow up"</pre>
+
+  <p>The <code>parse_deal_state</code> function handles all three. It tries JSON first, then checks for pipe delimiters, then falls through to a free-text mapping dictionary, then falls through to keyword inference. The keyword inferrer looks for "document" or "tour" or "follow" in the string. If nothing matches, the lead gets assigned to NEW and starts fresh. This chain of fallbacks exists because I could not afford to migrate 570 existing leads to the new format all at once. The old formats will die off as leads close or go dead. Until then, the parser digests whatever it finds.</p>
+
+</div>
+
+<!-- ═══════ FOLLOWUP CADENCE ═══════ -->
+
+<div class="asset">
+  <h2>Followup Cadence</h2>
+
+  <p>Every deal stage has its own followup schedule. The intervals are in hours, and each step is either an SMS or a voice call via Bland AI. After the last step in the path, the lead moves to COOLING_OFF automatically.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+FOLLOWUP_CADENCE = {
+  <span style="color:#e8e4de;">CONTACTED</span>:       4h sms, 24h sms, 48h call, 72h sms,
+                    120h call, 168h &rarr; cooling_off
+
+  <span style="color:#e8e4de;">ENGAGED</span>:         24h sms, 48h sms, 72h call,
+                    120h sms, 168h &rarr; cooling_off
+
+  <span style="color:#e8e4de;">TOUR_OFFERED</span>:    4h sms, 24h sms, 48h call,
+                    96h sms, 144h &rarr; cooling_off
+
+  <span style="color:#e8e4de;">TOUR_SCHEDULED</span>:  24h sms <span style="color:#666;">(confirmation only)</span>
+
+  <span style="color:#e8e4de;">TOURED</span>:          4h sms, 24h sms, 48h call
+
+  <span style="color:#e8e4de;">DOCS_REQUESTED</span>:  4h sms, 24h sms, 48h call,
+                    96h sms, 168h &rarr; cooling_off
+
+  <span style="color:#e8e4de;">DOCS_RECEIVED</span>:   24h sms <span style="color:#666;">(acknowledgment only)</span>
+
+  <span style="color:#e8e4de;">APPLIED</span>:         24h sms, 48h call, 72h sms, 120h call
+
+  <span style="color:#e8e4de;">APPROVED</span>:        24h sms, 48h call, 72h sms,
+                    96h call, 120h call
+
+  <span style="color:#e8e4de;">STALLED</span>:         72h sms, 168h call, 336h &rarr; cooling_off
+
+  <span style="color:#e8e4de;">COOLING_OFF</span>:     336h sms <span style="color:#666;">(one last attempt after 2 weeks)</span>
+}</pre>
+
+  <p>Look at the APPROVED cadence. Five touchpoints in 5 days, three of them calls. An approved lead who goes silent is the most expensive kind of failure &mdash; they passed every check, the apartment is theirs, and they just need to show up. The cadence is aggressive here because the cost of losing an approved lead is the full commission. $937 to $1,650 gone because nobody picked up the phone.</p>
+
+  <p>Speed multipliers adjust the timing based on cooperativeness:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">Cooperativeness > 70 (COOPERATIVE)</span>
+  fast_mult: 0.5x &mdash; a 24h interval becomes 12h
+  They want to move. Don't make them wait.
+
+<span style="color:#cc8888;">Cooperativeness < 25 (EVASIVE)</span>
+  slow_mult: 1.5x &mdash; a 24h interval becomes 36h
+  They need space. Crowding them kills the deal.
+
+<span style="color:#666;">Between 25&ndash;70</span>
+  1.0x &mdash; standard timing</pre>
+
+  <p>But the multipliers are per-stage, not global. TOUR_SCHEDULED has a slow multiplier of 1.0 regardless of cooperativeness &mdash; you do not delay a tour confirmation just because the lead was slow to respond earlier. APPROVED has a fast multiplier of 0.5 &mdash; once approved, follow up aggressively no matter what. The per-stage multiplier table in the code has 12 entries and each one was set based on what actually happened with real leads, not what felt right in theory.</p>
+
+  <p>The cadence respects commitments. If a lead says "I'll call you back at 3pm," the system stores that as <code>promised_callback</code> and the next followup is calculated from that timestamp, not from the cadence table. If a lead says "I'm busy until Friday," the system stores <code>lead_busy_until</code> and adds 30 minutes of buffer. If a lead says "let me think about it," the system enforces a minimum 48-hour gap before the next touchpoint. These overrides are stronger than the cadence &mdash; the code checks them first.</p>
+
+  <p>The daily limit is 3 messages per lead per day. Hard cap. No exceptions. If the cadence says to send a 4th message, it gets queued for tomorrow. This is both anti-spam protection and a legal consideration &mdash; TCPA compliance matters even if nobody's suing yet.</p>
+
+</div>
+
+<!-- ═══════ SMS / CALL WINDOWS ═══════ -->
+
+<div class="asset">
+  <h2>SMS and Call Windows</h2>
+
+  <p>Hard guardrails, not suggestions.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+SMS_WINDOW  = (<span style="color:#cccc88;">9</span>, <span style="color:#cccc88;">20</span>)    <span style="color:#666;"># 9 AM &ndash; 8 PM Central Time</span>
+CALL_WINDOW = (<span style="color:#cccc88;">10</span>, <span style="color:#cccc88;">19</span>)   <span style="color:#666;"># 10 AM &ndash; 7 PM Central Time</span>
+MAX_MESSAGES_PER_DAY = <span style="color:#cccc88;">3</span>
+
+<span style="color:#88cc88;">def</span> is_within_sms_window(hour):
+    <span style="color:#88cc88;">return</span> SMS_WINDOW[<span style="color:#cccc88;">0</span>] <= hour < SMS_WINDOW[<span style="color:#cccc88;">1</span>]
+
+<span style="color:#88cc88;">def</span> is_within_call_window(hour):
+    <span style="color:#88cc88;">return</span> CALL_WINDOW[<span style="color:#cccc88;">0</span>] <= hour < CALL_WINDOW[<span style="color:#cccc88;">1</span>]</pre>
+
+  <p>Calls get a narrower window than SMS. A text at 8:45 PM is annoying but forgivable. A phone call at 8:45 PM from a number you don't recognize is hostile. The call window closes an hour earlier for exactly this reason.</p>
+
+  <p>All times are Central. The buildings are in Chicago. Most leads are in Chicago. The system uses <code>ZoneInfo("America/Chicago")</code> for every time calculation. If a lead's phone area code maps to a different timezone, the window adjusts accordingly &mdash; a lead with a 212 area code (New York, Eastern) gets their SMS window shifted to 10 AM &ndash; 9 PM Eastern, which is still 9 AM &ndash; 8 PM Central. The adjustment is transparent to the rest of the system.</p>
+
+  <p>Never on Sundays before noon. This is a cultural guardrail, not a legal one. The population we serve goes to church. Texting someone about an apartment during Sunday morning service is a fast way to get blocked.</p>
+
+</div>
+
+<!-- ═══════ STALE CONTEXT DETECTION ═══════ -->
+
+<div class="asset">
+  <h2>Stale Context Detection</h2>
+
+  <p>After 7 days of no activity, the context is marked stale.</p>
+
+  <p>This matters because of what can change in a week. The lead might have gotten a new job. Their voucher might have been approved, or expired. Their move-in date might have changed. Their roommate might have backed out. They might have found another place and come back after it fell through. The intelligence profile built a week ago is not wrong &mdash; it is outdated, which is worse, because an outdated profile looks right and acts wrong.</p>
+
+  <p>The detection from <code>ygl_message_guard.py</code>:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+_ADVANCED_STAGES = {<span style="color:#cc8888;">"TOURED"</span>, <span style="color:#cc8888;">"DOCS_REQUESTED"</span>, <span style="color:#cc8888;">"DOCS_RECEIVED"</span>,
+                     <span style="color:#cc8888;">"DOCS_REVIEWED"</span>, <span style="color:#cc8888;">"APPLIED"</span>, <span style="color:#cc8888;">"APPROVED"</span>,
+                     <span style="color:#cc8888;">"TOUR_SCHEDULED"</span>}
+
+<span style="color:#88cc88;">def</span> detect_stale_context(current_stage, chat_history):
+    <span style="color:#88cc88;">if</span> current_stage <span style="color:#88cc88;">not in</span> _ADVANCED_STAGES:
+        <span style="color:#88cc88;">return</span> <span style="color:#cc8888;">""</span>
+    <span style="color:#88cc88;">if</span> chat_history <span style="color:#88cc88;">and</span> len(chat_history.strip()) > <span style="color:#cccc88;">100</span>:
+        <span style="color:#88cc88;">return</span> <span style="color:#cc8888;">""</span>
+    <span style="color:#88cc88;">return</span> (
+        f<span style="color:#cc8888;">"WARNING: Deal stage is {current_stage} but chat "</span>
+        f<span style="color:#cc8888;">"history is missing or very short. History may have "</span>
+        f<span style="color:#cc8888;">"failed to load. DO NOT restart from scratch - "</span>
+        f<span style="color:#cc8888;">"acknowledge the gap: 'hey! i think we were chatting "</span>
+        f<span style="color:#cc8888;">"before - remind me where we left off?' "</span>
+        f<span style="color:#cc8888;">"Recover context from the lead before proceeding."</span>
+    )</pre>
+
+  <p>The function checks two things: is the deal in an advanced stage (past the initial engagement), and is the chat history either missing or suspiciously short? If both are true, something went wrong &mdash; the history failed to load from the database, or the thread got corrupted. The injected warning tells the agent to NOT pretend nothing happened. Instead, the agent asks the lead where they left off.</p>
+
+  <p>This catches a specific failure mode: the database query for chat history times out on large threads, returns empty, and the agent re-introduces itself to a lead who already toured the apartment. The lead thinks they are dealing with an incompetent leasing office. They were, briefly, until I built this detector.</p>
+
+</div>
+
+<!-- ═══════ ADDRESS VALIDATION ═══════ -->
+
+<div class="asset">
+  <h2>Address Validation</h2>
+
+  <p>The LLM hallucinates addresses. This is not a theoretical concern. In production, the agent generated "1234 Maple Ave" as a unit address, "123 Main St" as a meeting location, and "456 Oak St" as a comparable property. None of these exist. They are the LLM equivalent of Lorem Ipsum &mdash; plausible-looking filler that means nothing.</p>
+
+  <p>The message guard maintains a set of known hallucinated addresses and a regex that detects street address patterns in outgoing messages:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+_HALLUCINATED_ADDRESSES = {
+    <span style="color:#cc8888;">"1234 maple ave"</span>, <span style="color:#cc8888;">"123 main st"</span>, <span style="color:#cc8888;">"456 oak st"</span>,
+    <span style="color:#cc8888;">"789 elm st"</span>, <span style="color:#cc8888;">"100 main street"</span>, <span style="color:#cc8888;">"1234 main st"</span>,
+    <span style="color:#cc8888;">"1234 elm st"</span>,
+}
+
+_ADDRESS_RE = re.compile(
+    r<span style="color:#cc8888;">'\b(\d{3,5}\s+[A-Za-z][\w\s\.]+</span>
+    <span style="color:#cc8888;">(?:Ave|St|Blvd|Dr|Rd|Pl|Ct|Way|Ln|Pkwy))\b'</span>,
+    re.IGNORECASE
+)</pre>
+
+  <p>Every address found in an outgoing message gets checked against inventory. The inventory streets are extracted lazily from <code>bluelake_inventory.py</code> the first time the validator runs:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">def</span> _load_inventory_streets():
+    <span style="color:#88cc88;">from</span> bluelake_inventory <span style="color:#88cc88;">import</span> INVENTORY
+    _INVENTORY_STREETS = set()
+    <span style="color:#88cc88;">for</span> addr <span style="color:#88cc88;">in</span> INVENTORY:
+        <span style="color:#666;"># "7450 S Luella #1B" &rarr; "s luella", "luella"</span>
+        parts = addr.lower().split(<span style="color:#cc8888;">'#'</span>)[<span style="color:#cccc88;">0</span>].strip().split()
+        <span style="color:#88cc88;">if</span> len(parts) >= <span style="color:#cccc88;">3</span>:
+            _INVENTORY_STREETS.add(<span style="color:#cc8888;">' '</span>.join(parts[<span style="color:#cccc88;">1</span>:]))
+            _INVENTORY_STREETS.add(<span style="color:#cc8888;">' '</span>.join(parts[<span style="color:#cccc88;">2</span>:]))
+
+<span style="color:#88cc88;">def</span> _is_known_address(addr_text):
+    streets = _load_inventory_streets()
+    <span style="color:#88cc88;">if not</span> streets:
+        <span style="color:#88cc88;">return True</span>   <span style="color:#666;"># can't validate, allow</span>
+    lower = addr_text.lower().strip()
+    <span style="color:#88cc88;">for</span> street <span style="color:#88cc88;">in</span> streets:
+        <span style="color:#88cc88;">if</span> street <span style="color:#88cc88;">and</span> len(street) > <span style="color:#cccc88;">2</span> <span style="color:#88cc88;">and</span> street <span style="color:#88cc88;">in</span> lower:
+            <span style="color:#88cc88;">return True</span>
+    <span style="color:#88cc88;">return False</span></pre>
+
+  <p>If an address in the outgoing message does not match any inventory street, the message gets blocked: <code>return False, f"unknown address not in inventory: {addr}"</code>. The agent never sends it. The lead never sees a fake address.</p>
+
+  <p>If the inventory streets set fails to load (import error, empty inventory), the validator returns <code>True</code> for all addresses &mdash; allows everything rather than blocking everything. A false negative (hallucinated address gets through) is embarrassing. A false positive (every message blocked because inventory failed to load) is catastrophic.</p>
+</div>
+
+<!-- ═══════ THE MESSAGE GUARD ═══════ -->
+
+<div class="asset">
+  <h2>The Message Guard</h2>
+
+  <p>Before any SMS leaves the system, it passes through <code>validate_outgoing_sms</code> in <code>ygl_message_guard.py</code>. Seven checks, any one of which can block the message.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">def</span> validate_outgoing_sms(text, unit_addr=<span style="color:#cccc88;">None</span>):
+    <span style="color:#666;"># 1. Template variable leaked</span>
+    <span style="color:#666;">#    [City], [Address], [calculate], [insert]</span>
+    <span style="color:#666;">#    The LLM left a placeholder in its response</span>
+
+    <span style="color:#666;"># 2. Prompt leak</span>
+    <span style="color:#666;">#    "stage instructions:", "TONE GUIDANCE:"</span>
+    <span style="color:#666;">#    Fragments of the system prompt in the SMS</span>
+
+    <span style="color:#666;"># 3. Phantom call promise</span>
+    <span style="color:#666;">#    "i'll call you in 2 min"</span>
+    <span style="color:#666;">#    Agent promises a call it cannot deliver</span>
+
+    <span style="color:#666;"># 4. Hallucinated address</span>
+    <span style="color:#666;">#    "123 Main St" — doesn't exist</span>
+
+    <span style="color:#666;"># 5. Address not in inventory</span>
+    <span style="color:#666;">#    Real address but not one of our buildings</span>
+
+    <span style="color:#666;"># 6. Brand violation</span>
+    <span style="color:#666;">#    "HomeEasy" or "Blue Lake" in a YGL message</span>
+    <span style="color:#666;">#    Must say "YNY Realty" — never reveal HomeEasy</span>
+
+    <span style="color:#666;"># 7. Excessive length</span>
+    <span style="color:#666;">#    > 1,600 chars — SMS should be conversational</span>
+
+    <span style="color:#88cc88;">return</span> (is_safe, reason)</pre>
+
+  <p>Check 6 has a carve-out: the email address <code>renterdocs@homeeasy.com</code> is allowed even though it contains "homeeasy." The validator detects the <code>@</code> sign in the surrounding context and lets it through. This took two production incidents to get right. The first time, the validator blocked every message that mentioned the doc submission email. The second time, it allowed brand violations that happened to be near an <code>@</code> sign. The current logic checks a 10-character window around the match for the <code>@</code> symbol.</p>
+
+  <p>There is also inbound message validation. The <code>detect_threat</code> function scans incoming messages for violence and threat patterns:</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+_THREAT_PATTERNS = [
+    r<span style="color:#cc8888;">'\b(?:kill|murder|hurt|shoot|stab|beat)\s+(?:you|u|ur)'</span>,
+    r<span style="color:#cc8888;">'\b(?:i\'?ll|ima|imma|gonna)\s+(?:find|come for|get)\s+(?:you|u)'</span>,
+    r<span style="color:#cc8888;">'\b(?:blow up|burn down|destroy)\b'</span>,
+    r<span style="color:#cc8888;">'\byou\'?re?\s+dead\b'</span>,
+    r<span style="color:#cc8888;">'\bwatch your back\b'</span>,
+]</pre>
+
+  <p>If a threat is detected: the agent does NOT respond. The lead is marked DEAD with a DNC (Do Not Contact) flag. A SAFETY alert goes to Discord. No automated system should argue with someone who is threatening violence. Silence is the only correct response.</p>
+
+  <p>Duplicate message suppression runs on MD5 hashes of message content, keyed by phone number, with a 5-minute window. If Celery retries a task or a webhook fires twice, the same SMS does not go out twice. The hash table lives in memory &mdash; not Redis, not Postgres &mdash; which means it resets on pod restart. Acceptable tradeoff. Pod restarts are rare and the window is short.</p>
+
+</div>
+
+<!-- ═══════ QUALIFICATION LANES ═══════ -->
+
+<div class="asset">
+  <h2>Qualification Lanes</h2>
+
+  <p>Five lanes. Each one determines priority, followup intensity, and which human (if any) gets involved.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#88cc88;">LANE 00: VOUCHER ATTACK IMMEDIATELY</span>
+  Criteria: Has Section 8 voucher + at least ID and voucher letter
+  Priority: HIGHEST. Process within 24 hours.
+  Commission: 100% of first month's rent
+  Why it matters: $1,650 commission on a 2BR. The building
+    WANTS these tenants &mdash; guaranteed rent from the government.
+  Detection: doc_interpreter finds voucher doc OR chat history
+    contains "section 8", "voucher", "cha", "housing authority"
+
+<span style="color:#e8e4de;">LANE 01: SLAM DUNK</span>
+  Criteria: Income verified >= 2.5x rent, credit signals positive,
+    has 2+ required docs already submitted
+  Priority: High. Same-day processing.
+  Commission: 75% market rate
+  These leads close themselves. The job is to not lose them
+    through slow followup or bureaucratic friction.
+
+<span style="color:#cccc88;">LANE 02: QUALIFIED</span>
+  Criteria: Active engagement, 1+ docs submitted,
+    missing specific items (system can name exactly what)
+  Priority: Normal. Standard cadence.
+  The agent knows to say: "just need [specific doc] and
+    we're all set" — not "please submit your documents."
+  Specificity is the difference between a response and a ghost.
+
+<span style="color:#cc8888;">LANE 03: WORKS WITH MITIGATION</span>
+  Criteria: Qualified but complicating factor.
+    Credit below 500. Needs a cosigner. Eviction on record.
+    Income borderline (between 2.0x and 2.5x rent).
+  Priority: Normal, but flagged for Zalmy review.
+  These are NOT rejected. They are routed differently.
+  The agent tells the lead: "the building needs a couple
+    more things" — never "you might not qualify."
+
+<span style="color:#666;">LANE 04: EDGE CASE</span>
+  Criteria: Missing critical docs. Can't verify income.
+    Unclear situation. Conflicting information.
+  Priority: Lower. Longer cadence intervals.
+  The system cannot determine qualification status.
+  These leads get extra time but less pressure &mdash; they
+    need to provide clarity before the system can help.
+
+<span style="color:#555;">DEAD: Do Not Contact</span>
+  Criteria: <span style="color:#cc8888;">Explicit opt-out ONLY.</span>
+  "Stop texting me." "Remove my number." "Not interested."
+  Ghosting is NOT death. Slow responses are NOT death.
+  Being difficult is NOT death. Only the lead can kill
+  the lead. We never give up on our own.</pre>
+
+  <p>Lane 00 exists because of the economics. A Section 8 tenant paying $1,650/mo on a 2-bedroom that market-rate tenants pay $1,250 for generates 76% more commission &mdash; $1,650 versus $937.50. And voucher holders are less likely to leave (the voucher is hard to transfer). And the building owner prefers them because the housing authority guarantees the rent. Every incentive aligns. The system knows to treat a voucher lead like a VIP because that is what they are.</p>
+
+  <p>The dead lane deserves emphasis. Human sales reps would mark leads as dead because "they didn't respond in 3 days" or "they seemed annoyed." The AI system is not allowed to make that judgment call. A lead is dead when the lead says they are dead. Everything else is a failure of persistence, creativity, or timing &mdash; and all three are fixable.</p>
+
+</div>
+
+<!-- ═══════ WHAT HAPPENS WHEN THINGS FAIL ═══════ -->
+
+<div class="asset">
+  <h2>What Happens When Things Fail</h2>
+
+  <p>The system is built on the assumption that everything will fail. Not occasionally. Regularly.</p>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#cc8888;">Gemini API goes down</span>
+  doc_interpreter falls back to filename classification
+  Confidence drops to 0.3
+  Pipeline keeps moving
+
+<span style="color:#cc8888;">Gmail API rate limited</span>
+  email_monitor skips this 5-minute cycle
+  Docs wait until next poll
+  No data loss (emails stay in inbox)
+
+<span style="color:#cc8888;">Chat history fails to load</span>
+  detect_stale_context fires
+  Agent asks "remind me where we left off"
+  Cooperativeness score defaults to 50
+
+<span style="color:#cc8888;">Invalid state transition attempted</span>
+  Warning logged to Discord
+  Transition allowed anyway
+  Better a wrong stage than a stuck lead
+
+<span style="color:#cc8888;">Outgoing SMS fails validation</span>
+  Message blocked, never sent
+  Error logged with the blocking reason
+  Lead gets no message (silence > hallucination)
+
+<span style="color:#cc8888;">Inbound threat detected</span>
+  No response sent. Lead marked DEAD + DNC.
+  SAFETY alert to Discord.
+  Human review required before reactivation.
+
+<span style="color:#cc8888;">Duplicate message detected</span>
+  Second copy suppressed (MD5 hash match)
+  First copy already sent, lead not spammed
+  Hash table auto-cleans after 5 minutes
+
+<span style="color:#cc8888;">Income unreadable from document</span>
+  approval_engine flags: "manual review needed"
+  Status: FLAGS_FOUND (not LIKELY_DENIED)
+  Zalmy reviews the actual document himself
+
+<span style="color:#cc8888;">Lead's deal stage data is corrupted/legacy</span>
+  parse_deal_state tries JSON, pipe-delimited, free-text
+  Falls through 4 layers of parsing
+  Last resort: assigns NEW, lead starts fresh
+  Better a fresh start than a crash</pre>
+
+  <p>Every failure mode has a fallback. Every fallback degrades gracefully. The system gets worse when things break &mdash; lower confidence, slower processing, more manual review &mdash; but it does not stop. The infrastructure carries the water even when parts of it are cracked.</p>
+
+</div>
+
+<!-- ═══════ THE NUMBERS ═══════ -->
+
+<div class="asset" style="margin-top:3rem; border-top:1px solid #333; padding-top:2rem;">
+  <h2>By the Numbers</h2>
+
+  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.85rem; line-height:1.7; color:#888; overflow-x:auto; margin:2rem 0;">
+35 units across 8 buildings
+3 neighborhoods (South Shore, Chatham, Chicago Heights)
+15 stages in the deal state machine (including COOLING_OFF)
+12 document types recognized
+8 behavioral signals in cooperativeness scoring
+7 checks in the outgoing message guard
+5 qualification lanes
+4 files in the document pipeline
+4 approval statuses
+3 messages per day maximum per lead
+2 pricing tiers (market rate, Section 8)
+1 human in the loop (Zalmy Vidal, building manager)
+0 staff in the leasing office</pre>
+
+</div>

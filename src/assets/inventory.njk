@@ -1,0 +1,228 @@
+---
+layout: base.njk
+title: "The Managed Portfolio"
+navActive: assets
+---
+
+<p style="margin-bottom:0.5rem;"><a href="/assets/" style="color:#666; font-size:0.85rem; text-decoration:none;">&larr; Back to Assets</a></p>
+
+<h1>The Managed Portfolio</h1>
+<p style="color:#999; font-size:1.05rem; margin-bottom:3rem;">35 units across 8 buildings. South Shore, Chatham, Chicago Heights. I am the leasing office.</p>
+
+
+<!-- ═══════ OPENING ═══════ -->
+
+<div class="asset">
+
+  <p>This is not a referral. This is not a cooperating building where I send leads and hope for commission. These 35 units belong to YNY Realty, and my agent IS the leasing office. Every inquiry, every showing, every lease &mdash; it runs through us.</p>
+
+  <p>The <a href="/assets/cooperating-network/" style="color:#888;">Cooperating Network</a> is the Apartment Locator's infrastructure: 83,191 buildings across three markets, scored and decaying. This page is the Landlord Rep's infrastructure: a small portfolio with total control.</p>
+
+  <p>Same codebase. Same matching architecture. Entirely different scale. The Locator searches 33,861 buildings and picks three. The Landlord Rep searches 35 units and picks one. Same river, different volume.</p>
+
+</div>
+
+
+<!-- ═══════ THE 8 BUILDINGS ═══════ -->
+
+<div class="asset">
+  <h2>Eight Buildings</h2>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+Building           Address                              Area
+──────────────────────────────────────────────────────────────
+Luella             7450 S Luella Ave                     South Shore
+Coles              7517-7525 S Coles Ave                 South Shore
+Ellis              8034-8038 S Ellis Ave                 Chatham
+Drexel             7945-7955 S Drexel Ave                Chatham
+Ingleside          7948 S Ingleside Ave                  Chatham
+81st Ingleside     8044-8050 S Ingleside                 Chatham
+Essex              7900-7908 S Essex Ave                 South Shore
+Chicago Heights    450-480 W 16th St                     Chicago Heights
+</pre>
+
+  <p>South Shore and Chatham are South Side Chicago. Chicago Heights is 30 miles south &mdash; a different market entirely. South Shore and Chatham buildings compete with each other. Chicago Heights competes with nobody in our portfolio; it serves the south suburbs.</p>
+
+  <p>Every building is a Python dict in <code>bluelake_inventory.py</code>. Not a database table. Not a CMS. A hardcoded dictionary that gets updated when Zalmy (the building manager) sends a vacancy email. When the dict changes, every conversation the agent has from that moment reflects the new reality.</p>
+
+</div>
+
+
+<!-- ═══════ DUAL PRICING ═══════ -->
+
+<div class="asset">
+  <h2>Dual Pricing</h2>
+
+  <p>Every unit has two prices. The gap is not subtle.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+                   Market Rate    Section 8 (CHA)
+──────────────────────────────────────────────────
+Studio:            $850/mo        $1,200/mo
+1BR:               $1,100/mo      $1,500/mo
+2BR:               $1,250/mo      $1,650/mo
+3BR:               $1,550/mo      $1,850/mo
+
+Commission:
+  Market rate:     75% of first month's rent
+  Section 8:       100% of first month's rent
+</pre>
+
+  <p>Section 8 rents are $300-$400 higher per unit. That is not gouging &mdash; it is the Chicago Housing Authority's Fair Market Rent standard for the area. The CHA sets the payment standard, not the landlord. The premium exists because the government guarantees payment. Market-rate tenants can default. Section 8 tenants cannot &mdash; the government pays the landlord directly.</p>
+
+  <p>That guarantee commands premium pricing and full commission. A 2BR Section 8 placement generates $1,650 in commission. Market-rate: $937.50. Every voucher lead is priority.</p>
+
+  <p>Full Section 8 occupancy vs full market-rate occupancy across all 35 units: $166,200 per year difference. That number is why Lane 00 (VOUCHER ATTACK IMMEDIATELY) exists in the <a href="/assets/landlord-rep/" style="color:#888;">qualification system</a>.</p>
+
+</div>
+
+
+<!-- ═══════ BUILDING METADATA ═══════ -->
+
+<div class="asset">
+  <h2>Policies</h2>
+
+  <p>Every building carries the same metadata structure. The policies that matter most are the ones that determine who can qualify:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;"># Qualification policies (all 8 buildings)</span>
+
+Credit minimum:       None (case by case)
+Income requirement:   2.5x monthly rent (Section 8 exempt)
+Background check:     Non-violent, over 3 years OK
+Eviction history:     Case by case, over 3 years preferred
+Application fee:      $0
+
+<span style="color:#e8e4de;"># Building features</span>
+
+Utilities included:   Heat, gas, electric, water, trash (all units)
+Parking:              Street parking (Luella has rear lot)
+Laundry:              Coin-op in building (Coles, Drexel, Essex)
+Pets:                 Case by case, no breed restrictions (most buildings)
+                      No pets (Chicago Heights)
+Renovated:            Luella (2024), Ellis (2023), Coles (partial 2024)
+</pre>
+
+  <p>No credit minimum and no application fee. These are the policies that let voucher holders with imperfect histories get housed. A 580 credit score with a Section 8 voucher and stable income gets approved. A 520 with a DV history and a case worker reference gets approved. The building manager reviews edge cases, but the default posture is to house people.</p>
+
+  <p>Utilities included is the other differentiator. A $1,100 1BR with all utilities is effectively $1,350-$1,400 compared to a building that charges $250-$300 for heat and electric. That makes the units more competitive than the sticker price suggests &mdash; and the agent knows to lead with this when a renter hesitates on price.</p>
+
+</div>
+
+
+<!-- ═══════ MATCHING (LANDLORD REP) ═══════ -->
+
+<div class="asset">
+  <h2>Unit Selection</h2>
+
+  <p>When a qualified lead contacts the Landlord Rep, the matching is different from the <a href="/assets/cooperating-network/" style="color:#888;">Locator's 83K-building search</a>. Here the search space is 35 units. The agent checks:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;"># Landlord Rep unit matching</span>
+
+1. AVAILABILITY      Is the unit actually vacant?
+2. BEDROOM MATCH     Does it have the beds they need?
+3. BUDGET FIT        Market rate or Section 8 pricing?
+4. AREA PREFERENCE   South Shore, Chatham, or Chicago Heights?
+5. PET COMPATIBILITY Does the building allow their animal?
+
+<span style="color:#e8e4de;"># Fallback sequence when no exact match:</span>
+
+Same building, different unit type
+  &rarr; Same area, different building
+    &rarr; Different area within portfolio
+      &rarr; Waitlist + notification when unit opens
+</pre>
+
+  <p>The fallback sequence matters because with only 35 units, exact matches are rare. A renter wants a 2BR in South Shore with a dog. Luella has a 2BR but no dog policy on file. Coles allows dogs but only has a 1BR available. Essex has a 2BR and allows dogs but is further from the renter's job. The agent presents all three options with trade-offs, not a single "best match."</p>
+
+</div>
+
+
+<!-- ═══════ VACANCY MANAGEMENT ═══════ -->
+
+<div class="asset">
+  <h2>Vacancy Updates</h2>
+
+  <p>The biggest failure mode in the managed portfolio is stale vacancy data. The INVENTORY dict says a unit is available. It was rented yesterday. Zalmy forgot to send the vacancy email. The agent offers a phantom unit. The renter shows up for a tour and finds furniture.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;"># Vacancy update flow</span>
+
+1. Zalmy sends vacancy email to renterdocs@homeeasy.com
+2. Email parser extracts: building, unit number, date available
+3. INVENTORY dict updated (manual deploy)
+4. All active conversations re-evaluated against new inventory
+
+<span style="color:#cc8888;"># What goes wrong:</span>
+
+Zalmy forgets to email           &rarr; phantom unit offered
+Email parser misreads unit #     &rarr; wrong unit marked available
+Deploy delayed by other work     &rarr; 12-hour stale window
+Unit rented between email/deploy &rarr; race condition, no fix
+</pre>
+
+  <p>The 12-hour stale window is the worst failure. A unit opens at 9 AM. Zalmy emails at noon. I deploy at 6 PM. For 9 hours, the agent did not know about a unit that could have been shown. For the 6 hours between the email and the deploy, the agent knew (in the email) but could not act (not in the dict). The solution is an API endpoint that Zalmy can hit directly &mdash; not yet built. That is the highest-priority infrastructure debt in the Landlord Rep business.</p>
+
+</div>
+
+
+<!-- ═══════ WHAT FAILS ═══════ -->
+
+<div class="asset">
+  <h2>What Fails</h2>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#cc8888;">Stale inventory</span>
+  INVENTORY dict says a unit is available.
+  It was rented yesterday. Zalmy forgot the email.
+  Agent offers a phantom unit.
+  Renter shows up and finds furniture.
+  Fix: API endpoint for real-time vacancy updates (not yet built).
+
+<span style="color:#cc8888;">Pet policy ambiguity</span>
+  "Case by case" means the agent cannot promise.
+  Renter with a 90-lb pit bull asks "do you allow dogs?"
+  Agent says "case by case" &mdash; renter reads it as no.
+  Fix: explicit breed/weight thresholds per building.
+
+<span style="color:#cc8888;">Chicago Heights isolation</span>
+  30 miles from South Shore/Chatham portfolio.
+  Cannot offer Chicago Heights as alternative to a
+  renter who works at 79th and Stony Island.
+  Effectively a separate micro-portfolio.
+
+<span style="color:#cc8888;">Seasonal vacancy clustering</span>
+  Leases cluster around May-August renewals.
+  September: 6 vacancies. February: 0.
+  Agent in February has nothing to offer.
+  The waitlist catches some, but most leads go cold.
+</pre>
+
+  <p>The seasonal clustering is the constraint you cannot engineer around. Real estate is seasonal. The managed portfolio is too small to smooth the curve. When vacancies drop to zero, the Landlord Rep agent becomes a waitlist manager, not a leasing agent. The Locator's 83,191 buildings do not have this problem &mdash; at that scale, there is always something available somewhere.</p>
+
+</div>
+
+
+<!-- ═══════ STATS ═══════ -->
+
+<div class="asset" style="margin-top:3rem; border-top:1px solid #333; padding-top:2rem;">
+  <h2>By the Numbers</h2>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.85rem; line-height:1.7; color:#888; overflow-x:auto; margin:2rem 0;">
+35 managed units
+8 buildings
+3 neighborhoods (South Shore, Chatham, Chicago Heights)
+4 unit types (studio, 1BR, 2BR, 3BR)
+2 pricing tiers (market rate, Section 8)
+$850 cheapest unit (studio, market rate)
+$1,850 most expensive unit (3BR, Section 8)
+$166,200/year Section 8 vs market-rate occupancy gap
+75% commission on market-rate placements
+100% commission on Section 8 placements
+$0 application fee
+0 credit minimum
+2.5x income requirement (Section 8 exempt)
+3 years background threshold</pre>
+
+</div>

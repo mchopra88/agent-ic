@@ -1,0 +1,755 @@
+---
+layout: base.njk
+title: "The Agent Brain"
+navActive: assets
+---
+
+<p style="margin-bottom:0.5rem;"><a href="/assets/" style="color:#666; font-size:0.85rem; text-decoration:none;">&larr; Back to Assets</a></p>
+
+<h1>The Agent Brain</h1>
+
+<p style="color:#999; font-size:1.05rem; margin-bottom:0.5rem; font-style:italic;">One loop runs every agent. The LLM decides. Guardrails catch.</p>
+
+<p style="color:#b0aca6; font-size:0.95rem; margin-bottom:3rem;">Every agent &mdash; Locator, Landlord Rep, Ken &mdash; runs on the same core architecture. The LLM is the decision-maker. Not an orchestrator. Not a state machine. The LLM reads the full situation and acts. Guardrails run AFTER generation, not before. This is the anti-determinism law.</p>
+
+
+<!-- ═══════ SECTION 1: AgentConfig ═══════ -->
+
+<div class="asset">
+  <h2>AgentConfig</h2>
+
+  <p>One dataclass configures every agent. The difference between a locator and a landlord rep is not the code. It is the config. The difference between an insurance agent and an apartment agent is not the loop. It is what you load into the loop.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">@dataclass</span>
+<span style="color:#e8e4de;">class AgentConfig:</span>
+    """Everything needed to run one agent turn."""
+    agent_id: str              <span style="color:#555;"># "ygl", "locator", "insurance"</span>
+    model_name: str            <span style="color:#555;"># Gemini model string</span>
+    google_api_key: str
+    system_prompt_builder: Callable[[dict], str]
+    <span style="color:#555;"># system_prompt_builder(context) -> full system prompt string</span>
+    tools: list[ToolDef] = field(default_factory=list)
+    guardrails: list[Guardrail] = field(default_factory=list)
+    max_tool_rounds: int = 3   <span style="color:#555;"># prevent infinite tool loops</span>
+    temperature: float = 0.7
+</pre>
+
+  <p>The <code>system_prompt_builder</code> is a function that takes the full context dict &mdash; chat history, lead profile, inventory data, intelligence signals &mdash; and produces the system prompt. Not a template. A function. Because the system prompt changes based on what we know about this lead, what stage they are in, and what tools are available.</p>
+
+  <p>The <code>tools</code> list defines what the LLM can do. A locator agent gets <code>update_requirements</code>, <code>search_inventory</code>, <code>escalate_to_human</code>, and <code>mark_dead</code>. A landlord rep agent gets <code>search_inventory</code>, <code>update_deal_stage</code>, <code>create_asana_task</code>, <code>dispatch_call</code>, <code>mark_dead</code>, and <code>check_documents</code>. The LLM sees the tool declarations. The LLM decides which ones to call. Not the code.</p>
+
+  <p>The <code>guardrails</code> list defines what runs after the LLM generates. Rate limits. Brand checks. Message safety. These are post-generation filters. They do not constrain the input. They catch the output.</p>
+
+  <p style="color:#666; font-size:0.9rem;">Three messages per day per lead. 9 AM to 8 PM Central. 0.7 temperature. Three tool rounds. These are not opinions. These are the numbers that survived production.</p>
+</div>
+
+
+<!-- ═══════ SECTION 2: The Universal 7-Step Loop ═══════ -->
+
+<div class="asset">
+  <h2>The Universal 7-Step Loop</h2>
+
+  <p>Every agent turn follows the same path. It does not matter if the agent is selling apartments, managing a landlord's property, or binding an insurance policy. The loop is the same.</p>
+
+  <div style="margin:2rem 0; padding:1.5rem; border:1px solid #222; background:#0a0a0a;">
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#88cc88; font-weight:600;">Step 1: LOAD CONTEXT</span><br>
+      <span style="color:#888; font-size:0.95rem;">Chat history, lead intelligence, inventory data, requirements, deal stage. Everything the LLM needs to understand the full situation.</span>
+    </div>
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#88cc88; font-weight:600;">Step 2: BUILD SYSTEM PROMPT</span><br>
+      <span style="color:#888; font-size:0.95rem;">Persona + tools + examples + business rules injected as CONTEXT. Not a static template. A dynamically built prompt tailored to this lead, this moment.</span>
+    </div>
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#88cc88; font-weight:600;">Step 3: LLM GENERATES</span><br>
+      <span style="color:#888; font-size:0.95rem;">Response text + optional tool calls. Multi-round: up to 3 tool calls per turn. Tool results feed back into the conversation. LLM generates again with new information.</span>
+    </div>
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#88cc88; font-weight:600;">Step 4: GUARDRAILS CHECK</span><br>
+      <span style="color:#888; font-size:0.95rem;">Post-generation. Message safety, rate limits, brand compliance, address validation, length. If any check fails, response is suppressed. Reason is logged.</span>
+    </div>
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#88cc88; font-weight:600;">Step 5: SEND</span><br>
+      <span style="color:#888; font-size:0.95rem;">SMS via Twilio. Or webhook. Or hold for human review. The guardrails already passed. This step is mechanical.</span>
+    </div>
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#88cc88; font-weight:600;">Step 6: LOG REASONING TRACE</span><br>
+      <span style="color:#888; font-size:0.95rem;">Full audit trail to Discord and database. Every tool call. Every guardrail result. Every millisecond of latency.</span>
+    </div>
+    <div>
+      <span style="color:#88cc88; font-weight:600;">Step 7: UPDATE STATE</span><br>
+      <span style="color:#888; font-size:0.95rem;">Deal stage, requirements, last contact timestamp. The conversation moved forward. The state reflects that.</span>
+    </div>
+  </div>
+
+  <p>Here is the actual loop. 392 lines of production Python. This is the function that runs every time a lead texts in, every time a scheduled follow-up fires, every time a new lead arrives.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">def run_agent_turn(</span>
+<span style="color:#e8e4de;">    config: AgentConfig,</span>
+<span style="color:#e8e4de;">    context: dict,</span>
+<span style="color:#e8e4de;">) -> dict:</span>
+    t0 = time.time()
+    trace = ReasoningTrace(
+        agent_id=config.agent_id,
+        timestamp=datetime.now(CT).isoformat(),
+        context_summary={k: type(v).__name__ for k, v in context.items()},
+        system_prompt_length=0,
+    )
+
+    <span style="color:#555;"># 1. Build system prompt</span>
+    system_prompt = config.system_prompt_builder(context)
+    trace.system_prompt_length = len(system_prompt)
+
+    <span style="color:#555;"># 2. Build message history</span>
+    messages = [SystemMessage(content=system_prompt)]
+
+    chat_history = context.get("chat_history", "")
+    last_message = context.get("last_client_message", "")
+
+    if chat_history:
+        messages.append(HumanMessage(
+            content=f"CONVERSATION SO FAR:\n{chat_history}"
+        ))
+    if last_message:
+        messages.append(HumanMessage(
+            content=f"LATEST MESSAGE FROM LEAD:\n{last_message}"
+        ))
+    elif not chat_history:
+        messages.append(HumanMessage(
+            content="This is a new lead. Generate the first outreach message."
+        ))
+
+    <span style="color:#555;"># 3. Build tool declarations</span>
+    tool_declarations = []
+    tool_map = {}
+    for tool in config.tools:
+        tool_declarations.append(tool.to_gemini_declaration())
+        tool_map[tool.name] = tool
+
+    <span style="color:#555;"># 4. Call LLM</span>
+    llm = ChatGoogleGenerativeAI(
+        model=config.model_name,
+        google_api_key=config.google_api_key,
+        temperature=config.temperature,
+    )
+    if tool_declarations:
+        llm_with_tools = llm.bind_tools(tool_declarations)
+    else:
+        llm_with_tools = llm
+
+    response_text = ""
+    all_tool_calls = []
+
+    <span style="color:#e8e4de;">for round_idx in range(config.max_tool_rounds + 1):</span>
+        <span style="color:#555;"># Each round: call LLM, check for tool calls, execute, feed back</span>
+        ai_msg = llm_with_tools.invoke(messages)
+
+        if hasattr(ai_msg, "content") and ai_msg.content:
+            response_text = ai_msg.content.strip()
+
+        tool_calls_in_response = []
+        if hasattr(ai_msg, "tool_calls") and ai_msg.tool_calls:
+            tool_calls_in_response = ai_msg.tool_calls
+
+        if not tool_calls_in_response:
+            break  <span style="color:#555;"># No tool calls — done</span>
+
+        <span style="color:#555;"># Execute each tool call, feed result back as ToolMessage</span>
+        messages.append(ai_msg)
+        for tc in tool_calls_in_response:
+            tool_name = tc.get("name", "")
+            tool_args = tc.get("args", {})
+            result = tool_map[tool_name].fn(**tool_args)
+            messages.append(ToolMessage(
+                content=str(result)[:2000],
+                tool_call_id=tc.get("id"),
+                name=tool_name,
+            ))
+            all_tool_calls.append({
+                "name": tool_name, "args": tool_args,
+                "result": str(result)[:2000], "round": round_idx,
+            })
+
+    <span style="color:#555;"># 5. Run guardrails (POST-generation)</span>
+    <span style="color:#e8e4de;">for guard in config.guardrails:</span>
+        is_safe, reason = guard.check_fn(response_text, guardrail_context)
+        if not is_safe:
+            trace.blocked = True
+            trace.block_reason = f"{guard.name}: {reason}"
+            return {"response": "", "blocked": True, ...}
+
+    return {
+        "response": response_text,
+        "tool_calls_made": all_tool_calls,
+        "blocked": False,
+        "trace": trace,
+    }
+</pre>
+
+  <p>Look at the loop structure. <code>for round_idx in range(config.max_tool_rounds + 1)</code> means the LLM gets up to 4 iterations: one initial generation plus 3 tool rounds. Each round: LLM generates, tools execute, results feed back. The LLM sees the tool results and decides what to do next. When it stops calling tools, the loop ends.</p>
+
+  <p>No intent classification. No stage detection. No template selection. The LLM reads the conversation, decides what to say, and optionally calls tools. That is the entire architecture.</p>
+</div>
+
+
+<!-- ═══════ SECTION 3: Tool Execution ═══════ -->
+
+<div class="asset">
+  <h2>Tool Execution (Max 3 Rounds)</h2>
+
+  <p>The LLM can call tools, get results, and call more tools &mdash; up to 3 rounds. Why 3? Because I tested higher limits and the LLM starts hallucinating tool calls that do not exist. 3 rounds covers the longest legitimate chain: search inventory, read results, update requirements. That is it.</p>
+
+  <p>When a tool call fails, the error message gets fed back to the LLM as a <code>ToolMessage</code>. The LLM usually recovers &mdash; tries a different approach, adjusts parameters, or generates a response without the tool. But if it fails 3 times, the response is suppressed, the failure is logged, and the lead gets picked up on the next cycle.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#555;"># What happens when a tool call fails:</span>
+
+if tool_name not in tool_map:
+    call_record["result"] = f"ERROR: Unknown tool '{tool_name}'"
+    call_record["error"] = True
+else:
+    try:
+        result = tool_map[tool_name].fn(**tool_args)
+        call_record["result"] = str(result)[:2000]
+        call_record["error"] = False
+    except Exception as e:
+        call_record["result"] = f"ERROR: {e}"
+        call_record["error"] = True
+
+<span style="color:#555;"># The error goes right back into the conversation as a ToolMessage.</span>
+<span style="color:#555;"># The LLM sees "ERROR: ..." and adapts. Usually it recovers.</span>
+<span style="color:#555;"># Sometimes it calls the same tool with corrected arguments.</span>
+<span style="color:#555;"># Sometimes it gives up on the tool and writes a text response.</span>
+
+messages.append(ToolMessage(
+    content=call_record["result"],
+    tool_call_id=tool_id,
+    name=tool_name,
+))
+</pre>
+
+  <p>The result truncation at 2000 characters is deliberate. Inventory searches can return pages of unit data. The LLM does not need all of it &mdash; it needs enough to pick the best matches. 2000 characters is roughly 6 to 8 unit summaries. That is plenty for a single SMS response.</p>
+
+  <p style="color:#666; font-size:0.9rem;">The <code>tool_call_id</code> tracks which tool call produced which result. Without it, multi-round conversations with multiple tool calls become ambiguous and the LLM loses track of which result belongs to which request.</p>
+</div>
+
+
+<!-- ═══════ SECTION 4: Gemini Fallback ═══════ -->
+
+<div class="asset">
+  <h2>Gemini thought_signature Fallback</h2>
+
+  <p>When the LLM call fails mid-loop &mdash; after tools have already executed &mdash; we cannot just abandon the turn. The tools already ran. We have data. The lead is waiting. So the system falls back to a text-only call with tool results injected as context.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#555;"># If the LLM fails on a followup round (after tools ran),</span>
+<span style="color:#555;"># fall back to text-only re-prompt with tool results as context.</span>
+
+if round_idx > 0 and all_tool_calls:
+    tool_results_text = "\n".join(
+        f"[{tc['name']}] -> {tc['result'][:500]}"
+        for tc in all_tool_calls
+    )
+    fallback_messages = [SystemMessage(content=system_prompt)]
+    if chat_history:
+        fallback_messages.append(HumanMessage(
+            content=f"CONVERSATION SO FAR:\n{chat_history}"
+        ))
+    if last_message:
+        fallback_messages.append(HumanMessage(
+            content=f"LATEST MESSAGE FROM LEAD:\n{last_message}"
+        ))
+    fallback_messages.append(HumanMessage(
+        content=f"Tool results (incorporate into your response):\n"
+                f"{tool_results_text}\n\n"
+                f"Generate your SMS response to the lead."
+    ))
+    try:
+        fallback_resp = llm.invoke(fallback_messages)  <span style="color:#555;"># no tools bound</span>
+        if hasattr(fallback_resp, "content") and fallback_resp.content:
+            response_text = fallback_resp.content.strip()
+    except Exception as e2:
+        logger.error(f"Fallback LLM call also failed: {e2}")
+    break
+</pre>
+
+  <p>This handles a specific Gemini failure mode. Gemini's multi-round tool calling sometimes chokes on the <code>thought_signature</code> format during the second or third round. Claude returns structured <code>tool_use</code> blocks natively. Gemini does not always. When Gemini trips on its own tool-calling protocol, the fallback strips tools entirely and just tells the LLM: "Here are the tool results. Write the response." It works. It is ugly. It is in production.</p>
+
+  <p>If the first round fails &mdash; before any tools ran &mdash; there is nothing to fall back to. The error gets logged, the trace records it, and the return value has <code>blocked: True</code> with the error message. The lead picks up on the next scheduled cycle.</p>
+</div>
+
+
+<!-- ═══════ SECTION 5: The Four Locator Tools ═══════ -->
+
+<div class="asset">
+  <h2>The Four Locator Tools</h2>
+
+  <p>The Locator Agent (Amy Scott) gets 4 tools. These are the only actions Amy can take beyond sending text. The LLM sees the tool declarations and decides when to call them. Not when a stage triggers. Not when a classifier fires. When the conversation makes it obvious.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">1. update_requirements(</span>
+    client_id: int,         <span style="color:#555;"># required</span>
+    budget: int,            <span style="color:#555;"># monthly budget in dollars</span>
+    bedrooms: int,
+    neighborhoods: list,    <span style="color:#555;"># ["Lincoln Park", "Lakeview"]</span>
+    move_in_date: str,      <span style="color:#555;"># ISO date or "ASAP"</span>
+    credit_score: int,
+    occupant_moving: str,   <span style="color:#555;"># "just me", "family of 4"</span>
+    moving_reason: str,
+    dwelling: str,          <span style="color:#555;"># apartment, condo, townhouse</span>
+    has_pets: bool,
+    cosigner: bool,
+    cosigner_credit_score: int,
+<span style="color:#e8e4de;">)</span>
+<span style="color:#555;">"Extract naturally from conversation, don't interrogate."</span>
+<span style="color:#555;">"You don't need all fields at once."</span>
+<span style="color:#555;">Only client_id is required. Everything else is optional.</span>
+</pre>
+
+  <p>12 parameters. 1 required. The description tells the LLM: extract naturally, do not interrogate. This is not a form. It is a signal that the LLM should pick up on what the renter mentions and save it. Budget comes up in conversation? Call <code>update_requirements</code> with just <code>client_id</code> and <code>budget</code>. Pets come up three messages later? Call it again with just <code>client_id</code> and <code>has_pets</code>.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">2. search_inventory(</span>
+    client_id: int,         <span style="color:#555;"># required</span>
+    budget: int,
+    bedrooms: int,
+    neighborhoods: list,
+<span style="color:#e8e4de;">)</span>
+<span style="color:#555;">"If you have the basics, search. Don't wait for everything."</span>
+<span style="color:#555;">Triggers an internal API call to /inventory/search.</span>
+<span style="color:#555;">Returns matches or error. 10-second timeout.</span>
+</pre>
+
+  <p>This one hits the inventory service via HTTP POST. The instruction is explicit: do not gate this behind collecting all information. If you have budget, bedrooms, and a neighborhood, search. Do not wait for credit score, pets, move-in date, cosigner status. The renter wants options, not an interrogation.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">3. escalate_to_human(</span>
+    client_id: int,         <span style="color:#555;"># required</span>
+    reason: str,            <span style="color:#555;"># required</span>
+<span style="color:#e8e4de;">)</span>
+<span style="color:#555;">"Legal questions, complaints, special accommodations,</span>
+<span style="color:#555;"> or lead explicitly asks for a person."</span>
+<span style="color:#555;">Creates Discord alert with full context + CRM link:</span>
+<span style="color:#555;">https://homeeasy.org/crm/inbox/chat/{client_id}</span>
+</pre>
+
+  <p>This sends a Discord alert with the client ID, reason, and a direct link to the CRM chat. The human can see the full conversation and pick up where the AI left off. No context loss. No "can you start over?" The handoff preserves everything.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">4. mark_dead(</span>
+    client_id: int,         <span style="color:#555;"># required</span>
+    reason: str,            <span style="color:#555;"># required: opted_out, found_place,</span>
+                            <span style="color:#555;">#   requested_stop, scam_hostile</span>
+<span style="color:#e8e4de;">)</span>
+<span style="color:#555;">"ONLY when lead EXPLICITLY opts out."</span>
+<span style="color:#555;">"Do NOT mark dead for ghosts or slow responders."</span>
+<span style="color:#555;">Sets client stage to 9 (dead) in database.</span>
+</pre>
+
+  <p>The description is the most aggressive in the entire system. Five words in capitals: "ONLY when lead EXPLICITLY opts out." The examples are concrete: "stop", "not interested", "remove me", "found a place", thinks it is a scam and is hostile. Not "hasn't replied in 3 days." Not "seems uninterested." Ghosts get follow-ups, not death.</p>
+
+  <p style="color:#666; font-size:0.9rem;">The human sales team's original disease was giving up on leads. Every constraint in this system exists to prevent the AI from inheriting that disease.</p>
+</div>
+
+
+<!-- ═══════ SECTION 6: The 6 YGL Tools ═══════ -->
+
+<div class="asset">
+  <h2>The 6 YGL (Landlord Rep) Tools</h2>
+
+  <p>Different business. Different tool set. The Locator Agent is a middleman &mdash; it searches other buildings' inventory. The Landlord Rep Agent IS the building. It manages its own units, schedules tours, tracks documents, dispatches phone calls.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">1. search_inventory(budget, bedrooms, area, include_section8_pricing)</span>
+   Searches YNY Realty inventory directly &mdash; not an API call, a function call
+   into bluelake_inventory.py. Returns address, type, beds, rent, building,
+   area, utilities_included. If lead mentions Section 8: include_section8_pricing=True.
+
+<span style="color:#e8e4de;">2. update_deal_stage(client_id, stage, reason)</span>
+   15 deal stages: NEW -> CONTACTED -> ENGAGED -> TOUR_OFFERED ->
+   TOUR_SCHEDULED -> TOURED -> DOCS_REQUESTED -> DOCS_RECEIVED ->
+   DOCS_REVIEWED -> APPLIED -> APPROVED -> MOVED_IN
+   Terminal: DEAD, STALLED, COOLING_OFF
+   Stored as pipe-delimited in lead_memory.agent_next_action:
+   "STAGE:TOUR_OFFERED|transition_reason=lead asked about tours"
+
+<span style="color:#e8e4de;">3. create_asana_task(task_type, client_id, client_name, client_phone,</span>
+<span style="color:#e8e4de;">                     unit_address, details)</span>
+   4 task types: tour, doc_review, confidence_case, prospect
+   Creates Asana ticket assigned to Zalmy Vidal (building manager).
+   Only for YNY Realty properties. NEVER for locator leads.
+
+<span style="color:#e8e4de;">4. dispatch_call(call_type, client_phone, client_name, unit_address,</span>
+<span style="color:#e8e4de;">                 rent, tour_date, tour_time)</span>
+   4 call types: tour_confirmation, reengagement, qualification, doc_reminder
+   Queues a FancyHands call (real humans making real phone calls).
+   Only during call hours: 10 AM - 7 PM CT.
+   The LLM should send a heads-up SMS first.
+
+<span style="color:#e8e4de;">5. mark_dead(client_id, reason)</span>
+   Same rules as locator: ONLY explicit opt-out.
+   Sets dead=true in lead_memory table.
+   Ghosts get follow-ups, not death.
+
+<span style="color:#e8e4de;">6. check_documents(client_id)</span>
+   Checks if the lead submitted documents via email to renterdocs@homeeasy.com.
+   Returns has_documents, document_count, document list.
+   Use when lead says "I sent the docs" or during DOCS_REQUESTED follow-up.
+</pre>
+
+  <p>6 tools instead of 4. The landlord rep has more levers because it controls more of the process. The locator hands off to the building's leasing team. The landlord rep IS the leasing team. It can schedule tours, dispatch phone calls, create tickets for the building manager, and verify document submissions.</p>
+
+  <p>The <code>dispatch_call</code> tool is the bridge between AI and human. When the situation requires a human voice &mdash; confirming a tour, re-engaging a stalled lead, qualifying someone who will not text &mdash; the LLM dispatches a FancyHands call. A real person calls the renter. The instructions come from the AI. The human follows the script. It is AI-directed human labor.</p>
+</div>
+
+
+<!-- ═══════ SECTION 7: Message Guard ═══════ -->
+
+<div class="asset">
+  <h2>Message Guard (9 Blocking Categories)</h2>
+
+  <p>Every outbound SMS passes through <code>validate_outgoing_sms()</code> before it reaches the renter. 9 checks. If any check fails, the message is blocked and the reason is logged. The LLM does not get to override this. The guardrail is the final authority.</p>
+
+  <div style="margin:2rem 0; padding:1.5rem; border:1px solid #222; background:#0a0a0a;">
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#cc8888; font-weight:600;">1. Template Leaks</span><br>
+      <span style="color:#888; font-size:0.95rem;">Un-substituted brackets: <code>[City]</code>, <code>[Address]</code>, <code>[insert your name]</code>, <code>[placeholder]</code>. Regex catches 15 bracket patterns including <code>[calculate...]</code>, <code>[TODO]</code>, <code>[TBD]</code>.</span>
+    </div>
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#cc8888; font-weight:600;">2. Prompt Leaks</span><br>
+      <span style="color:#888; font-size:0.95rem;">System prompt fragments visible to renter. 10 regex patterns: "you are the leasing agent for", "COOPERATIVENESS CONTEXT", "TONE GUIDANCE:", "generate a reply", "system prompt". If the renter sees the instructions, the illusion is dead.</span>
+    </div>
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#cc8888; font-weight:600;">3. Phantom Calls</span><br>
+      <span style="color:#888; font-size:0.95rem;">Promising calls that never happen: "I'll give you a call in two minutes", "calling you right now." The AI cannot make phone calls on demand. If it promises one, the lead sits by their phone waiting. Trust destroyed.</span>
+    </div>
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#cc8888; font-weight:600;">4. Hallucinated Addresses</span><br>
+      <span style="color:#888; font-size:0.95rem;">Known fake addresses the LLM has produced before: "1234 Maple Ave", "123 Main St", "456 Oak St", "789 Elm St". Hardcoded set built from actual production hallucinations.</span>
+    </div>
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#cc8888; font-weight:600;">5. Unknown Addresses</span><br>
+      <span style="color:#888; font-size:0.95rem;">Any full street address in the response that does not match inventory street fragments. Regex extracts addresses, then checks against a set built from <code>bluelake_inventory.INVENTORY</code>. If the address is not in our buildings, the LLM made it up.</span>
+    </div>
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#cc8888; font-weight:600;">6. Brand Violations</span><br>
+      <span style="color:#888; font-size:0.95rem;">Saying "HomeEasy" or "Blue Lake" in YGL context. The renter should only see "YNY Realty." Exception: <code>renterdocs@homeeasy.com</code> is allowed because it is a real email address the renter needs.</span>
+    </div>
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#cc8888; font-weight:600;">7. Length &gt; 1600 Characters</span><br>
+      <span style="color:#888; font-size:0.95rem;">SMS breaks at this length. Some carriers split. Some truncate. Some silently drop. The message should be conversational, not an essay. 1600 is the hard cap.</span>
+    </div>
+    <div style="margin-bottom:0.8rem;">
+      <span style="color:#cc8888; font-weight:600;">8. Unverified Amenities</span><br>
+      <span style="color:#888; font-size:0.95rem;">Claiming amenities not backed by building data: dishwasher, in-unit laundry, gym, pool, rooftop, doorman, central air, balcony, garage, bike room. 16 keywords checked. If the building does not have it, we do not claim it.</span>
+    </div>
+    <div>
+      <span style="color:#cc8888; font-weight:600;">9. Threats</span><br>
+      <span style="color:#888; font-size:0.95rem;">For inbound messages. 5 regex patterns: "kill you", "I'll find you", "blow up", "you're dead", "watch your back." Triggers silence protocol: do NOT respond, mark dead + DNC, log SAFETY alert.</span>
+    </div>
+  </div>
+
+  <p>The guard function is 60 lines. Each check returns <code>(is_safe, reason)</code>. The first failure stops the chain &mdash; no point checking brand compliance if the message already has a hallucinated address in it.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">def validate_outgoing_sms(text, unit_addr=None):</span>
+    if not text or not text.strip():
+        return False, "empty message"
+
+    stripped = text.strip()
+
+    <span style="color:#555;"># 1. Bracket / placeholder check</span>
+    bracket_match = _BRACKET_RE.search(stripped)
+    if bracket_match:
+        return False, f"template variable leaked: {bracket_match.group()}"
+
+    <span style="color:#555;"># 2. Prompt leak check</span>
+    for pattern in _PROMPT_LEAK_PATTERNS:
+        if pattern.search(stripped):
+            return False, f"prompt leak detected: {pattern.pattern[:60]}"
+
+    <span style="color:#555;"># 3. Phantom call promise check</span>
+    for pattern in _PHANTOM_CALL_PATTERNS:
+        if pattern.search(stripped):
+            return False, f"phantom call promise: {pattern.pattern[:60]}"
+
+    <span style="color:#555;"># 4. Hallucinated address check</span>
+    for fake_addr in _HALLUCINATED_ADDRESSES:
+        if fake_addr in stripped.lower():
+            return False, f"hallucinated address: {fake_addr}"
+
+    <span style="color:#555;"># 5. Address validation against inventory</span>
+    found_addresses = _ADDRESS_RE.findall(stripped)
+    for addr in found_addresses:
+        if unit_addr and _normalize_addr(addr) == _normalize_addr(unit_addr):
+            continue
+        if not _is_known_address(addr):
+            return False, f"unknown address not in inventory: {addr}"
+
+    <span style="color:#555;"># 6. Brand violation check</span>
+    for pattern in _BRAND_VIOLATIONS:
+        match = pattern.search(stripped)
+        if match:
+            if 'homeeasy.com' in stripped.lower() and '@' in stripped:
+                continue  <span style="color:#555;"># allow renterdocs@homeeasy.com</span>
+            return False, f"brand violation: '{match.group()}'"
+
+    <span style="color:#555;"># 7. Length check</span>
+    if len(stripped) > 1600:
+        return False, f"message too long ({len(stripped)} chars)"
+
+    return True, ""
+</pre>
+
+  <p>When a guard blocks a message, the entire agent turn returns <code>blocked: True</code>. The response field is empty. The trace logs exactly which guard fired and why. Discord gets an alert with the blocked content.</p>
+
+  <p style="color:#666; font-size:0.9rem;">The hallucinated address set was built empirically. Every address in <code>_HALLUCINATED_ADDRESSES</code> is one the LLM actually generated in production. "123 Main St" appeared 4 times before I added the check. "1234 Maple Ave" appeared twice. The set grows when production surfaces new hallucinations.</p>
+</div>
+
+
+<!-- ═══════ SECTION 8: Sanitization ═══════ -->
+
+<div class="asset">
+  <h2>Sanitization (Pre-Guard)</h2>
+
+  <p>Before the message hits the guard, it passes through <code>sanitize_response()</code>. This is not a safety filter. It is a formatting fix for common LLM quirks that are annoying but not dangerous.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">def sanitize_response(text):</span>
+    if not text:
+        return text
+    result = text.strip().strip('"').strip("'").strip()
+    <span style="color:#555;"># Remove LLM self-labeling prefixes</span>
+    for prefix in ['Agent:', 'AI:', 'Assistant:', 'YNY Realty:']:
+        if result.startswith(prefix):
+            result = result[len(prefix):].strip()
+    return result
+</pre>
+
+  <p>LLMs love to prefix their responses with role labels. "Agent: Hey! Great to hear from you." The renter should not see the word "Agent:". It should look like a text from a person. Sanitization strips the label. The guard validates the rest.</p>
+</div>
+
+
+<!-- ═══════ SECTION 9: Duplicate Suppression ═══════ -->
+
+<div class="asset">
+  <h2>Duplicate Suppression</h2>
+
+  <p>Celery retries. Webhook double-delivery. Pod restarts during mid-send. All of these produce duplicate SMS. The dedup layer catches them.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">def is_duplicate_message(phone, message, window_seconds=300):</span>
+    msg_hash = hashlib.md5(
+        message.strip().lower().encode()
+    ).hexdigest()
+
+    <span style="color:#555;"># Clean entries older than the window (300 seconds = 5 minutes)</span>
+    if phone in _recent_messages:
+        cutoff = now - timedelta(seconds=window_seconds)
+        _recent_messages[phone] = [
+            (h, t) for h, t in _recent_messages[phone]
+            if t > cutoff
+        ]
+
+    <span style="color:#555;"># Check for duplicate hash</span>
+    if phone in _recent_messages:
+        for h, t in _recent_messages[phone]:
+            if h == msg_hash:
+                return True  <span style="color:#555;"># duplicate suppressed</span>
+
+    <span style="color:#555;"># Record this message</span>
+    _recent_messages[phone].append((msg_hash, now))
+
+    <span style="color:#555;"># Memory caps</span>
+    if len(_recent_messages) > 50:       <span style="color:#555;"># max 50 phones tracked</span>
+        <span style="color:#555;"># evict the oldest phone</span>
+        oldest = min(_recent_messages,
+            key=lambda p: _recent_messages[p][-1][1])
+        del _recent_messages[oldest]
+    if len(_recent_messages.get(phone, [])) > 20:
+        _recent_messages[phone] = _recent_messages[phone][-10:]
+
+    return False
+</pre>
+
+  <p>MD5 hash of the message content, lowercased and stripped. 5-minute dedup window. In-memory dict, resets on pod restart. That means after a restart, the first message through will not be caught as a duplicate. That is acceptable. The alternative is a database lookup on every outbound SMS, and that adds latency to the critical path.</p>
+
+  <p>The 50-phone cap is not a rate limiter. It is a memory bound. If the system is tracking more than 50 phones simultaneously, it evicts the oldest to keep memory stable. The 20-message cap per phone prevents a single busy conversation from consuming the entire dict. Both caps are conservative &mdash; production rarely hits them because the 5-minute window naturally prunes entries.</p>
+
+  <p style="color:#666; font-size:0.9rem;">The dedup is per-pod, not global. If a message routes to pod A and the retry routes to pod B, the dedup will not catch it. This is a known gap. The Twilio-level dedup (message SID) catches most of what leaks through.</p>
+</div>
+
+
+<!-- ═══════ SECTION 10: Rate Limiting and Business Hours ═══════ -->
+
+<div class="asset">
+  <h2>Rate Limiting and Business Hours</h2>
+
+  <p>3 messages per day per lead. 9 AM to 8 PM Central Time. If a lead texts at 11 PM, the response queues for 9 AM. The rate limit resets at midnight CT.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">def make_rate_limit_guard(max_per_day=3, sms_window=(9, 20)):</span>
+    """Rate limit guardrail: max N messages/day, business hours only."""
+    def check(response_text, ctx):
+        now = datetime.now(CT)
+        hour = now.hour
+        if not (sms_window[0] <= hour < sms_window[1]):
+            return False, (
+                f"Outside SMS window ({sms_window[0]}-{sms_window[1]} CT), "
+                f"current hour: {hour}"
+            )
+        <span style="color:#555;"># Daily count check happens in the service layer (DB query).</span>
+        <span style="color:#555;"># This guardrail enforces the time window.</span>
+        return True, ""
+    return Guardrail(name="rate_limit", check_fn=check)
+</pre>
+
+  <p>The time window check is in the guardrail. The daily count check is in the service layer. Why split? Because the guardrail runs inside <code>agent_core.py</code>, which does not have a database connection. The service layer has the database. It checks how many messages this lead has received today before even calling the agent loop.</p>
+
+  <p>When a message hits the time window guard, it returns <code>(False, "Outside SMS window")</code>. The response is suppressed. But the response is not dropped &mdash; it is queued for the next business hours window. The Celery beat scheduler picks up queued responses at 9 AM and processes them in order.</p>
+
+  <p>Why 3 messages per day? Because I sent 5 per day for a month and leads started blocking the number. 2 per day was not enough to maintain deal momentum. 3 is the equilibrium: enough to keep the conversation moving, not enough to feel like spam.</p>
+
+  <p style="color:#666; font-size:0.9rem;">CT = <code>ZoneInfo("America/Chicago")</code>. Every timestamp in the system is Central Time. The leads are in Chicago. The buildings are in Chicago. The business hours are Chicago hours. UTC is for logs. CT is for business rules.</p>
+</div>
+
+
+<!-- ═══════ SECTION 11: Reasoning Traces ═══════ -->
+
+<div class="asset">
+  <h2>Reasoning Traces</h2>
+
+  <p>Every agent turn produces a <code>ReasoningTrace</code>. This is the flight recorder. When something goes wrong at 2 AM, you read the trace.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">@dataclass</span>
+<span style="color:#e8e4de;">class ReasoningTrace:</span>
+    agent_id: str
+    timestamp: str
+    context_summary: dict       <span style="color:#555;"># {key: type_name} for each context entry</span>
+    system_prompt_length: int
+    llm_response_raw: str = ""
+    tool_calls: list[dict] = field(default_factory=list)
+    tool_results: list[dict] = field(default_factory=list)
+    final_response: str = ""
+    guardrail_results: list[dict] = field(default_factory=list)
+    blocked: bool = False
+    block_reason: str = ""
+    latency_ms: int = 0
+
+    <span style="color:#e8e4de;">def to_dict(self) -> dict:</span>
+        return {
+            "agent_id": self.agent_id,
+            "timestamp": self.timestamp,
+            "context_keys": list(self.context_summary.keys()),
+            "system_prompt_length": self.system_prompt_length,
+            "llm_response_length": len(self.llm_response_raw),
+            "tool_calls": self.tool_calls,
+            "final_response": self.final_response[:500],
+            "guardrail_results": self.guardrail_results,
+            "blocked": self.blocked,
+            "block_reason": self.block_reason,
+            "latency_ms": self.latency_ms,
+        }
+</pre>
+
+  <p>The trace captures everything. Which tools were called. What arguments they received. What they returned. Which guardrails passed. Which guardrails blocked. How long the entire turn took in milliseconds. The raw LLM output (first 500 characters in the serialized form).</p>
+
+  <p>The Discord format is designed for scanning at 2 AM with one eye open.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">**Agent Turn: ygl**</span>
+Time: 2026-04-02T14:23:07-05:00
+Latency: 2847ms
+Tools used: 2
+  - `search_inventory({"budget":1200,"bedrooms":2})` -> OK
+  - `update_deal_stage({"client_id":"51980","stage":"ENGAGED"})` -> OK
+Guard `rate_limit`: PASS
+Guard `message_guard`: PASS
+Response: hey! i found a couple 2-beds in your budget. we have
+a nice one at 7450 S Luella for $1,150/mo &mdash; all utilities
+included. want to set up a showing this week?...
+</pre>
+
+  <p>2847 milliseconds. 2 tool calls, both succeeded. Both guardrails passed. Response sent. That is a healthy turn. When the trace shows 8000ms latency, or tools that error, or a guardrail that blocks &mdash; you know exactly what happened and where to look.</p>
+
+  <p>The <code>log_trace_to_discord</code> function truncates the summary to 1900 characters. Discord's message limit is 2000. The 100-character buffer accounts for formatting overhead that might push the message over. The trace also writes to the database for longer-term analysis, but the Discord message is the alert &mdash; it is what you see in real time.</p>
+</div>
+
+
+<!-- ═══════ SECTION 12: Stale Context Detection ═══════ -->
+
+<div class="asset">
+  <h2>Stale Context Detection</h2>
+
+  <p>There is one more guard that is not in the 9-category list because it does not block messages. It injects a warning into the system prompt.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e8e4de;">_ADVANCED_STAGES = {</span>
+    "TOURED", "DOCS_REQUESTED", "DOCS_RECEIVED",
+    "DOCS_REVIEWED", "APPLIED", "APPROVED", "TOUR_SCHEDULED"
+<span style="color:#e8e4de;">}</span>
+
+<span style="color:#e8e4de;">def detect_stale_context(current_stage, chat_history):</span>
+    if current_stage not in _ADVANCED_STAGES:
+        return ""
+    if chat_history and len(chat_history.strip()) > 100:
+        return ""
+    return (
+        "WARNING: Deal stage is {stage} but chat history is "
+        "missing or very short. History may have failed to load. "
+        "DO NOT restart from scratch -- acknowledge the gap: "
+        "'hey! i think we were chatting before -- "
+        "remind me where we left off?' "
+        "Recover context from the lead before proceeding."
+    )
+</pre>
+
+  <p>If the deal is at <code>TOURED</code> but the chat history is empty &mdash; the database query failed, the chat log got truncated, the context window overflowed &mdash; the LLM would normally restart from scratch. "Hi! I'm from YNY Realty, we have some great apartments..." The renter, who already toured the unit last week, would rightfully think the operation is a mess.</p>
+
+  <p>The stale context detector catches this. It tells the LLM: you are missing context. Do not pretend you are not. Ask the lead to fill in the gap. The renter understands "let me pull up where we left off" far better than receiving a cold intro for the third time.</p>
+</div>
+
+
+<!-- ═══════ SECTION 13: Architecture Summary ═══════ -->
+
+<div class="asset">
+  <h2>Why This Architecture</h2>
+
+  <p>The universal loop exists because I tried the alternative first.</p>
+
+  <p>The first version of every agent had its own conversation handler. The locator agent had <code>service_Amy_v3_improved.py</code>. The landlord rep agent had <code>service_YNY_v1.py</code>. Each one was 400+ lines of prompt building, response parsing, tool calling, error handling, and state management. They diverged. Bugs fixed in one were not fixed in the other. Guardrails added to one were missing from the other. A brand violation check added to YGL in February was still missing from the locator in March.</p>
+
+  <p>The universal loop is the scar tissue from that divergence. One loop. Shared guardrails. Tool sets defined per agent via config. When I fix a bug in the guardrail chain, every agent gets the fix. When I add a new guard category, every agent gets the protection. The loop does not know or care what business unit it serves.</p>
+
+  <p style="color:#666; font-size:0.9rem;">392 lines in agent_core.py. 254 lines in locator_tools.py. 415 lines in ygl_tools.py. 279 lines in ygl_message_guard.py. The brain is 1,340 lines total. Everything a lead ever receives passes through these four files.</p>
+</div>
+
+
+<!-- ═══════ STATS ═══════ -->
+
+<div class="asset" style="margin-top:3rem; border-top:1px solid #333; padding-top:2rem;">
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.7; color:#888; overflow-x:auto; margin:1rem 0;">
+agent_core.py          392 lines    Universal loop, guardrails, traces
+locator_tools.py       254 lines    4 tools for apartment locator
+ygl_tools.py           415 lines    6 tools for landlord rep
+ygl_message_guard.py   279 lines    9 blocking categories, dedup, sanitization
+
+max_tool_rounds        3            Tested higher, LLM hallucinated
+temperature            0.7          Tested 0.5 (too stiff) and 1.0 (too wild)
+rate_limit             3/day        Tested 5/day, leads blocked the number
+sms_window             9 AM-8 PM    Central Time, always
+dedup_window           300 sec      5 minutes, in-memory, per-pod
+max_sms_length         1600 chars   Carriers truncate or drop above this
+phones_tracked         50 max       Memory bound for dedup dict
+hallucinated_addrs     6            Built from production hallucinations
+prompt_leak_patterns   10           Built from production leaks
+brand_violation_words  2            "homeeasy", "blue lake"
+unverified_amenities   16           dishwasher through bike room
+threat_patterns        5            Triggers silence protocol + DNC
+</pre>
+
+</div>

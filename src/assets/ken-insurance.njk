@@ -1,0 +1,693 @@
+---
+layout: base.njk
+title: "Ken Insurance"
+navActive: assets
+---
+
+<p style="margin-bottom:0.5rem;"><a href="/assets/" style="color:#666; font-size:0.85rem; text-decoration:none;">&larr; Back to Assets</a></p>
+<h1>Ken Insurance</h1>
+<p style="color:#999; font-size:1.05rem; margin-bottom:3rem;">14 intents, one state machine, and the Stripe checkout that binds the policy.</p>
+
+<!-- ======= OPENING ======= -->
+
+<div class="asset">
+
+<p>Ken is a separate business. Separate legal entity (Jamboree Insurance), separate codebase, separate compliance requirements. HO4 renters insurance underwritten by Assurant, a Fortune 500 carrier. The product: $100,000 liability coverage + $10,000 personal property protection, delivered via SMS to renters who need proof of insurance before their leasing office hands over keys.</p>
+
+<p>The critical rule: NEVER hardcode a price. Every dollar amount comes from Assurant's rating engine. If Ken quotes a premium before calling the API, that price is a hallucination. If it is too low, the renter signs, discovers the real price at checkout, cancels, and files a complaint with the state insurance commissioner. If it is too high, they walk. Either direction: legal liability. The classifier, the state machine, the templates, the followup scheduler -- all of it exists to collect an address, call the API, and deliver the real number.</p>
+
+<p>Six files. classifier.py, ken.py, templates.py, routes.py, checkout.py, followup.py.</p>
+
+</div>
+
+<!-- ======= INTENT CLASSIFICATION ======= -->
+
+<div class="asset">
+<h2>Intent Classification -- 14 Intents</h2>
+
+<p>Every inbound SMS passes through a regex classifier. No LLM in the loop. The classifier returns an intent, a sentiment, a confidence score, and extracted data. Here are the patterns from production, grouped by category:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e06c75;"># TERMINAL</span>
+<span style="color:#c678dd;">STOP</span> — r'\bstop\b', r'\bunsubscribe\b', r'\bopt\s*out\b',
+       r'\bremove\s*me\b', r'\bcancel\b', r'\bleave\s*me\s*alone\b'
+       <span style="color:#5c6370;">→ Opt out immediately. No reply. TCPA. Confidence: 0.99</span>
+
+<span style="color:#c678dd;">WRONG_NUMBER</span> — r'\bwrong\s*(number|person)\b',
+                r"\bdon'?t\s*know\s*(what|who)\b"
+                <span style="color:#5c6370;">→ Same as STOP. Lead gets opted out.</span>
+
+<span style="color:#e06c75;"># ESCALATION</span>
+<span style="color:#c678dd;">WANT_CALL</span> — r'\bcall\s*me\b', r'\bspeak\s*(to|with)\s*(someone|a\s*person)\b'
+             <span style="color:#5c6370;">→ Creates escalation ticket. Priority: high.</span>
+
+<span style="color:#e06c75;"># OBJECTIONS</span>
+<span style="color:#c678dd;">ALREADY_HAS</span> — r'\balready\s*(have|got|covered)\b',
+               r'\b(using|through|with)\s*(state\s*farm|geico|lemonade)\b'
+               <span style="color:#5c6370;">→ Verify they have $100k liability. Most don't.</span>
+
+<span style="color:#c678dd;">PRICE_QUESTION</span> — r'\bhow\s*much\b', r'\bwhat\'?s?\s*(the\s*)?(cost|price)\b'
+                  <span style="color:#5c6370;">→ NEVER answer with a number. Redirect to address collection.</span>
+
+<span style="color:#c678dd;">IS_THIS_SCAM</span> — r'\bscam\b', r'\bfraud\b', r'\bspam\b', r'\bsketchy\b'
+<span style="color:#c678dd;">WHO_IS_THIS</span> — r'\bwho\s*(is\s*this|are\s*you)\b', r'\bwhat\s*company\b'
+<span style="color:#c678dd;">IS_THIS_AI</span> — r'\b(are\s*you|is\s*this)\s*(a\s*)?(ai|bot|robot)\b'
+              <span style="color:#5c6370;">→ Mandatory disclosure. "I'm Ken, an AI assistant."</span>
+
+<span style="color:#c678dd;">FOXEN_MENTION</span> — r'\bfoxen\b', r'\bbuilding\s*(provides?|has|offers?)\b'
+                <span style="color:#5c6370;">→ "Foxen is a waiver, not insurance. Covers the building, not you."</span>
+
+<span style="color:#c678dd;">WILL_DO_LATER</span> — r'\b(maybe\s*)?later\b', r'\bbusy\b', r'\bnot\s*a\s*good\s*time\b'
+<span style="color:#c678dd;">NOT_INTERESTED</span> — r'\bnot?\s*interested\b', r'\bno\s*thanks?\b', r'\bnope\b'
+
+<span style="color:#e06c75;"># POSITIVE</span>
+<span style="color:#c678dd;">YES_INTERESTED</span> — r'^yes+\b', r'^yeah+\b', r'^sure\b', r'^ok(ay)?\b',
+                  r'^let\'?s?\s*do\s*it\b', r'^send\s*(it|the\s*link)\b'
+
+<span style="color:#e06c75;"># INFO EXTRACTION</span>
+<span style="color:#c678dd;">GAVE_EMAIL</span> — r'\b[\w\.-]+@[\w\.-]+\.\w+\b'  <span style="color:#5c6370;">Confidence: 0.95</span>
+<span style="color:#c678dd;">GAVE_DATE</span> — r'\b(\d{1,2})[/\-](\d{1,2})\b', r'\b(tomorrow|today)\b'
+<span style="color:#c678dd;">GAVE_UNIT</span> — r'\b(unit|apt|#)\s*(\d+\w*)\b'  <span style="color:#5c6370;">Confidence: 0.7</span>
+<span style="color:#c678dd;">GAVE_BUILDING</span> — short message, no other match  <span style="color:#5c6370;">Confidence: 0.6</span>
+</pre>
+
+<p>Priority order matters. STOP always wins. Email is checked before YES because "send it to john@gmail.com" should extract the email, not classify as positive. The classify function walks each pattern set in sequence and returns the first match:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+def classify_message(message: str) -> Classification:
+    text = message.lower().strip()
+    extracted = {}
+
+    <span style="color:#5c6370;"># STOP first (highest priority)</span>
+    for pattern in STOP_PATTERNS:
+        if re.search(pattern, text, re.IGNORECASE):
+            return Classification(Intent.STOP, Sentiment.NEGATIVE, <span style="color:#d19a66;">0.99</span>, {})
+
+    <span style="color:#5c6370;"># Email early (before YES steals "send it to john@...")</span>
+    for pattern in EMAIL_PATTERNS:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            return Classification(Intent.GAVE_EMAIL, Sentiment.POSITIVE,
+                                  <span style="color:#d19a66;">0.95</span>, {'email': match.group(0)})
+
+    <span style="color:#5c6370;"># WRONG_NUMBER → WANT_CALL → YES → ALREADY_HAS → PRICE
+    # → LATER → WHO_IS_THIS → SCAM → AI → FOXEN
+    # → NOT_INTERESTED → DATE → UNIT → BUILDING</span>
+
+    <span style="color:#5c6370;"># Default: unclear</span>
+    return Classification(Intent.UNCLEAR, Sentiment.NEUTRAL, <span style="color:#d19a66;">0.3</span>, {})
+</pre>
+
+<p>Confidence scores descend as intents become ambiguous. STOP at 0.99. A 3-digit number guessed as a unit? 0.7. A short phrase guessed as a building name? 0.6.</p>
+
+</div>
+
+<!-- ======= STATE MACHINE ======= -->
+
+<div class="asset">
+<h2>The State Machine -- 14 States, 16 Events</h2>
+
+<p>If a renter texts "stop" after receiving a quote, they are opted out. If they text "yes" before giving an address, they get asked for an address. If they text "yes" after a quote but the payment link is missing, the system re-triggers quote generation instead of sending a template with a literal "[LINK]" placeholder. Every path is a state transition.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+class LeadStatus(Enum):
+    NEW            = "new"
+    CONTACTED      = "contacted"
+    ENGAGED        = "engaged"
+    INFO_GATHERED  = "info_gathered"
+    QUOTED         = "quoted"
+    PAYMENT_SENT   = "payment_sent"
+    CONVERTED      = "converted"
+    NO_RESPONSE    = "no_response"
+    FOLLOWUP_1     = "followup_1"
+    FOLLOWUP_2     = "followup_2"
+    FOLLOWUP_3     = "followup_3"
+    EXPIRED        = "expired"
+    OPTED_OUT      = "opted_out"
+    HUMAN_ESCALATION = "human_escalation"
+
+TRANSITIONS = {
+    <span style="color:#5c6370;"># Normal flow</span>
+    (NEW, MESSAGE_SENT):           CONTACTED,
+    (CONTACTED, MESSAGE_RECEIVED): ENGAGED,
+    (CONTACTED, TIMEOUT_4H):       NO_RESPONSE,
+    (CONTACTED, OPTED_OUT):        OPTED_OUT,
+
+    <span style="color:#5c6370;"># Follow-up sequence</span>
+    (NO_RESPONSE, FOLLOWUP_SENT):    FOLLOWUP_1,
+    (FOLLOWUP_1, MESSAGE_RECEIVED):  ENGAGED,
+    (FOLLOWUP_1, TIMEOUT_24H):       FOLLOWUP_2,
+    (FOLLOWUP_2, MESSAGE_RECEIVED):  ENGAGED,
+    (FOLLOWUP_2, TIMEOUT_48H):       FOLLOWUP_3,
+    (FOLLOWUP_3, MESSAGE_RECEIVED):  ENGAGED,
+    (FOLLOWUP_3, TIMEOUT_72H):       EXPIRED,
+
+    <span style="color:#5c6370;"># Conversion flow</span>
+    (ENGAGED, INFO_COLLECTED):          INFO_GATHERED,
+    (ENGAGED, OPTED_OUT):               OPTED_OUT,
+    (ENGAGED, ESCALATION_REQUESTED):    HUMAN_ESCALATION,
+    (INFO_GATHERED, QUOTE_SENT):        QUOTED,
+    (QUOTED, PAYMENT_LINK_SENT):        PAYMENT_SENT,
+    (QUOTED, OPTED_OUT):                OPTED_OUT,
+    (PAYMENT_SENT, PAYMENT_COMPLETED):  CONVERTED,
+    (PAYMENT_SENT, OPTED_OUT):          OPTED_OUT,
+}
+</pre>
+
+<p>The happy path is a river: NEW, CONTACTED, ENGAGED, INFO_GATHERED, QUOTED, PAYMENT_SENT, CONVERTED. Seven states, straight line. Every other state is a tributary -- places the lead gets stuck, and mechanisms to pull them back.</p>
+
+<p>OPTED_OUT is reachable from CONTACTED, ENGAGED, QUOTED, and PAYMENT_SENT. Four entry points. The moment someone says "stop," the current just stops. That is not a design choice. That is federal law.</p>
+
+<p>A lead that responds after FOLLOWUP_2 goes straight back to ENGAGED. The system does not hold grudges.</p>
+
+</div>
+
+<!-- ======= FOLLOWUP SCHEDULE ======= -->
+
+<div class="asset">
+<h2>The Followup Schedule</h2>
+
+<p>Five attempts. Intervals from the database query:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+(status = 'contacted'  AND last_outbound_at < NOW() - INTERVAL '<span style="color:#d19a66;">4 hours</span>')
+(status = 'followup_1' AND last_outbound_at < NOW() - INTERVAL '<span style="color:#d19a66;">24 hours</span>')
+(status = 'followup_2' AND last_outbound_at < NOW() - INTERVAL '<span style="color:#d19a66;">48 hours</span>')
+(status = 'followup_3' AND last_outbound_at < NOW() - INTERVAL '<span style="color:#d19a66;">120 hours</span>')
+(status = 'no_response' AND last_outbound_at < NOW() - INTERVAL '<span style="color:#d19a66;">168 hours</span>')
+
+AND (last_inbound_at IS NULL OR last_inbound_at < last_outbound_at)
+
+ORDER BY
+    CASE urgency_tier
+        WHEN 'emergency' THEN 1 WHEN 'critical' THEN 2
+        WHEN 'red' THEN 3 WHEN 'orange' THEN 4
+        WHEN 'yellow' THEN 5 ELSE 6
+    END, last_outbound_at
+</pre>
+
+<p>4 hours. 24 hours. 48 hours. 120 hours. 168 hours. After 168 hours (7 days) with no response, the lead expires. The AND clause prevents followups to leads who already responded. The ORDER BY prioritizes by urgency first -- a lead moving in tomorrow gets the followup before a lead moving in 30 days.</p>
+
+<p>Pre-quote followups (no address yet) focus on requirement urgency:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#5c6370;"># 4h: Requirement</span>
+"{first_name} - following up on the renters insurance. It's
+required in {state} before your landlord will hand over keys.
+Send me the address and I'll get you a quote in 2 minutes."
+
+<span style="color:#5c6370;"># 24h: Consequence</span>
+"Hey {first_name}, circling back. I've seen people get stuck
+at key pickup because they didn't have insurance ready."
+
+<span style="color:#5c6370;"># 48h: Easy</span>
+"{first_name} - still need to get you sorted. It's required
+either way, let's just knock it out. Send me the address."
+
+<span style="color:#5c6370;"># 5d: Last minute</span>
+"Your leasing office will ask for proof of insurance before
+keys. I can get you covered same-day - just need the address."
+
+<span style="color:#5c6370;"># 7d: Soft close</span>
+"{first_name}, last message from me on this. If you've got
+coverage handled, ignore me. If not, send the address."
+</pre>
+
+<p>Post-quote followups echo the renter's own statements and include the payment link:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#5c6370;"># Post-quote 1: Echo + link</span>
+"Link's still ready for {address}. You said {move_date_statement}
+- let's get this crossed off. {payment_link}"
+
+<span style="color:#5c6370;"># Post-quote 2: Checklist pressure</span>
+"You're {days_until} days out. Leasing office is gonna ask for:
+proof of insurance, signed lease, deposit, ID... ${monthly}/mo,
+30 seconds: {payment_link}"
+
+<span style="color:#5c6370;"># Post-quote 3: Urgency</span>
+"You mentioned {move_date_statement} - that's coming up fast.
+I've seen people get stuck at key pickup. Your quote's still
+locked at ${monthly}/mo: {payment_link}"
+</pre>
+
+<p>"I've seen people get stuck at key pickup" appears twice across the template set. It is the single most effective line in the system. Not because it is clever. Because it is true.</p>
+
+</div>
+
+<!-- ======= MESSAGE TEMPLATES ======= -->
+
+<div class="asset">
+<h2>Message Templates</h2>
+
+<p>Ken's templates follow reverse selling. Instead of pushing insurance onto the renter, take it off their plate. "Let me handle this so you're not scrambling at key pickup." Three initial outreach variations rotate:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+INITIAL_OUTREACH = """Hey {first_name} - we got flagged that
+you're moving into a rental in {city}. I'm reaching out to
+get you set up with renters insurance - it's required before
+you can get keys in {state}. Apologies if this info is out
+of date, just let me know."""
+</pre>
+
+<p>The "apologies if this info is out of date" is not politeness. It is compliance. We are texting people who did not ask to hear from us. The out gives them a non-confrontational exit before they say "stop" and trigger the opt-out machinery.</p>
+
+<p>The quote template. Only fires AFTER the Assurant API returns a real premium:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+QUOTE_STANDARD = """{first_name}, here's your quote for {address}:
+
+${monthly}/mo (${annual}/year)
+$100k liability + $10k personal property
+
+Moving is stressful enough - let me get this off your plate.
+Apple Pay takes 30 seconds: {payment_link}
+
+Once done, you get the signed policy instantly and I'll send
+it to your leasing office. One less thing."""
+</pre>
+
+<p>The payment link is always included with the quote. The system never asks "ready for the link?" That extra round trip kills conversions. Apple Pay reduces payment to 30 seconds.</p>
+
+<p>Objection responses redirect back to address collection:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#5c6370;"># "Already have insurance"</span>
+"Got it. Just make sure your policy has $100k liability - that's
+what most {state} landlords require."
+
+<span style="color:#5c6370;"># "Is this a scam?"</span>
+"We're licensed in {state} and work with Assurant - one of the
+largest insurance carriers in the country."
+
+<span style="color:#5c6370;"># "Foxen / building provides it"</span>
+"What buildings offer is usually a liability waiver, not actual
+renters insurance. It covers the building, not your stuff."
+
+<span style="color:#5c6370;"># "Too expensive" (after quote)</span>
+"That's ${monthly}/mo - works out to about ${daily} a day. And
+it's required by your landlord. The alternative is not getting
+your keys."
+
+<span style="color:#5c6370;"># STOP</span>
+"Got it - you won't hear from me again. Take care."
+</pre>
+
+<p>The STOP_CONFIRM is 9 words. It does not try to retain. It does not ask why. Anything more is a TCPA violation.</p>
+
+</div>
+
+<!-- ======= ASSURANT API FLOW ======= -->
+
+<div class="asset">
+<h2>The Assurant API Flow</h2>
+
+<p>Two steps: authenticate, then quote. Card data never touches our servers.</p>
+
+<p>Step 1: OAuth 2.0. Client credentials grant. Token lasts 7200 seconds. Cached with a 300-second buffer to avoid mid-request expiry:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+async def _get_token(self) -> str:
+    if self._token and self._token_expires and datetime.now() < self._token_expires:
+        return self._token
+
+    auth = base64.b64encode(
+        f"{self.config.client_id}:{self.config.client_secret}".encode()
+    ).decode()
+
+    response = await client.post(self.config.token_url, headers={
+        "Authorization": f"Basic {auth}",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }, data={"grant_type": "client_credentials", "scope": self.config.scope})
+
+    data = response.json()
+    self._token = data["access_token"]
+    self._token_expires = datetime.now() + timedelta(
+        seconds=data.get("expires_in", 7200) - <span style="color:#d19a66;">300</span>
+    )
+    return self._token
+</pre>
+
+<p>Step 2: Create quote. Address, state, coverage levels, underwriting defaults. Standard tier: $100,000 liability, $10,000 personal property (or $20,000 default), $250 deductible, dwelling type "A" (apartment):</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+quote_request = {
+    "transaction": {
+        "clientId": "JAM",     <span style="color:#5c6370;"># Jamboree</span>
+        "referralId": "SMS",   <span style="color:#5c6370;"># Track channel</span>
+        "productType": "RI",
+        "policyEffectiveDate": effective_date
+    },
+    "policyHolder": {"insured": {"address": {
+        "address1": address, "city": city,
+        "state": state, "postalCode": zipcode
+    }}},
+    "underWriting": {"questions": [
+        {"questionName": "dwellingType", "answer": "A"},
+        {"questionName": "mustHaveInsurance", "answer": "Y"},
+        {"questionName": "howManyLosses", "answer": "0"},
+        {"questionName": "hadAnimalInjury", "answer": "N"},
+    ]},
+    "coverage": {"parameters": [
+        {"name": "personalPropertyAmount", "value": "10000"},
+        {"name": "liabilityAmount", "value": "100000"},
+        {"name": "deductible", "value": "250"},
+        {"name": "replacementCost", "value": "Y"},
+    ]}
+}
+
+response = await client.post(
+    f"{api_base}/renters/quote/v2/",
+    headers=self._get_headers(token),
+    json=quote_request,
+    timeout=<span style="color:#d19a66;">30.0</span>
+)
+</pre>
+
+<p>The response returns a <code>workItemId</code>, premium amount, and payment schedules. The parser extracts the full-pay option:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+def parse_quote_response(response):
+    tx = response.get("transactionDetails", {})
+    premium = response.get("premiumDetails", {})
+    payments = tx.get("payments", {}).get("schedules", [])
+
+    return {
+        "work_item_id": tx.get("workItemId"),
+        "premium": premium.get("premiumAmount"),
+        "monthly_estimate": f"{float(premium.get('premiumAmount', 0)) / 12:.2f}",
+        "payment_options": [{"payments": p["numberOfPayments"],
+                             "down_payment": p["downPaymentAmount"]}
+                            for p in payments],
+        "denied": tx.get("denialNotice") is not None,
+    }
+</pre>
+
+<p>What happens when the API is down. The route handler has a fallback: state-based premium estimates (TX: $168, IL: $156, MI: $144). Marked <code>"estimated": True</code> in metadata. The renter sees a real number, but the system knows it might shift. If they complete checkout at the estimated price and the real price differs, the system absorbs the delta. The alternative -- "our pricing system is down, try again later" -- loses the lead forever.</p>
+
+</div>
+
+<!-- ======= CHECKOUT FLOW ======= -->
+
+<div class="asset">
+<h2>The Checkout Flow</h2>
+
+<p>The payment link points to <code>/checkout/{lead_id}</code>. Server-rendered HTML with the renter's name, building, coverage breakdown, and price pre-filled. No login. No account creation. Click, see price, tap Apple Pay.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#5c6370;"># Personalized header</span>
+"Hey {first_name}, you're almost covered!"
+
+<span style="color:#5c6370;"># Coverage</span>
+$100,000 liability  +  $10,000 personal property
+
+<span style="color:#5c6370;"># Price (from Assurant API, NEVER hardcoded)</span>
+${monthly}/mo  (${annual}/year)
+
+<span style="color:#5c6370;"># Trust badges</span>
+Secure Payment  |  Assurant Backed  |  Instant Coverage
+
+<span style="color:#5c6370;"># Payment via Spreedly -- PCI Level 1</span>
+<span style="color:#5c6370;"># Card data never touches our servers</span>
+</pre>
+
+<p>The payment gateway is Spreedly. It tokenizes card details client-side and sends a payment method token to our backend. Our backend forwards that token to Assurant for policy issuance. At no point does raw card data pass through our servers.</p>
+
+<p>The success page has confetti. The renter just made a purchase they did not want to make, for a product they are legally required to have. The confetti makes it feel like they accomplished something instead of paying a bill. Measurable impact on support ticket volume.</p>
+
+</div>
+
+<!-- ======= WEBHOOK HANDLING ======= -->
+
+<div class="asset">
+<h2>Webhook Handling</h2>
+
+<p>The Twilio webhook is the front door. Every inbound text hits <code>/twilio/incoming</code>. Three things in order: validate signature, check for opt-out, process message. Signature validation and opt-out are synchronous. Message processing is async (background task) because Twilio has a 15-second timeout -- exceed it and Twilio retries, generating duplicate messages.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+@router.post("/twilio/incoming")
+async def twilio_incoming(request, background_tasks):
+    form = await request.form()
+    data = dict(form)
+
+    if not sms.validate_webhook(url, data, signature):
+        raise HTTPException(status_code=<span style="color:#d19a66;">403</span>)
+
+    from_number = data.get('From', '')
+    body = data.get('Body', '')
+
+    <span style="color:#5c6370;"># TCPA GATE: opt-out check is SYNCHRONOUS</span>
+    if compliance and compliance.is_opt_out_message(body):
+        await compliance.process_opt_out(phone=from_number)
+        if lead:
+            await db.update_lead(lead['id'], {
+                'status': 'opted_out',
+                'opted_out_at': datetime.utcnow(),
+            })
+        return Response(content="", media_type="text/xml")
+
+    <span style="color:#5c6370;"># Non-opt-out: process in background</span>
+    lead = await db.get_lead_by_phone(from_number)
+    if lead:
+        background_tasks.add_task(
+            process_inbound_message,
+            lead['id'], body, message_sid, request.app
+        )
+    return Response(content="", media_type="text/xml")
+</pre>
+
+<p>The payment webhook handles success and failure. Payment success triggers policy creation and a confirmation SMS. Failure increments a retry counter. Signature verification happens before processing -- without it, anyone could POST fake payment confirmations and generate fraudulent policies.</p>
+
+</div>
+
+<!-- ======= POLICY GENERATION ======= -->
+
+<div class="asset">
+<h2>Policy Generation</h2>
+
+<p>Policy number format: <code>JMB-YYYY-{hex}</code>. JMB = Jamboree. YYYY = bind year. Hex = first 8 characters of the lead UUID, uppercased. Deterministic from the lead ID -- trace any policy back to its lead without a database lookup.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+async def process_successful_payment(lead_id, transaction_token, app):
+    effective_date = datetime.utcnow().date()
+    expiration_date = effective_date + timedelta(days=365)
+    policy_number = f"JMB-{datetime.utcnow().strftime('%Y')}-{str(lead_id)[:8].upper()}"
+
+    policy_id = await db.create_policy({
+        'lead_id': lead_id,
+        'policy_number': policy_number,
+        'premium_monthly': (lead_data.get('quote_premium') or 180) / 12,
+        'premium_annual': lead_data.get('quote_premium') or 180,
+        'effective_date': effective_date,
+        'expiration_date': expiration_date,
+        'spreedly_transaction_id': transaction_token,
+    })
+
+    await db.update_lead(lead_id, {
+        'status': 'converted',
+        'converted_at': datetime.utcnow(),
+        'policy_number': policy_number,
+    })
+
+    <span style="color:#5c6370;"># Schedule LTV lifecycle (welcome, check-ins, renewal)</span>
+    if ltv:
+        await ltv.schedule_touchpoints(policy_id, lead_id,
+            effective_date, expiration_date)
+
+    <span style="color:#5c6370;"># SMS: "Done! You're covered, {first_name}."</span>
+    confirmation = ken.handle_payment_completed(lead)
+</pre>
+
+<p>The LTV scheduler fires after policy creation. Welcome check-in at day 7, satisfaction pulse at day 30, mid-term at 6 months, renewal notice 45 days before expiration. Ken's job ends when the policy is bound. Everything after is retention.</p>
+
+</div>
+
+<!-- ======= FOLLOWUP JOB ======= -->
+
+<div class="asset">
+<h2>The Followup Job</h2>
+
+<p>Runs every 15 minutes. Pulls up to 100 leads, ordered by urgency tier then staleness. For each lead: load full object with metadata, generate context-aware followup through Ken, send via Twilio with compliance checking, log, update status.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+async def process_followups(db, sms, ken):
+    leads = await db.get_leads_needing_followup(limit=<span style="color:#d19a66;">100</span>)
+
+    sent = 0
+    for lead_data in leads:
+        lead = Lead(
+            id=lead_data['id'],
+            phone=lead_data['phone'],
+            status=LeadStatus(lead_data['status']),
+            metadata=lead_data.get('metadata') or {},
+            <span style="color:#5c6370;"># ... all fields loaded for personalization</span>
+        )
+
+        message = ken.handle_timeout(lead)
+        if message:
+            result = await sms.send_sms_checked(
+                to_number=lead.phone, message=message,
+                state=lead.state or 'TX', lead_id=lead.id)
+
+            await db.log_message(lead_id=lead.id,
+                direction='outbound', content=message,
+                template_id=f'followup_{lead.followup_count}')
+
+            await db.update_lead(lead.id, {
+                'status': lead.status.value,
+                'followup_count': lead.followup_count,
+                'last_outbound_at': datetime.utcnow()})
+
+            sent += 1
+            await asyncio.sleep(<span style="color:#d19a66;">1</span>)  <span style="color:#5c6370;"># Rate limit</span>
+
+    return sent
+</pre>
+
+<p>The <code>asyncio.sleep(1)</code> is our rate limit, not Twilio's. If 100 followups fire in 2 seconds and 30 reply immediately, the inbound handler floods. The 1-second pause spreads load. 100 leads in under 2 minutes.</p>
+
+<p>A separate daily job, <code>expire_past_move_ins</code>, finds every active lead whose move-in date has passed and marks them EXPIRED. Ken stops texting.</p>
+
+</div>
+
+<!-- ======= STATEMENT TRACKING ======= -->
+
+<div class="asset">
+<h2>Statement Tracking</h2>
+
+<p>Every inbound message is scanned for trackable statements. When a renter says "I'm moving next week," that phrase gets stored in <code>lead.metadata['statements_made']['move_date']</code>. When the followup fires, the template echoes it: "You said next week -- that's coming up fast."</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+def _extract_statements(self, lead, message):
+    message_lower = message.lower()
+
+    <span style="color:#5c6370;"># Move date mentions</span>
+    for phrase in ['next week', 'this week', 'tomorrow',
+                   'in a few days', 'end of month']:
+        if phrase in message_lower:
+            self._track_statement(lead, 'move_date', phrase)
+            break
+
+    <span style="color:#5c6370;"># Staff name mentions</span>
+    name_match = re.search(r'(?:with|to|from)\s+([A-Z][a-z]+)', message)
+    if name_match:
+        self._track_statement(lead, 'contact_name', name_match.group(1))
+
+    <span style="color:#5c6370;"># Busy/stress signals</span>
+    for phrase in ['busy', 'lot going on', 'swamped', 'stressed']:
+        if phrase in message_lower:
+            self._track_statement(lead, 'busy', message)
+            break
+
+def build_urgency_from_statements(statements, days_until_move=None):
+    parts = []
+    if statements.get('move_date') and days_until_move:
+        parts.append(f"You said {statements['move_date']} - "
+                     f"that's {days_until_move} days.")
+    if statements.get('busy'):
+        parts.append("I know you've got a lot going on. "
+                     "Let me take this off your plate.")
+    if not parts:
+        parts.append("Moving is stressful enough - "
+                     "let's cross this off the list.")
+    return " ".join(parts)
+</pre>
+
+<p>"You said next week" is five words and it changes the psychology of the conversation. The renter is no longer being sold to by a stranger. They are being held to something they said themselves. Their own words become the urgency mechanism.</p>
+
+</div>
+
+<!-- ======= DATABASE SCHEMA ======= -->
+
+<div class="asset">
+<h2>Database Schema</h2>
+
+<p>Three tables. PostgreSQL. UUIDs for primary keys, JSONB for metadata.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+<span style="color:#e06c75;">-- insurance_leads: one row per renter</span>
+CREATE TABLE insurance_leads (
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    phone             TEXT NOT NULL UNIQUE,
+    first_name        TEXT,
+    email             TEXT,
+    building_name     TEXT,
+    building_address  TEXT,
+    unit              TEXT,
+    city              TEXT,
+    state             TEXT NOT NULL,
+    zipcode           TEXT,
+    move_in_date      DATE,
+    status            TEXT NOT NULL DEFAULT 'new',
+    urgency_tier      TEXT NOT NULL DEFAULT 'green',
+    last_outbound_at  TIMESTAMPTZ,
+    last_inbound_at   TIMESTAMPTZ,
+    followup_count    INT DEFAULT 0,
+    quote_premium     NUMERIC(10,2),
+    payment_link_url  TEXT,
+    policy_number     TEXT,
+    metadata          JSONB DEFAULT '{}',
+    created_at        TIMESTAMPTZ DEFAULT NOW(),
+    converted_at      TIMESTAMPTZ,
+    opted_out_at      TIMESTAMPTZ
+);
+
+CREATE INDEX idx_leads_phone ON insurance_leads(phone);
+CREATE INDEX idx_leads_status ON insurance_leads(status);
+<span style="color:#5c6370;">-- Partial index: only active leads, keeps followup query fast</span>
+CREATE INDEX idx_leads_followup ON insurance_leads(status, last_outbound_at)
+    WHERE status NOT IN ('converted', 'expired', 'opted_out');
+
+<span style="color:#e06c75;">-- conversations: every SMS sent or received</span>
+CREATE TABLE conversations (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    lead_id     UUID NOT NULL REFERENCES insurance_leads(id),
+    direction   TEXT NOT NULL,  <span style="color:#5c6370;">-- 'inbound' or 'outbound'</span>
+    content     TEXT NOT NULL,
+    twilio_sid  TEXT,
+    intent      TEXT,
+    sent_at     TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_conv_lead ON conversations(lead_id);
+
+<span style="color:#e06c75;">-- policies: one row per bound policy</span>
+CREATE TABLE policies (
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    lead_id                 UUID NOT NULL REFERENCES insurance_leads(id),
+    policy_number           TEXT NOT NULL UNIQUE,
+    carrier                 TEXT DEFAULT 'Assurant',
+    premium_monthly         NUMERIC(10,2),
+    premium_annual          NUMERIC(10,2),
+    liability               INT DEFAULT 100000,
+    personal_property       INT DEFAULT 10000,
+    effective_date          DATE NOT NULL,
+    expiration_date         DATE,
+    spreedly_transaction_id TEXT,
+    created_at              TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_policies_lead ON policies(lead_id);
+CREATE INDEX idx_policies_expiry ON policies(expiration_date);
+</pre>
+
+<p>The partial index <code>idx_leads_followup</code> is the one that matters most. The followup job runs every 15 minutes and queries by status and last_outbound_at. Without it, the query scans the entire table. With it, only active leads get touched. As converted and expired leads accumulate, the partial index keeps the followup query fast.</p>
+
+<p>The <code>metadata</code> JSONB column holds everything that does not deserve its own column: statements_made, building_contact, property_lookup results, quote_data from Assurant. It is the scar tissue of the conversation -- everything Ken learned about this person, stored in a format that survives schema changes.</p>
+
+</div>
+
+<!-- ======= WHAT FAILS ======= -->
+
+<div class="asset">
+<h2>What Fails</h2>
+
+<p>Three failure modes that matter.</p>
+
+<p>First: Assurant API timeout. The 30-second timeout. If Assurant is slow during maintenance windows (Sunday 2-6 AM CT), the renter gets "One sec, getting your numbers..." and then the fallback estimate fires. But if they already closed the conversation, that quote lands in a dead thread. The followup job picks it up 4 hours later. By then, momentum is gone.</p>
+
+<p>Second: the renter gives a building name, not an address. "The Lydian." Ken triggers a property lookup in the background and asks for the unit number. If the lookup returns 3 matches, the renter gets a numbered list. If it returns 0 -- misspelling, new construction not in Maps -- they get "Can you send me the full address?" That round trip adds 2-4 messages, each one a chance to disengage.</p>
+
+<p>Third: TCPA liability. The opt-out gate in the webhook is the last line of defense. But the real risk is upstream: did the partner building have proper consent to share this renter's phone number? If a renter says "how did you get my number" and the answer is "your building gave it to us," we are one complaint away from a $500-$1,500 per-message fine. The WHO_IS_THIS handler deflects. It does not eliminate the consent question. That is a business problem, not a code problem.</p>
+
+</div>

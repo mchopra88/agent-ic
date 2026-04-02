@@ -1,0 +1,589 @@
+---
+layout: base.njk
+title: "Deployment"
+navActive: assets
+---
+
+<p style="margin-bottom:0.5rem;"><a href="/assets/" style="color:#666; font-size:0.85rem; text-decoration:none;">&larr; Back to Assets</a></p>
+
+<h1>Deployment</h1>
+<p style="color:#999; font-size:1.05rem; margin-bottom:0.5rem; font-style:italic;">Four containers in one pod, Cloud Build, and 16 Discord channels watching everything.</p>
+
+<p>When you're the only person operating a system that processes 30,000 leads a day, deployment infrastructure isn't optional. It's the difference between a bad deploy costing you an hour and costing you 8 days. I know this because an 8-day doom loop once cost me $4,000-$5,000 per day in lost revenue.</p>
+
+<p>That story is at the bottom of this page. Read the architecture first. Then you'll understand why every piece exists.</p>
+
+
+<!-- ====== 1. THE 4-CONTAINER GKE POD ====== -->
+
+<div class="asset">
+  <h2>The 4-Container GKE Pod</h2>
+
+  <p>One Kubernetes pod. Four containers. All running the same Docker image with different entrypoints. This is the core of the Landlord Rep agent &mdash; the system that operates as the leasing office for 8 buildings with zero human staff.</p>
+
+  <p>The pod is named <code>homeeasy-ai-service-v3</code>. Legacy name from a time when this was the third rewrite. It stuck because renaming a GKE deployment mid-production is a great way to lose an afternoon you'll never get back.</p>
+
+  <div style="margin:2rem 0; padding:1.5rem; border:1px solid #222; background:#0a0a0a;">
+    <div style="margin-bottom:1.5rem;">
+      <span style="color:#88cc88; font-weight:600;">Container 1: Web Server (gunicorn)</span><br>
+      <code style="color:#888; font-size:0.85rem;">gunicorn -w 1 -b 0.0.0.0:5012 app:app --log-level debug --timeout 60</code><br>
+      <span style="color:#888; font-size:0.9rem;">250m CPU, 512Mi RAM. The lightest container. Receives Twilio webhooks, serves API endpoints. One worker because the real work gets handed off to Celery immediately. The 60-second timeout matters: Twilio will retry if your webhook doesn't respond in time, and duplicate inbound processing is worse than a slow response.</span>
+    </div>
+    <div style="margin-bottom:1.5rem;">
+      <span style="color:#88cc88; font-weight:600;">Container 2: Celery Beat (scheduler)</span><br>
+      <code style="color:#888; font-size:0.85rem;">celery -A app.celery beat --loglevel=info</code><br>
+      <span style="color:#888; font-size:0.9rem;">500m CPU request, 2Gi RAM limit. The cron scheduler. Fires periodic tasks: followup checks every 30 minutes, stale context cleanup, SLA nag sequences, daily owner reports. Beat doesn't execute tasks &mdash; it drops them into the RabbitMQ queue. But it needs enough CPU to not drift on timing. A beat that fires 3 minutes late compounds into missed followup windows across hundreds of leads.</span>
+    </div>
+    <div style="margin-bottom:1.5rem;">
+      <span style="color:#88cc88; font-weight:600;">Container 3: Celery Worker</span><br>
+      <code style="color:#888; font-size:0.85rem;">celery -A app.celery worker --loglevel=info -c 6 --queues=ai_client_service_v3 --time-limit=1700 --soft-time-limit=1600 --max-tasks-per-child=10 --prefetch-multiplier=1</code><br>
+      <span style="color:#888; font-size:0.9rem;">1000m CPU, 2Gi RAM. The workhorse. 6 concurrent workers processing AI conversations in parallel. Every flag on that command line exists because of a production incident.</span>
+    </div>
+    <div>
+      <span style="color:#88cc88; font-weight:600;">Container 4: Second Celery Worker</span><br>
+      <span style="color:#888; font-size:0.9rem;">Identical configuration to Container 3. Redundancy and throughput. If one worker container OOM-kills, the other keeps processing. Without it, a single container restart means 6 workers go dark simultaneously &mdash; and every lead in mid-conversation gets silence.</span>
+    </div>
+  </div>
+
+  <p>The service fronting this pod:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+apiVersion: v1
+kind: Service
+metadata:
+  name: homeeasy-ai-service-v3
+spec:
+  selector:
+    app: homeeasy-ai-service-v3
+  ports:
+    - protocol: TCP
+      port: 5012
+      targetPort: 5012
+  type: LoadBalancer</pre>
+
+  <p>LoadBalancer type means GKE provisions a public IP. Twilio's webhooks hit that IP directly. No ingress controller, no nginx reverse proxy, no API gateway. One fewer thing to break.</p>
+</div>
+
+
+<!-- ====== 2. THE CELERY FLAGS ====== -->
+
+<div class="asset">
+  <h2>Why Those Celery Flags</h2>
+
+  <p>Every flag on the worker command exists because something went wrong in production without it.</p>
+
+  <p><code>--time-limit=1700</code> and <code>--soft-time-limit=1600</code> &mdash; these are seconds, not milliseconds. The soft limit (1600 seconds, about 26.6 minutes) sends a SIGTERM so the task can clean up: close database connections, flush partial state, send a Discord alert. The hard limit (1700 seconds, about 28.3 minutes) kills the process. The gap gives 100 seconds for graceful shutdown. Without this pair, a stuck LLM call (Anthropic or Gemini timing out on their end) would hold a worker forever. Six stuck workers means zero capacity.</p>
+
+  <p><code>--max-tasks-per-child=10</code> &mdash; after 10 tasks, the child process restarts. This is the memory leak seatbelt. Python's garbage collector doesn't always reclaim everything, especially with large LLM response objects and 500-message chat histories that get parsed into dictionaries of dictionaries. After 10 conversations, restart the process. Clean slate. The 2Gi limit is tight enough that without this flag, you get OOM kills within hours.</p>
+
+  <p><code>--prefetch-multiplier=1</code> &mdash; each worker only grabs one task at a time from the queue. Default is 4, which means a worker pulls 4 tasks, starts processing one, and holds the other 3 hostage. If that worker OOM-kills during task 1, tasks 2-4 vanish. With multiplier=1, each task is only pulled when the worker is ready. Slower throughput, but no phantom task loss.</p>
+
+  <p><code>-c 6</code> &mdash; six concurrent workers per container. Two containers means 12 total. Each conversation takes 3-15 seconds depending on LLM response time. At peak, I've seen 40+ tasks queued simultaneously during a lead batch drop from YouGotListings. 12 workers drain that in under a minute.</p>
+</div>
+
+
+<!-- ====== 3. RESOURCE SIZING ====== -->
+
+<div class="asset">
+  <h2>Why These Sizes</h2>
+
+  <p>Web server at 250m CPU, 512Mi RAM: it receives a Twilio webhook (a few KB of JSON), validates it, drops a task into RabbitMQ, and returns a 200. That's it. No heavy compute. The RAM limit is generous for what it does, but Flask + gunicorn + the imported module tree takes about 180Mi on startup. The remaining 330Mi is headroom for request spikes.</p>
+
+  <p>Workers at 1000m CPU, 2Gi RAM: LLM calls take wall-clock time, not CPU. But response parsing &mdash; extracting tool calls, building context windows, serializing conversation history &mdash; needs CPU. And it needs RAM. A lead with 500 messages has a chat history that, when loaded and parsed into the context window, can consume 800Mi. Multiply by 6 concurrent workers and the 2Gi limit is the floor, not the ceiling.</p>
+
+  <p>I've seen OOM kills when a worker handles a lead with 500+ message history. The container restarts. The in-flight task is lost. The lead doesn't get a response. And the only evidence is a single line in <code>kubectl describe pod</code>:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+State:          Running
+Last State:     Terminated
+  Reason:       OOMKilled
+  Exit Code:    137
+Restart Count:  1</pre>
+
+  <p>Exit code 137 is the kernel killing your process. There is no stack trace. There is no error log. There is no Discord alert. The process is gone. The only way to know it happened is to check restart counts or watch the pod events. That's why the Discord error pipeline exists &mdash; to catch everything upstream of the kill.</p>
+
+  <p>Beat at 500m CPU request, 2Gi RAM limit: the RAM limit looks oversized for a scheduler. It is. But beat imports the same codebase as the workers (same Docker image, same Python modules), so the baseline memory footprint is the same ~180Mi. The CPU request of 500m ensures the scheduler doesn't get starved during pod resource contention. A beat that drifts on timing means followup sequences fire late, SLA checks miss their windows, and the daily owner report arrives at 11am instead of 7am.</p>
+</div>
+
+
+<!-- ====== 4. CLOUD BUILD PIPELINE ====== -->
+
+<div class="asset">
+  <h2>Cloud Build Pipeline</h2>
+
+  <p>Six steps. Push to the <code>test-deployment</code> branch triggers the build. The trigger name is <code>homeeasy-amyservice-v1</code> &mdash; another legacy name. Renaming it would break the trigger ID references in deployment scripts.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+steps:
+  # Step 1: Fetch ConfigMap values for tests
+  - name: 'gcr.io/cloud-builders/kubectl'
+    id: FetchConfig
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud container clusters get-credentials \
+          homeeasy-microservice-cluster-v1 --zone=us-central1
+        kubectl get configmap homeeasy-may-ai-service-v3-config-b4hc \
+          -o jsonpath='{.data.GOOGLE_API_KEY}' > /workspace/google_api_key.txt
+        kubectl get configmap homeeasy-may-ai-service-v3-config-b4hc \
+          -o jsonpath='{.data.MAY_AI_MODEL}' > /workspace/may_ai_model.txt
+
+  # Step 2: Run tests
+  - name: 'python:3.11'
+    id: Tests
+    entrypoint: bash
+    args:
+      - -lc
+      - |
+        python -m pip install -U pip
+        pip install -r requirements.txt
+        pip install pytest pytest-mock requests-mock
+        export GOOGLE_API_KEY=$(cat /workspace/google_api_key.txt 2>/dev/null || echo "")
+        export MAY_AI_MODEL=$(cat /workspace/may_ai_model.txt 2>/dev/null || echo "gemini-2.5-flash")
+        python run_tests.py
+
+  # Step 3: Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '--no-cache', '-t',
+      'us-central1-docker.pkg.dev/hep01-303921/homeeasy-repos/homeeasy-ai-service-v3:latest',
+      '.', '-f', './Dockerfile.prod']
+    id: Build
+
+  # Step 4: Push to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push',
+      'us-central1-docker.pkg.dev/hep01-303921/homeeasy-repos/homeeasy-ai-service-v3:latest']
+    id: Push
+
+  # Step 5: Stamp IMAGE_TAG in deployment.yaml
+  - name: 'alpine'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        sed -i "s/IMAGE_TAG/latest/g" ./deployment.yaml
+
+  # Step 6: Deploy to GKE
+  - name: 'gcr.io/cloud-builders/kubectl'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud container clusters get-credentials \
+          homeeasy-microservice-cluster-v1 --zone=us-central1
+        kubectl replace -f ./deployment.yaml || kubectl apply -f ./deployment.yaml
+    env:
+    - 'CLOUDSDK_COMPUTE_ZONE=us-central1'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=homeeasy-microservice-cluster-v1'</pre>
+
+  <p>Step 1 is unusual. Most CI pipelines don't reach into the live cluster during the test phase. Mine does because the tests need real API keys &mdash; specifically the Gemini API key to test the LLM fallback path. The keys live in the Kubernetes ConfigMap, not in the repo. So the pipeline pulls them from the cluster, writes them to files in <code>/workspace/</code> (shared across all Cloud Build steps), and the test step reads them.</p>
+
+  <p>When Step 2 fails, the entire pipeline stops. No partial deploys. No "the tests failed but the image built anyway." This is the seatbelt. Before Cloud Build existed, I was doing <code>kubectl apply</code> from my laptop. One bad deploy that passes through a broken test gate is exactly how the 8-day doom loop started.</p>
+
+  <p>Step 5 does a <code>sed</code> replacement on the deployment YAML. The image tag in the repo says <code>IMAGE_TAG</code> as a placeholder. Cloud Build replaces it with <code>latest</code>. In a proper setup, this would be a commit SHA. Using <code>latest</code> means I can't pin to a specific image version for rollback &mdash; I have to rebuild from the git commit. That's a known weakness. The tradeoff is simplicity: one tag, one image, no tag garbage collection.</p>
+
+  <p>Step 6 runs <code>kubectl replace</code> first, falling back to <code>kubectl apply</code>. Replace is a full object replacement &mdash; it overwrites the entire deployment spec. Apply is a merge patch &mdash; it only changes what's different. Replace is more predictable: you get exactly what's in the YAML file, no leftover fields from previous applies. The fallback to apply handles the case where the deployment doesn't exist yet (first deploy to a new cluster).</p>
+</div>
+
+
+<!-- ====== 5. ENVIRONMENT VARIABLES ====== -->
+
+<div class="asset">
+  <h2>20+ Environment Variables</h2>
+
+  <p>Every container in the pod gets the same set of environment variables. They come from a Kubernetes ConfigMap named <code>homeeasy-may-ai-service-v3-config-b4hc</code>. The <code>b4hc</code> suffix is a hash &mdash; Kubernetes generates it to track ConfigMap versions.</p>
+
+  <p>Separation of config from code. The Docker image contains the application. The ConfigMap contains the credentials and feature flags. Changing a flag doesn't require a rebuild. <code>kubectl edit configmap</code> and restart the pods.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# Database
+DATABASE_URL              # Production Postgres (read-write)
+NEW_DATABASE_URL          # Newer Postgres instance (read-write)
+READONLY_DATABASE_URL     # Read-only replica (analytics, probes)
+
+# Message broker
+CELERY_BROKER_URL         # RabbitMQ: amqp://herabbitmq:rabbitmq@...
+CELERY_RESULT_BACKEND     # Redis for task results
+
+# SMS
+TWILIO_SERVICE_HOMEEASY   # Twilio messaging service SID
+
+# LLM providers
+ANTHROPIC_API_KEY         # Claude Opus 4.6 (primary brain)
+GOOGLE_API_KEY            # Gemini (fallback, bulk work)
+OPENAI_API_KEY            # Legacy, still referenced
+MAY_AI_MODEL              # Which Gemini model for fallback
+
+# Monitoring
+DISCORD_BOT_TOKEN         # Bot auth for 16 alert channels
+DISCORD_WEBHOOK           # Legacy webhook (being migrated to bot)
+
+# Integrations
+FUB_API                   # Follow Up Boss CRM API key
+FUB_TEXTING_SERVICE       # FUB texting endpoint
+BUILDING_SERVICE_API      # Internal building data API
+BLAND_AI_API_KEY          # Voice call provider
+ASANA_ACCESS_TOKEN        # Task management (Landlord Rep only)
+
+# Tracing
+LANGSMITH_TRACING         # LangSmith trace enabled flag
+LANGSMITH_API_KEY         # LangSmith auth
+LANGSMITH_ENDPOINT        # LangSmith API URL
+LANGSMITH_PROJECT         # LangSmith project name
+
+# Feature flags
+USE_AGENT_CORE            # true|false|shadow - V2 agent architecture
+HITL_ENABLED              # Human-in-the-loop gate
+
+# Staff
+OWNER_PHONE               # Mukund's phone (escalation endpoint)
+BLUELAKE_STAFF_EMAIL      # Building manager email
+FEEDBACK_FORM_URL         # Discord feedback form URL
+HOMEEASY_DIALER_URL       # Outbound dialer endpoint
+
+# Google Drive / Gmail
+YGL_DRIVE_PARENT_FOLDER_ID  # Doc storage folder
+GDRIVE_SERVICE_ACCOUNT_JSON # Service account (from K8s Secret)
+GMAIL_SERVICE_ACCOUNT_JSON  # Same SA for email monitoring</pre>
+
+  <p>Important detail: adding a key to the ConfigMap does NOT automatically expose it to the pod. Each variable needs an explicit <code>configMapKeyRef</code> entry in the deployment YAML. I've lost 2 hours twice to "I added the key to the ConfigMap, why isn't the code seeing it?" The variable existed in Kubernetes but the pod spec didn't reference it.</p>
+
+  <p>Two variables come from a Kubernetes Secret instead of the ConfigMap: <code>GDRIVE_SERVICE_ACCOUNT_JSON</code> and <code>GMAIL_SERVICE_ACCOUNT_JSON</code>. These are the Google service account credentials for reading doc submissions from Gmail and storing files in Drive. They're marked <code>optional: true</code> because the pod should start even if the secret doesn't exist &mdash; the doc processing features just won't work.</p>
+</div>
+
+
+<!-- ====== 6. DISCORD ERROR PIPELINE ====== -->
+
+<div class="asset">
+  <h2>Discord Error Logging Pipeline</h2>
+
+  <p>16 channels. One Discord bot token. Each channel receives a different event type. I watch these from my phone. When something breaks, I know within seconds. Not minutes. Seconds.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+Channel ID              Function Name                     What It Receives
+----------------------------------------------------------------------
+1451222534098784409      sendDiscordYNYErrorAlert           Unhandled exceptions, OOM context
+1451222534098784409      sendDiscordYNYEvent                Typed events: message_received,
+                                                           ai_response, sms_sent, error,
+                                                           dead_lead, qualification, etc.
+1367629803624071188      sendDiscordMessage                 General system messages
+1367630555235221514      sendDiscordMessageAmy              Locator agent events
+1379390986643574835      sendDiscordLangAgentAlert          Agent brain reasoning traces
+1367635290272829520      sendDiscordFollowUpMessage         Followup sequence events
+1367635613523771514      sendDiscordDeadClientAlert         Lead death events
+1402984649055014952      sendDiscordTourRequest             Tour scheduling requests
+1380340043058643096      sendDiscordBuildingOptionsAlert    Building option generation
+1375064707844669520      sendDiscordRequirementsCheck       Requirements gathering events
+1377926979155922974      sendDiscordAgentResponse           Agent responses (all agents)
+1380283563106242680      sendDiscordChatHistoryNotFound     Missing chat history warnings
+1373226159369748571      sendDiscordUnauthorizedMessage     Auth failures
+1373805249428455494      sendDiscordRequirementsNoteAlert   CRM note updates
+1373808201216163901      sendDiscordStageSuggestionNoteAlert Stage transition suggestions
+1377308566922334311      sendDiscordSanityCheckNoteAlert    Sanity check results
+1451549206585282776      sendDiscordMessageWithFeedbackButton HITL escalation w/ feedback</pre>
+
+  <p>The core posting function is the same pattern repeated 16 times:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+def sendDiscordYNYErrorAlert(textContent, channel_id='1451222534098784409'):
+    try:
+        url = f"https://discord.com/api/v10/channels/{channel_id}/messages"
+        payload = {
+            "content": f"YNY Service Error\n{str(textContent)}"
+        }
+        headers = {
+            "Authorization": f"Bot {DISCORD_BOT_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        response = requests.post(url, headers=headers, json=payload)
+        return response
+    except Exception as e:
+        print(f"Error sending Discord YNY error message: {e}")
+        return None</pre>
+
+  <p>The error handler in the main service wraps this:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+def log_yny_error(error_message, context="", notify_discord=True):
+    full_message = (f"YNY Service Error - {context}: {error_message}"
+                    if context
+                    else f"YNY Service Error: {error_message}")
+    logger.error(full_message)
+    if notify_discord:
+        try:
+            discord_message = (f"**Context:** {context}\n**Error:** {error_message}"
+                              if context
+                              else f"**Error:** {error_message}")
+            sendDiscordYNYErrorAlert(discord_message)
+        except Exception as discord_error:
+            logger.error(f"Failed to send Discord notification: {discord_error}")</pre>
+
+  <p>Notice the try/except inside log_yny_error. If Discord itself is down, the error logging shouldn't crash the error handler. Errors about errors are the most dangerous kind &mdash; they mask the original problem.</p>
+
+  <p>The typed event system (<code>sendDiscordYNYEvent</code>) maps event types to context fields. A <code>message_received</code> event carries client_id, phone, name. A <code>dead_lead</code> event carries the reason. Discord has a 2000-character limit per message, so the function truncates at 1950 characters with a <code>... (truncated)</code> suffix. I've had production stack traces that exceeded 2000 characters &mdash; the truncation prevents the Discord API from rejecting the alert entirely, which would mean the error disappears into silence.</p>
+</div>
+
+
+<!-- ====== 7. PRE/POST DEPLOYMENT CHECKLISTS ====== -->
+
+<div class="asset">
+  <h2>Pre/Post Deployment Checklists</h2>
+
+  <p>Seven steps after every deploy. No exceptions. These are not suggestions.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# 1. Pod is running
+kubectl get pods -l app=homeeasy-ai-service-v3
+# Look for: 1/1 Running, 0 restarts, age < 5m
+
+# 2. All containers healthy
+kubectl describe pod -l app=homeeasy-ai-service-v3 | grep -A 3 "State:"
+# FAIL if any container shows: CrashLoopBackOff, Error, OOMKilled
+
+# 3. LoadBalancer has external IP
+kubectl get svc homeeasy-ai-service-v3
+# EXTERNAL-IP must not be &lt;pending&gt;
+
+# 4. Webhook endpoint responds
+curl -s -o /dev/null -w "%{http_code}" http://&lt;EXTERNAL-IP&gt;:5012/health
+# Must return 200
+
+# 5. Celery beat is scheduling
+kubectl exec &lt;pod-name&gt; -c homeeasy-ai-service-v3-celery-beat \
+  -- celery -A app.celery inspect scheduled
+# Must show upcoming tasks
+
+# 6. Workers are consuming
+kubectl exec &lt;pod-name&gt; -c homeeasy-ai-service-v3-celery-worker \
+  -- celery -A app.celery inspect active
+# Must show worker registered on ai_client_service_v3 queue
+
+# 7. End-to-end test
+# Send a test SMS to the Twilio number
+# Verify: webhook received -> task queued -> worker processed -> response sent
+# Check Discord channels for the event trace</pre>
+
+  <p><strong>CrashLoopBackOff</strong> is the most common failure mode. It means the container started, crashed, restarted, crashed again, and Kubernetes is now backing off on restart attempts. Each restart doubles the wait: 10s, 20s, 40s, 80s, up to 5 minutes. During that backoff, the container is dead. No tasks process. No webhooks respond.</p>
+
+  <p>The usual cause: a Python import error. A new module references a dependency that's not in <code>requirements.txt</code>. Or a circular import. The container starts Python, hits the import error in the first 2 seconds, exits with code 1, and Kubernetes restarts it. The fix is always in the build step, never in the cluster. But you won't know it's an import error until you read the logs:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+kubectl logs &lt;pod-name&gt; -c homeeasy-ai-service-v3-web --previous
+# --previous shows logs from the LAST container instance (before crash)
+# Without --previous, you get the current instance, which might be mid-crash</pre>
+
+  <p>The <code>--previous</code> flag is the one that matters. Without it, you see the current container's logs, which might be 0.5 seconds of startup before the next crash. With it, you see the full output from the container that actually failed. Every crash investigation starts here.</p>
+</div>
+
+
+<!-- ====== 8. SLA MONITORING ====== -->
+
+<div class="asset">
+  <h2>SLA Monitoring</h2>
+
+  <p>Five internal SLAs. Not aspirational targets. Hard deadlines that trigger automated nag sequences when breached.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+SLA_DOC_REVIEW_H        = 24    # Doc review: 24 hours from receipt
+SLA_APP_DECISION_H      = 48    # Application decision: 48 hours from complete docs
+SLA_INVOICE_DAYS         = 30    # Invoice delivery: 30 days from move-in
+SLA_SHOWING_SCHEDULE_H  = 48    # Showing schedule: 48 hours from request
+# First response: 5 minutes from inbound lead (handled by Celery task priority)</pre>
+
+  <p>When an SLA is breached, the system doesn't just log it. It starts nagging. At 50% of the SLA window, a gentle reminder hits the Asana ticket. At 100%, an overdue alert fires to Discord and Asana. Every 8 hours after that, another nag, up to 3 times. Then it escalates to me.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+def _sla_check(lead, ctx, now, sla_hours, send_sms, send_discord,
+               first_name, db=None, start_key="ticket_created_at",
+               lead_msg_gentle=None, lead_msg_overdue=None):
+    start = _parse_dt(ctx.get(start_key))
+    if not start:
+        return None
+
+    hours_waiting = _hours_since(start, now)
+    ticket_id = ctx.get("ticket_id", "")
+    nag_count = int(ctx.get("staff_nag_count", "0"))
+    hours_since_nag = _hours_since(
+        _parse_dt(ctx.get("staff_last_nagged_at")), now
+    )
+    result = {"nagged": 0, "updated_lead": 0}
+
+    # Staff nag at 100% SLA, min 8h between nags
+    if hours_waiting >= sla_hours and nag_count < 3 and hours_since_nag >= 8:
+        nag = (f"OVERDUE ({hours_waiting:.0f}h): "
+               f"{lead.full_name} waiting {hours_waiting:.0f}h "
+               f"(SLA: {sla_hours}h)")
+        if ticket_id and not ticket_id.startswith("dry-run"):
+            add_comment_to_ticket(ticket_id, nag)
+        if send_discord:
+            send_discord(f"STAFF NAG: {nag}")
+        ctx["staff_last_nagged_at"] = now.isoformat()
+        ctx["staff_nag_count"] = str(nag_count + 1)
+        _save_ctx(lead.id, ctx, db)
+        result["nagged"] = 1
+
+    # Gentle nag at 50% SLA
+    elif hours_waiting >= sla_hours * 0.5 and nag_count == 0:
+        nag = (f"Reminder: {lead.full_name} waiting "
+               f"{hours_waiting:.0f}h (SLA: {sla_hours}h)")
+        if ticket_id and not ticket_id.startswith("dry-run"):
+            add_comment_to_ticket(ticket_id, nag)
+        ctx["staff_last_nagged_at"] = now.isoformat()
+        ctx["staff_nag_count"] = "1"
+        result["nagged"] = 1
+
+    # Update lead if no contact in 24h
+    hours_since_update = _hours_since(
+        _parse_dt(ctx.get("lead_last_update_at")), now
+    )
+    if hours_since_update >= 24:
+        msg = lead_msg_overdue if hours_waiting >= 48 else lead_msg_gentle
+        if msg:
+            _send_sms(send_sms, lead.id, lead.phone,
+                      msg.format(name=first_name))
+            ctx["lead_last_update_at"] = now.isoformat()
+            result["updated_lead"] = 1</pre>
+
+  <p>The <code>dry-run</code> prefix on ticket IDs is a testing safeguard. During simulations, ticket IDs start with "dry-run" so the nag system won't spam real Asana tickets. The code checks for this prefix before writing comments. Without it, every test run would pollute production task threads with fake overdue alerts.</p>
+
+  <p>The 8-hour minimum between nags prevents alert fatigue. Three nags and then silence &mdash; if three nags didn't work, a fourth won't either. That's when it comes to me.</p>
+</div>
+
+
+<!-- ====== 9. THE POD SPEC ====== -->
+
+<div class="asset">
+  <h2>The Full Pod Spec</h2>
+
+  <p>This is the actual deployment YAML. Not a simplified version. Not pseudocode. The file that <code>kubectl apply</code> reads.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homeeasy-ai-service-v3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homeeasy-ai-service-v3
+  template:
+    metadata:
+      labels:
+        app: homeeasy-ai-service-v3
+    spec:
+      containers:
+      - name: homeeasy-ai-service-v3-web
+        image: us-central1-docker.pkg.dev/hep01-303921/homeeasy-repos/\
+homeeasy-ai-service-v3:IMAGE_TAG
+        command: ["gunicorn"]
+        args: ["-w", "1", "-b", "0.0.0.0:5012", "app:app",
+               "--log-level", "debug", "--timeout", "60"]
+        ports:
+        - containerPort: 5012
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: homeeasy-may-ai-service-v3-config-b4hc
+              key: DATABASE_URL
+        # ... 25+ more env vars from ConfigMap ...
+
+      - name: homeeasy-ai-service-v3-celery-beat
+        image: us-central1-docker.pkg.dev/hep01-303921/homeeasy-repos/\
+homeeasy-ai-service-v3:IMAGE_TAG
+        command: ["celery"]
+        args: ["-A", "app.celery", "beat", "--loglevel=info"]
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "500m"
+        env:
+        # ... same env vars as web container ...
+
+      - name: homeeasy-ai-service-v3-celery-worker
+        image: us-central1-docker.pkg.dev/hep01-303921/homeeasy-repos/\
+homeeasy-ai-service-v3:IMAGE_TAG
+        command: ["celery"]
+        args: ["-A", "app.celery", "worker", "--loglevel=info",
+               "-c", "6", "--queues=ai_client_service_v3",
+               "--time-limit=1700", "--soft-time-limit=1600",
+               "--max-tasks-per-child=10", "--prefetch-multiplier=1"]
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        env:
+        # ... same env vars as web container ...</pre>
+
+  <p>Replicas: 1. One pod. The second Celery worker runs as a second container within the same pod, not as a second pod. This means all four containers share the same node. If the node goes down, everything goes down. The tradeoff: simplicity. One pod to monitor, one set of logs, one restart command. At 30,000 leads per day, the volume doesn't justify multi-node redundancy yet. It will. When it does, the architecture changes to a Deployment with 2+ replicas and a separate Redis/RabbitMQ StatefulSet.</p>
+</div>
+
+
+<!-- ====== 10. WHAT 8 DAYS OF SILENCE LOOKS LIKE ====== -->
+
+<div class="asset">
+  <h2>What 8 Days of Silence Looks Like</h2>
+
+  <p>February 14-21, 2026.</p>
+
+  <p>A deploy went out on the 14th. It broke the lead processing pipeline. Leads came in from Zillow, YouGotListings, Apartments.com. They landed in the database. The system acknowledged receipt. But responses didn't go out. The agent brain wasn't firing. Leads texted us and got nothing back.</p>
+
+  <p>The monitoring didn't catch it because the monitoring deployed with the bad code. The Discord alert functions imported from the same codebase that was broken. When the import failed, the alert functions failed. When the alert functions failed, nobody knew the alerts were failing. The snake ate its tail.</p>
+
+  <p>So I fixed it. Pushed another deploy on the 15th. That fix introduced a new regression &mdash; the CI pipeline had its own bugs, and the "fix" passed tests that weren't testing the right thing. Pushed another fix on the 16th. That one created a duplicate message problem: leads started getting the same SMS 3 times. Fixed the dedup on the 16th. That broke the Gemini timeout handling. Fixed Gemini on the 16th. That exposed a dormant bug in the YGL inbox processing. And so on.</p>
+
+  <p>Eight consecutive days. Each fix introduced new breakage. No session knew what previous sessions had tried. The session memory system didn't exist yet. DEPLOYMENT_STATE.md didn't exist yet. Each AI coding session started fresh, read the code, saw something broken, fixed it, and deployed &mdash; not knowing that the exact same approach had been tried and failed 48 hours earlier.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# From DEPLOYMENT_STATE.md — written after the doom loop ended:
+
+What Was Tried And Failed:
+- 2026-02-14: nightly slop PRD fix
+- 2026-02-15: CI fix, codebase decomposition PR7, verification rootcause
+- 2026-02-16: duplicate message dedup, Gemini timeout hotfix
+- 2026-02-17: YGL audit inbox rescue
+- 2026-02-18: 17-lead recovery, inventory recovery overnight,
+              lead intelligence Gemini fix
+- 2026-02-19: overnight system health fix
+- 2026-02-20: CRM three features design, overnight full simulation
+- 2026-02-21: infinite loop fix
+
+Pattern: Each fix introduced new breakage.
+         No session knew what previous sessions tried.</pre>
+
+  <p>$4,000-$5,000 per day. Eight days. Call it $36,000 in lost revenue.</p>
+
+  <p>This is why three things now exist that didn't exist before:</p>
+
+  <p><strong>1. DEPLOYMENT_STATE.md</strong> &mdash; a plain text file at the repo root. It gets read at the start of every AI coding session, regardless of what code is deployed. It says what's running, what's broken, what was tried and failed. The file is outside the application code. If the application code is broken, the state file still works. If every Python file in the repo has an import error, DEPLOYMENT_STATE.md still tells the next session what happened.</p>
+
+  <p><strong>2. Session memory</strong> &mdash; every session auto-saves what it did, what broke, and what to do next. The next session reads the last 2-3 session files before starting work. No more flying blind. No more repeating failed approaches.</p>
+
+  <p><strong>3. The 7-step verification checklist</strong> &mdash; mandatory after every deploy. Not "run if you feel like it." Mandatory. Enforced by hooks. The checklist exists because during the doom loop, I was deploying without verifying. Push code, assume it works, move on. Seven times in a row, it didn't work. Now nothing gets marked "deployed" until all 7 steps pass.</p>
+
+  <p>The code is just the latest attempt. The state file is the ground truth. When those two things are the same file, a bad deploy kills both. When they're separate, the ground truth survives.</p>
+
+  <p>Infrastructure is scar tissue. Every piece of this deployment system &mdash; the Celery flags, the Discord channels, the verification checklist, the state file &mdash; is a scar from something that went wrong. Systems don't get built from first principles. They get built from consequences.</p>
+</div>
+
+
+<!-- ====== CLOSING ====== -->
+
+<div class="asset" style="margin-top:3rem; border-top:1px solid #333; padding-top:2rem;">
+  <p style="color:#666; font-size:0.9rem; font-style:italic;">This deployment infrastructure runs the Landlord Rep agent &mdash; the system that operates as the leasing office for 8 buildings in South Shore, Chatham, and Chicago Heights. The same architectural patterns (GKE pod, Celery workers, Discord monitoring, Cloud Build pipeline) apply to the Locator Agent and Ken Insurance, with different container counts and queue names. The principles are the same: test before you deploy, watch everything, and keep the ground truth outside the blast radius.</p>
+</div>

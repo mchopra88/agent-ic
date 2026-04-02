@@ -6,732 +6,101 @@ navActive: assets
 
 <h1>Assets</h1>
 
-<p style="color:#999; font-size:1.05rem; margin-bottom:3rem;">Seven years of production infrastructure. Four business units. 30,000 leads a day. Everything on this page is running right now.</p>
+<p style="color:#999; font-size:1.05rem; margin-bottom:1.5rem;">Seven years of production infrastructure. Four business units. 30,000 leads a day. Everything described here is running right now.</p>
+
+<p style="color:#b0aca6; font-size:0.95rem; margin-bottom:3rem;">Each deep dive below was written after reading every function, every regex, every threshold in the actual production code. Not from summaries. Not from architecture diagrams. From the source files that handle real money and real people every day.</p>
 
 <!-- ═══════ THE FOUR BUSINESSES ═══════ -->
 
 <div class="asset">
   <h2>The Four Business Units</h2>
 
-  <p>Each business unit has its own codebase, its own revenue model, and its own AI agent. They share infrastructure — Postgres, Redis, GKE, Twilio — but they're operationally independent. A failure in the insurance vertical doesn't touch the locator. A deployment to the landlord rep doesn't affect the insurance agent. This matters because when you're operating alone, blast radius is everything.</p>
-
   <div style="margin:2rem 0; padding:1.5rem; border:1px solid #222; background:#0a0a0a;">
     <div style="margin-bottom:1.2rem;">
       <span style="color:#88cc88; font-weight:600;">1. Apartment Locator</span><br>
-      <span style="color:#888; font-size:0.95rem;">Middleman model. Leads come in from Zillow, Apartments.com, Craigslist, YouGotListings, Google Ads, and building partners. I remarket those leads to cooperating buildings that pay 50-100% of first month's rent per signed lease. Five markets: Dallas, Houston, Austin, Denver, Chicago. The agent's name is Amy Scott. She handles everything from first contact through tour scheduling.</span>
+      <span style="color:#888; font-size:0.95rem;">Middleman model. Leads from Zillow, Apartments.com, Craigslist, YouGotListings, Google Ads. Remarketed to cooperating buildings for 50-100% of first month's rent. Five markets. Agent name: Amy Scott.</span>
     </div>
     <div style="margin-bottom:1.2rem;">
       <span style="color:#88cc88; font-weight:600;">2. Landlord Rep (Blue Lake / YNY Realty)</span><br>
-      <span style="color:#888; font-size:0.95rem;">I am the leasing office. Not a referral. Not a middleman. I operate 36 units across 8 buildings in South Shore, Chatham, and Chicago Heights through YouGotListings. First contact through lease signing. The agent handles renter qualification, document collection, tenant screening, voucher processing, and application management. 75% commission on market-rate tenants, 100% on Section 8.</span>
+      <span style="color:#888; font-size:0.95rem;">I am the leasing office. 35 units across 8 buildings in South Shore, Chatham, and Chicago Heights. First contact through lease signing. 75% commission market-rate, 100% Section 8.</span>
     </div>
     <div style="margin-bottom:1.2rem;">
-      <span style="color:#88cc88; font-weight:600;">3. Ken — Renters Insurance</span><br>
-      <span style="color:#888; font-size:0.95rem;">Separate entity (Jamboree Insurance), separate codebase, separate compliance. HO4 renters insurance via Assurant, a Fortune 500 carrier. SMS-based. Outbound-first — I get leads from partner buildings and initiate contact. The agent extracts address and move-in details through conversation, quotes via the Assurant API, collects payment through Stripe, and binds the policy. I never touch the card data.</span>
+      <span style="color:#88cc88; font-weight:600;">3. Ken &mdash; Renters Insurance</span><br>
+      <span style="color:#888; font-size:0.95rem;">Separate entity (Jamboree Insurance). HO4 renters insurance via Assurant. SMS-based, outbound-first. Quote, collect payment via Stripe, bind the policy. Card data never touches my servers.</span>
     </div>
     <div>
       <span style="color:#88cc88; font-weight:600;">4. Financial Analysis</span><br>
-      <span style="color:#888; font-size:0.95rem;">P&L, payment reconciliation, revenue tracking, commission verification. 367 bank statement PDFs across 6 accounts. Seven years of transaction data. The CSV parsers broke — they missed 0-98% of transactions depending on the bank — so I read the actual PDFs with pdfplumber and use the balance method instead.</span>
+      <span style="color:#888; font-size:0.95rem;">P&L, payment reconciliation, revenue tracking, commission verification. 367 bank statement PDFs across 6 accounts. Seven years. The CSV parsers broke, so I read the actual PDFs.</span>
     </div>
     <div style="margin-top:1.2rem; padding-top:1rem; border-top:1px solid #222;">
-      <span style="color:#666; font-size:0.85rem;">Shared infrastructure: Cloud SQL Postgres, Celery/Redis, GKE cluster (us-central1), Twilio SMS, Bland AI voice, Claude Opus 4.6, Gemini (bulk only). Site source: <a href="https://github.com/mchopra88/agent-ic" style="color:#888;">github.com/mchopra88/agent-ic</a></span>
+      <span style="color:#666; font-size:0.85rem;">Shared infrastructure: Cloud SQL Postgres, Celery/Redis, GKE cluster (us-central1), Twilio SMS, Bland AI voice, Claude Opus 4.6, Gemini (bulk only). Source: <a href="https://github.com/mchopra88/agent-ic" style="color:#888;">github.com/mchopra88/agent-ic</a></span>
     </div>
   </div>
 </div>
 
-<!-- ═══════ LEAD INTELLIGENCE ═══════ -->
+<!-- ═══════ DEEP DIVES ═══════ -->
 
 <div class="asset">
-  <h2>Lead Intelligence: What Happens Before the First Message</h2>
-
-  <p>Every inbound lead gets profiled before the agent sends a single word. Not from a credit bureau. Not from a background check service. From five independent signals extracted from whatever data we already have.</p>
-
-  <p>The lead comes in with a name, phone number, and the address of the ad they clicked. That's it. From those three inputs, the system builds a financial picture: estimated income, likely credit range, geographic context, employer (if they mention one in conversation), and background awareness. The profile doesn't gate the conversation — the agent doesn't refuse to talk to someone with bad credit. It shapes <em>how</em> the agent talks to them.</p>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">Signal 1: Phone Area Code (Are They Moving From Out of State?)</h2>
-
-  <p>A 214 area code inquiring about Chicago apartments means a potential relocation from Dallas. A 312 means they're local. A 219 inquiring about Chicago is NOT a mismatch — that's Northwest Indiana, Gary, and it's a common South Side pattern. The system knows this.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Phone analysis — from lead_intelligence.py
-
-def analyze_phone(phone, inquiry_state="IL"):
-    ac = extract_area_code(phone)
-    state = AREA_CODE_STATE.get(ac, "")
-    metro = AREA_CODE_METRO.get(ac, "")
-    mismatch = bool(state and inquiry_state and state != inquiry_state)
-    return {"area_code": ac, "phone_state": state,
-            "metro": metro, "mismatch": mismatch}
-
-# Chicago metro: 312, 773, 872, 708, 630, 224, 847
-# Dallas:        214, 972, 469
-# Houston:       713, 832, 281
-# LA:            213, 323, 310
-
-# Special rule: 219 (NW Indiana/Gary) + IL inquiry = NO mismatch
-# Common South Side pattern. Don't flag it as relocation.</pre>
-
-  <p>The mismatch flag changes how the agent approaches the conversation. A local lead gets neighborhood-specific recommendations. An out-of-state lead gets a broader orientation — transit options, neighborhood comparisons, proximity to their employer if they've mentioned one.</p>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">Signal 2: Employer Extraction (What Do They Do for a Living?)</h2>
-
-  <p>When a lead says "I work at UPS" in the conversation, five regex patterns try to extract the employer name. If regex finds it, Gemini Flash verifies whether it's a real company and estimates the income range. If regex finds nothing, Gemini reads the full chat and tries to extract it from context.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Employer extraction — regex first, Gemini fallback
-
-_EMPLOYER_RE = [
-    re.compile(r"i (?:work|am|been) (?:at|for|with)\s+(.+?)(?:\.|\n|$)", re.I),
-    re.compile(r"(?:employed|working) (?:at|for|with|by)\s+(.+?)(?:\.|\n|$)", re.I),
-    re.compile(r"my (?:job|employer|company) (?:is|at)\s+(.+?)(?:\.|\n|$)", re.I),
-    re.compile(r"(?:i do|i drive for|i deliver for)\s+(.+?)(?:\.|\n|$)", re.I),
-]
-
-# If regex finds "UPS":
-#   → Gemini Flash verifies: "Is this a real employer?"
-#   → Returns: plausible=true, sector=logistics, size=large
-#   → Income range: ($35,000, $65,000) — "employed_stable"
-#
-# If regex finds "attorney at Jones Day":
-#   → Gemini: plausible=true, sector=legal, size=large
-#   → Income range: ($55,000, $120,000) — "professional"
-#
-# If regex finds nothing:
-#   → Gemini reads full chat context and attempts extraction
-
-# Income categories (annual, Chicago market):
-JOB_INCOME_ESTIMATES = {
-    "section8_voucher": (15000, 30000),
-    "employed_stable":  (35000, 65000),
-    "professional":     (55000, 120000),
-    "self_employed":    (25000, 60000),
-    "disability":       (12000, 24000),
-    "cash_worker":      (20000, 35000),
-    "student":          (8000, 25000),
-    "gig_worker":       (20000, 45000),
-    "retired":          (18000, 40000),
-}</pre>
-
-  <p>The employer verification isn't a filter. It's context. If Gemini says "UPS — large logistics employer, stable employment," the agent knows this person probably has steady income and can qualify for most buildings. If Gemini can't verify the employer, that's a signal too. The agent doesn't stop. It adjusts.</p>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">Signal 3: ZIP Code Demographics (What Does the Neighborhood Tell Us?)</h2>
-
-  <p>The inquiry ZIP — the address of the ad they clicked — tells you about their aspirations. It's NOT where they live. People browse aspirationally. Someone clicking on a $2,200 Lincoln Park listing might live in Englewood. The ZIP demographics provide a statistical baseline when there's nothing else to go on.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# South Side Chicago ZIP demographics — hardcoded from Census data
-
-SOUTH_SIDE_ZIPS = {
-    "60617": {"median_income": 32000, "poverty_pct": 28, "renter_pct": 65, "area": "South Shore"},
-    "60619": {"median_income": 30000, "poverty_pct": 31, "renter_pct": 55, "area": "Chatham"},
-    "60620": {"median_income": 33000, "poverty_pct": 25, "renter_pct": 48, "area": "Auburn Gresham"},
-    "60621": {"median_income": 22000, "poverty_pct": 42, "renter_pct": 72, "area": "Englewood"},
-    ...
-}
-
-# If a lead inquires from 60621 (Englewood) and we have no other income signal:
-# median_income = $22,000 → max affordable rent ≈ $611/mo
-# This is the LAST RESORT signal. Stated income or employer always wins.</pre>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">Signal 4: Financial Capacity (Can They Actually Afford This?)</h2>
-
-  <p>The core rule: <code>max_affordable_rent = annual_income / 36</code>. That's the 33% rent-to-income ratio every property manager uses. The system builds the income estimate from five sources in priority order. Stated income in the chat wins. Then employer category. Then ZIP demographics. If we have nothing, the system falls back to the state median and notes the uncertainty.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Five-source financial synthesis
-
-def estimate_financial_capacity(
-    inquiry_rent=0,        # Source 1: what ad they clicked
-    chat_history="",       # Source 2+3: stated budget & income
-    renter_profile=None,   # Source 4: income category
-    phone_state="",        # metadata
-    inquiry_zip="",        # Source 5: ZIP demographics
-):
-
-# Priority order for income estimation:
-# 1. Stated income in chat: "I make $55K" → $55,000
-# 2. Employer category: "UPS" → employed_stable → midpoint $50,000
-# 3. ZIP median income: 60617 → $32,000
-# 4. State median: IL → $55,000
-# 5. National default: $55,000
-
-# Affordability gate:
-max_affordable_rent = best_income_estimate / 36
-affordable = effective_budget <= max_affordable_rent * 1.15
-
-# 15% wiggle room. If they're at 35% rent-to-income, that's tight
-# but not impossible. Above that, the agent knows to suggest
-# alternatives: smaller unit, different neighborhood, cosigner.
-
-# Section 8 is different — Housing Authority covers the gap
-# between 30% of tenant income and the contract rent.
-# Affordability check doesn't apply the same way.</pre>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">Signal 5: Credit Estimation (Without Pulling a Report)</h2>
-
-  <p>I don't pull credit reports. The system estimates from whatever signals exist in the conversation. If they say "my credit is 720," that's the strongest signal. If they say "my credit is bad," that's clear too. If they're asking about cosigners, that tells you something. If they mention bankruptcy or eviction, that tells you more. And if they say nothing at all, the ZIP demographics provide a statistical baseline.</p>
-
-  <p>The system also detects what I call "confident asserters" — people who say things like "my credit is fine, money is not an issue, don't worry about it." That pattern matters. If someone asserts strong standing AND we can verify their employer AND the income math works — that's a <strong>confidence case</strong>. The agent can offer a showing even with partial documentation.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Credit estimation — 6 signal types
-
-Signal 1: Explicit score ("my credit is 720")
-Signal 2: Self-reported quality ("bad credit" / "good credit")
-Signal 3: Cosigner inquiry ("do you accept co-signers?")
-Signal 4: Eviction history ("I was evicted" / "broken lease")
-Signal 5: Bankruptcy ("chapter 7" / "discharged")
-Signal 6: ZIP-based inference (lower-income ZIP → statistically lower credit)
-
-# Confident asserter detection — specific language patterns:
-"my credit is good" / "credit is fine" / "no problem there"
-"I make good money" / "money is not an issue"
-"I got steady income" / "don't worry about it"
-
-# If confident asserter = true AND employer verified AND affordable:
-# → CONFIDENCE CASE: STRONG
-# → Recommend showing the unit even with partial docs
-# → Create Asana task for building manager with full assessment
-# → Continue coaxing docs: "while we get your tour set up,
-#   can you snap a pic of your ID?"</pre>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">Background Awareness (Safety, Not Judgment)</h2>
-
-  <p>The system detects sensitive situations. Reentry from incarceration. Domestic violence. Crisis housing needs. This isn't a filter — it's a tone adjustment. Someone fleeing a domestic violence situation doesn't need to be interrogated about their credit score. They need housing fast. The agent knows this and adjusts accordingly.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Background concern detection — from lead_intelligence.py
-
-Reentry signal: "released", "incarceration", "parole", "probation"
-  → "Be compassionate, non-judgmental. SAFER Foundation + St. Leonard's
-     help with deposits. Background is case-by-case — older/non-violent
-     usually OK."
-
-DV/Safety: "domestic", "abuse", "restraining order", "flee"
-  → "SAFETY: Possible DV situation. Prioritize speed + privacy.
-     Do NOT ask why they're moving. Do NOT share their info."
-
-Crisis housing: renter_type = "crisis"
-  → "Be compassionate, not clinical. Skip interrogation. Focus on
-     solving the housing problem fast. Mention HPRP and ERA programs
-     that help with deposits."</pre>
-</div>
-
-<!-- ═══════ TONALITY: HOW INTELLIGENCE SHAPES THE CONVERSATION ═══════ -->
-
-<div class="asset">
-  <h2>Tonality: How the Intelligence Shapes the Conversation</h2>
-
-  <p>All five signals — phone, employer, ZIP, financial capacity, credit — feed into the system prompt as context. Not as gates. Not as decision trees. The LLM reads the intelligence and decides how to talk to this person. The architecture is called the River Principle: every decision uses all signal sources. The intelligence shapes HOW the agent works the lead.</p>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">Renter Profiling (Via Gemini)</h2>
-
-  <p>Gemini reads the conversation and extracts a profile: renter type, urgency, pain point, where they can bend, what could kill the deal, household composition, and language. The profile determines the tone of every subsequent message.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Renter types and how the agent adjusts
-
-working_class:
-  "Be warm, direct, no jargon. Frame costs as daily amounts.
-   Don't interrogate — guide. They respect straight talk."
-
-professional:
-  "Be consultative, add value. They have options and are evaluating us.
-   Curate, don't hard-sell. Anticipate their questions."
-
-section8:
-  "Be patient, encouraging. They've dealt with judgment before.
-   Explain the process clearly. Voucher paperwork first.
-   If new to Section 8: walk them through step by step."
-
-student:
-  "Be casual, quick. They want speed and price.
-   Lead with rent and proximity to transit."
-
-crisis:
-  "Be compassionate, not clinical. They may be homeless, fleeing DV,
-   or facing eviction. Do NOT ask why they need to move urgently.
-   Focus on solving the housing problem fast.
-   Mention Chicago rapid re-housing programs (HPRP, ERA)."</pre>
-
-  <p>The tone map is a lookup, not an LLM call. Fast and deterministic. But it feeds INTO the LLM prompt as guidance. The LLM still generates every response from scratch — it just knows that this person is working class and wants direct answers, or that this person is a professional comparing three buildings and wants curated options.</p>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">Communication Style Detection</h2>
-
-  <p>On top of the renter type, the system detects how the person actually texts. If their average message is under 10 characters — "ok," "yep," "how much" — they're terse. The agent matches that energy. If they use emojis in more than half their messages, the agent mirrors that. If they write formal sentences with periods and capitalization, the agent responds in kind.</p>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">Three Tonality Tiers (Locator Agent)</h2>
-
-  <p>The apartment locator operates in three tiers based on the lead's financial profile. This isn't about being nicer to rich people. It's about matching the conversation to the reality of the deal.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Three tonality tiers — from the Locator CLAUDE.md
-
-LOW-END (blockers, low credit, stretched budget):
-  AUTHORITATIVE tone. Direct. Commanding. No hedging.
-  These leads need guidance, not options.
-  "I can get you into this building. Here's what you need to do."
-
-MID-TIER (qualified, no major blockers):
-  PROFESSIONAL tone. Efficient. Value-oriented.
-  "I found three options in your range. Here's what stands out."
-
-HIGH-END (2x+ median income, strong profile):
-  CONSULTATIVE tone. Concierge. Curated.
-  "Based on what you're looking for, I'd recommend looking at
-   these two buildings. Here's why."</pre>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">What the Agent Actually Sees</h2>
-
-  <p>All of this intelligence gets formatted into a block that's injected into the system prompt. The LLM reads it alongside the full conversation history and decides what to say next. Here's what that looks like for a real lead:</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# What the agent brain receives — formatted intelligence block
-
-LEAD INTELLIGENCE:
-PHONE: 214 (Dallas metro)
-  WARNING: Out-of-state inquiry. Lead may be relocating from Texas.
-EMPLOYER: UPS [PLAUSIBLE — major logistics employer, large, stable]
-FINANCIAL: Inquiry rent $1,200/mo → needs ~$43,200/yr income
-  Est. income: ~$50,000/yr (estimated from employed_stable)
-  Rent-to-income: 29% (comfortable)
-CREDIT: GOOD (self-reported, confident asserter)
-  → CONFIDENT ASSERTER: Lead claims strong standing.
-    Consider showing even with partial docs.
-No background concerns detected.
-LANE 02: QUALIFIED
-  → Active lead. Keep engaging, collect docs.
-CONFIDENCE CASE: STRONG — SHOW THEM THE UNIT</pre>
-
-  <p>The agent doesn't follow rules about what to do with this information. It reads it, understands the context, and generates a response that accounts for all of it. That's the anti-determinism law: no decision trees, no templates, no "if credit is poor then send message X." The LLM reasons about the whole picture every time.</p>
-</div>
-
-<!-- ═══════ INVENTORY MATCHING ═══════ -->
-
-<div class="asset">
-  <h2>Inventory Matching: Distance, Budget, and Reasonableness</h2>
-
-  <p>The matching algorithm is LLM-driven. I give Gemini the renter's profile, their requirements, and the available inventory. Gemini ranks properties using five weighted criteria. Neighborhood proximity is 40% of the score — calculated with geodesic distance in miles, not ZIP code approximations. Budget compatibility is 25%. The remaining 35% splits across unit specs, move-in timeline, and special needs like parking or pets.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Matching weights and distance calculation
-
-1. NEIGHBORHOOD PROXIMITY (40%)
-   → geopy.distance.geodesic(client_coords, property_coords).miles
-   → Actual geodesic distance, not ZIP codes
-2. BUDGET COMPATIBILITY (25%)
-   → Rent within stated range, net effective rent if specials apply
-3. UNIT SPECIFICATIONS (20%)
-   → Bedrooms, bathrooms, dwelling type
-4. TIMELINE ALIGNMENT (10%)
-   → Move-in date vs vacancy date
-5. SPECIAL REQUIREMENTS (5%)
-   → Parking, pets, amenities
-
-# Net effective rent:
-# (Monthly Rent × 12 - Move-in Savings) ÷ 12
-# $2,000/mo with 1 month free = $1,833 net effective
-# Always show both when specials apply.</pre>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">Gap Analysis: What Happens When the Budget Doesn't Match</h2>
-
-  <p>When the renter's budget doesn't match what's available, the agent doesn't say "sorry, nothing in your range." It runs gap analysis. Three tiers depending on how far the gap stretches. The gap determines the approach — reframe, value-sell, or honestly redirect.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Gap analysis framework
-
-Gap ≤ $100:
-  → "That's about a coffee a day difference."
-  → Reframe as manageable. Push the property.
-
-Gap $100-$300:
-  → Value proposition. Show what the extra gets them.
-  → "For $150 more you're in Lincoln Square with in-unit laundry."
-  → Calculate net effective rent if move-in specials apply.
-
-Gap > $300:
-  → Deep stretch. Don't push. Be honest.
-  → Widen geographic search. Drop bedroom count.
-  → "Honest take — $2,200 in Lincoln Park for a 1BR is a stretch
-     at your budget. But I can get you into Ravenswood for $1,700
-     with the same commute."
-
-# Budget floors (below these, there's nothing to show):
-DFW:     Studio $950  | 1BR $1,000 | 2BR $1,300
-Houston: Studio $900  | 1BR $950   | 2BR $1,200
-Chicago: Studio $1,100 | 1BR $1,200 | 2BR $1,600</pre>
-</div>
-
-<!-- ═══════ THE AGENT BRAIN ═══════ -->
-
-<div class="asset">
-  <h2>The Agent Brain: How It Actually Works</h2>
-
-  <p>Every agent — Locator, Landlord Rep, Ken — runs on the same core loop. The LLM receives the full conversation history, the lead intelligence, and the available tools. It decides whether to search inventory, update requirements, escalate to a human, or just respond. No orchestrator tells it what to do. The LLM reads the situation and acts.</p>
-
-  <p>Guardrails run AFTER the LLM generates a response, not before. Rate limits, business hours, message safety, brand compliance — all post-generation filters. The LLM is the decision-maker. Guardrails are the seatbelts. This is the anti-determinism law: the LLM generates every response from scratch, with tools as capabilities it can invoke, not steps it's forced through.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Universal agent loop — from agent_core.py
-
-1. LOAD CONTEXT
-   chat history, lead intelligence, inventory, requirements
-
-2. BUILD SYSTEM PROMPT
-   persona + tools + 30+ examples + business rules as CONTEXT
-
-3. LLM GENERATES
-   response text + optional tool calls (LLM DECIDES)
-   Multi-round: up to 3 tool calls per turn
-   Tool results feed back → LLM generates again
-
-4. GUARDRAILS CHECK (post-generation)
-   Message safety, rate limits, brand compliance
-   If blocked → response is suppressed, reason logged
-
-5. SEND
-   SMS via Twilio, webhook, or hold for human review
-
-6. LOG REASONING TRACE
-   Full audit trail: prompt length, tool calls, guardrail results,
-   latency, blocked status, raw LLM output</pre>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">The Four Locator Tools</h2>
-
-  <p>The LLM decides when to call these. No orchestrator tells it "now search inventory." It reads the conversation and decides. If the lead just told it their budget and neighborhood, it calls <code>search_inventory</code>. If the lead said "stop texting me," it calls <code>mark_dead</code>. The key instruction in the tool definition for <code>search_inventory</code>: "Don't gate this behind collecting ALL info. If you have the basics, search."</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Four tools the Locator LLM can invoke
-
-update_requirements(client_id, budget, bedrooms, neighborhoods,
-    move_in_date, credit_score, pets, cosigner, ...)
-    → "Extract naturally from conversation, don't interrogate.
-       You don't need all fields at once."
-
-search_inventory(client_id, budget, bedrooms, neighborhoods)
-    → "If you have the basics, search. Don't wait for everything."
-
-escalate_to_human(client_id, reason)
-    → "Legal questions, complaints, special accommodations,
-       or lead explicitly asks for a person."
-
-mark_dead(client_id, reason)
-    → "ONLY when lead EXPLICITLY opts out: stop, not interested,
-       found a place, scam-hostile. Do NOT mark dead for ghosts
-       or slow responders."</pre>
-</div>
-
-<!-- ═══════ GKE DEPLOYMENT ═══════ -->
-
-<div class="asset">
-  <h2>GKE: What's Actually Running</h2>
-
-  <p>The Landlord Rep agent runs on Google Kubernetes Engine in us-central1. One pod. Four containers inside it. A gunicorn web server on port 5012, a Celery beat scheduler for cron jobs, and two Celery workers for async tasks — 6 concurrent workers each, 1000m CPU and 2GB RAM per worker. The web server is the smallest container (250m CPU, 512MB). The workers do the heavy lifting.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# GKE pod architecture — homeeasy-ai-service-v3
-
-Container 1: Web Server (gunicorn)
-  gunicorn -w 1 -b 0.0.0.0:5012 app:app --timeout 60
-  250m CPU, 512Mi RAM
-
-Container 2: Celery Beat (scheduler)
-  celery -A app.celery beat --loglevel=info
-  500m CPU, 512Mi RAM
-
-Container 3: Celery Worker
-  celery -A app.celery worker -c 6
-    --queues=ai_client_service_v3
-    --time-limit=1700 --soft-time-limit=1600
-    --max-tasks-per-child=10
-  1000m CPU, 2Gi RAM
-
-Service: LoadBalancer on port 5012
-
-# Deploy pipeline (Cloud Build):
-# Tests → Build Docker → Push to Artifact Registry → Apply to GKE
-# Trigger: push to test-deployment branch
-# Image: us-central1-docker.pkg.dev/hep01-303921/homeeasy-repos/...</pre>
-
-  <p>16 Discord channels receive different event types — errors, deployments, lead events, deal stage changes. Every error in the GKE pod goes to Discord within seconds. I watch it from my phone.</p>
-</div>
-
-<!-- ═══════ LANDLORD REP ═══════ -->
-
-<div class="asset">
-  <h2>Landlord Rep: Operating as the Leasing Office</h2>
-
-  <p>This is not a referral play. I am the leasing office. Eight buildings. 36 units. Every unit has dual pricing — market rate for walk-in tenants, Section 8 rate for voucher holders. The Section 8 rate is higher because the Housing Authority guarantees the payment. The commission structure reflects this: 75% on market-rate, 100% on Section 8. Every voucher tenant is a priority.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Dual pricing — from bluelake_inventory.py
-
-              Market Rate    Section 8 (CHA)
-Studio:       $850/mo        $1,200/mo
-1BR:          $1,100/mo      $1,500/mo
-2BR:          $1,250/mo      $1,650/mo
-3BR:          $1,550/mo      $1,850/mo
-
-ALL UNITS: Utilities included (heat, gas, electric, water, trash)
-Commission: 75% of 1 month (market), 100% (Section 8)
-
-# Building metadata — every building has its own policies:
-Luella (7450 S Luella Ave, South Shore):
-  pets: case-by-case, $250 deposit
-  breed restrictions: pit bull, rottweiler, doberman
-  parking: street only
-  income requirement: 2.5x monthly rent
-  background: non-violent, over 3 years OK
-  renovated: 2025
-  laundry: on-site, secure entry, cameras</pre>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">Cooperativeness Scoring</h2>
-
-  <p>The system scores how cooperative a renter is on a 0-100 scale. It starts at 50 (neutral) and moves based on behavior. Respond within 2 hours? +15. Send documents without being asked twice? +15. Go silent for 48 hours after a doc request? -15. Ask three times for the same information without delivering? -20. The score determines the recommended approach — direct ask, reluctant concede, back off, or let the cadence handle it.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Cooperativeness scoring — from approval_engine.py
-
-def score_cooperativeness(chat_messages, deal_stage):
-    score = 50.0  # starts neutral
-
-    Response < 2 hours:          +15
-    Proactive ("when/ready/send"): +10 to +20
-    Docs sent unprompted:        +15
-    Response > 48 hours:         -15
-    Pushback ("why/scam/uncomfortable"): -10 to -25
-    Asked 3x, sent 0 docs:      -20
-    Silent after doc request:    -15
-    "Looking elsewhere":         -10
-
-    Returns:
-      score:    0-100
-      level:    COOPERATIVE | HESITANT | RESISTANT | EVASIVE
-      approach: direct_ask | reluctant_concede | back_off | let_cadence_handle</pre>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">The Document Pipeline</h2>
-
-  <p>Renters email documents to renterdocs@homeeasy.com. Gmail API polls every 5 minutes. AI classifies each document — pay stub, bank statement, ID, voucher letter. The approval engine scores against building criteria: income at least 2.5x monthly rent (Section 8 exempt), background check passes (non-violent, over 3 years is OK), all required docs present. Asana tickets get created for the building manager with the full assessment.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Document pipeline — four stages
-
-email_monitor.py     Gmail API every 5 minutes → extract attachments
-doc_interpreter.py   AI classifies: pay stubs, bank statements, ID, voucher
-approval_engine.py   Income ≥ 2.5x rent? Background OK? Docs complete?
-asana_ygl.py         Create ticket → assignee: building manager → SLA tracking
-
-# Qualification lanes:
-Lane 00: VOUCHER ATTACK       Section 8 + docs → process in 24hrs. 100% commission.
-Lane 01: SLAM DUNK            Strong income, good credit, docs near complete.
-Lane 02: QUALIFIED             Active, some docs, needs specific remaining items.
-Lane 03: WORKS W/ MITIGATION   Qualified but complicating factor (credit, cosigner).
-Lane 04: EDGE CASE             Missing critical docs, uncertain qualification.
-
-# SMS response after doc receipt:
-READY_TO_SUBMIT:  "got your docs. everything looks good — submitting now."
-NEEDS_MORE_DOCS:  "got your [paystub]. just need [ID] and we're all set."
-FLAGS_FOUND:      "got your docs. reviewing now — i have a couple questions."</pre>
-</div>
-
-<!-- ═══════ KEN: INSURANCE ═══════ -->
-
-<div class="asset">
-  <h2>Ken: How the Insurance Agent Sells</h2>
-
-  <p>Ken is an SMS insurance sales agent. Outbound-first. I get a name, phone, city, and state from a partner building. Ken texts them, extracts their address and move-in date through conversation, calls the Assurant API for a real quote, sends a Stripe checkout link, and binds the policy. The critical rule: NEVER hardcode prices. Every price comes from Assurant's rating engine. If Ken quotes before calling the API, that price is a hallucination. If it's too low, the renter signs, discovers the real price, cancels, and files a complaint. If it's too high, they walk. Either way: legal liability.</p>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">Intent Classification</h2>
-
-  <p>Every inbound message gets classified into one of 14 intents using regex patterns. The classification determines the immediate response path. "Stop" means opt out — no reply, hard stop, TCPA compliance. "Gave address" means trigger the Assurant API quote. "Is this a scam" means explain that we're licensed and Assurant-backed. "Foxen mention" means explain that Foxen is a waiver service, not actual insurance — and that if their building floods, a Foxen waiver pays them nothing.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Intent classification — from classifier.py
-
-STOP           → Opt out immediately. No reply. TCPA compliance.
-GAVE_ADDRESS   → Trigger Assurant API quote.
-GAVE_EMAIL     → Store for policy delivery.
-GAVE_DATE      → Store move-in date.
-YES_INTERESTED → Ask for address.
-PRICE_QUESTION → Collect address FIRST. Never quote before API call.
-IS_THIS_SCAM   → "Licensed agent, Assurant-backed, Fortune 500 carrier."
-WHO_IS_THIS    → "We got flagged that you're moving into a rental."
-FOXEN_MENTION  → "Foxen is a waiver, not insurance. If your building
-                   floods, a Foxen waiver pays you nothing."
-ALREADY_HAS    → Verify they have $100K liability coverage.
-WILL_DO_LATER  → Schedule 24h follow-up.
-WANT_CALL      → Escalate to human.
-NOT_INTERESTED → Mark opted out.
-GENERAL_INQUIRY → Route to LLM.
-
-# Address detection regex:
-ADDRESS_PATTERN = re.compile(
-    r'\d+\s+[a-zA-Z].*(?:st|street|ave|avenue|rd|road|dr|drive'
-    r'|blvd|boulevard|ln|lane|way|ct|court)', re.IGNORECASE
-)</pre>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">The Payment Flow</h2>
-
-  <p>Assurant API for the quote. Stripe for the payment. PCI compliance is handled entirely by Stripe — card data never touches my servers. The checkout page is personalized: "Hey Sarah, you're almost covered!" with their name, building, coverage breakdown ($100K liability + $10K personal property), and the real premium from Assurant's rating engine.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Payment flow: Assurant quote → Stripe checkout → policy bind
-
-Step 1: Assurant API (OAuth 2.0)
-  authenticate() → client_credentials grant → access_token
-  create_quote(address, coverage, dwelling_type) → premium
-  # Premium varies by address, state, dwelling type.
-  # $100K liability + $10K personal property is the standard tier.
-
-Step 2: Stripe checkout session
-  checkout_page_html(lead_id, first_name, building_name, premium)
-  # Personalized landing page:
-  #   "Hey {first_name}, you're almost covered!"
-  #   Coverage: $100K liability + $10K personal property
-  #   Price: ${monthly}/mo (${annual}/year)
-  #   Trust badges: Secure Payment, Assurant Backed, Instant Coverage
-
-Step 3: SMS delivery
-  "Here's your checkout link: {url}"
-  # Card data handled entirely by Stripe. PCI Level 1.
-  # AI disclosure (mandatory): "I'm Ken, an AI assistant
-  # for Jamboree Insurance."
-
-Step 4: Policy bind
-  issue_policy(quote_id, payment_token)
-  # Assurant binds the policy. Renter gets confirmation.</pre>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">Drip Cadence: The Follow-Up Sequence</h2>
-
-  <p>If someone doesn't respond, Ken follows up on a schedule: 4 hours, 24 hours, 48 hours, 5 days, 7 days. After 7 days with no response, the lead expires. Each follow-up isn't a generic nudge. The system tracks what the person said — their move date, their name, their concern, whether they said they were busy at work. The follow-up references their own words back to them. "You mentioned you're moving in on April 15th — just wanted to make sure you're covered before then."</p>
-</div>
-
-<!-- ═══════ FINANCIAL ANALYSIS ═══════ -->
-
-<div class="asset">
-  <h2>Financial Analysis: Horizontal Truths Across APIs</h2>
-
-  <p>The CSV parsers broke. Chase missed 42% of transactions. Wintrust missed 98%. Spirit Credit Union doesn't even offer CSV exports. The fix: stop parsing CSVs. Read the actual bank statement PDFs with pdfplumber. 367 PDFs across 6 accounts. The real financial picture came from the balance method — opening balance plus deposits minus withdrawals — not from trying to categorize individual transactions.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# Why CSVs failed (actual production test results):
-Chase:     Missed 42% of transactions
-Wells:     Missed 0% (good format)
-Wintrust:  Missed 98% of transactions
-Spirit CU: No CSV export available
-
-# PDF balance method:
-367 PDFs across 6 accounts, 7 years of data
-Opening balance + deposits - withdrawals = closing balance
-Cross-verified against statement ending balances: 100% accurate
-
-# The real numbers:
-Total deposits (7 years):    $1.66M
-Total withdrawals (7 years): $1.67M
-Lifetime position:           ~$404K-$436K loss
-Texas AR write-off rate:     27%</pre>
-
-  <h2 style="font-size:1.1rem; margin-top:3rem;">4-Tier Payment Verification</h2>
-
-  <p>When a payment is disputed or missing, the system searches four independent sources. The consistent story across all four is what you trust. No single source tells the full picture.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# 4-tier payment verification
-
-Tier 1: Spirit Portal (bank records)
-  → ACH timestamps. Check numbers. Did the money move?
-
-Tier 2: Invoice + lease cross-reference
-  → Invoice amount vs lease terms vs deposit. Right amount?
-
-Tier 3: Zoho Books (accounting)
-  → Revenue recognition. Categorization. Tax reporting.
-
-Tier 4: Contextual evidence
-  → Email threads. SMS conversations. CRM notes.
-  → "What did we promise vs what did we deliver?"
-
-# When Tier 1 says $1,200 and Tier 2 says $1,200
-# but Tier 3 says $1,100 and Tier 4 has an email saying
-# "$100 discount for late maintenance" — now you have
-# the full story. No single source tells you that.
-
-# This pattern — cross-referencing independent APIs to find
-# the consistent truth — applies everywhere:
-#   Lead quality:   Twilio logs × CRM × conversation × outcome
-#   Building value: Voice calls × ILS data × commission actually paid
-#   Agent perf:     Messages sent × responses × conversions × revenue</pre>
-</div>
-
-<!-- ═══════ HUMAN ESCALATION ═══════ -->
-
-<div class="asset">
-  <h2>Human Escalation: Bland AI and FancyHands</h2>
-
-  <p>Humans are API endpoints. When the AI decides a situation needs a person, it routes to one of two services. Bland AI handles automated voice calls to buildings: vacancy checks, commission verification, scheduling. FancyHands handles tasks that need a real human: calling a building manager who won't answer the AI, resolving a lease dispute, collecting a document that requires a phone conversation. Opus 4.6 evaluates every call dispatch decision and picks the right executor.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# The executor spectrum
-
-Deterministic code:  $0/task      Compliance, DB queries, scheduling
-LLM (Claude/Gemini): $0.003/task  Conversation, reasoning, analysis
-Voice AI (Bland):    $0.09/min    Building calls, vacancy checks
-Human (FancyHands):  $3-7/task    Complex escalations, disputes
-
-# A building call that Bland AI can't close after 2 attempts
-# gets routed to FancyHands. Same interface:
-# "Call [building] and confirm [details]."
-# The executor swaps. The interface stays.</pre>
-</div>
-
-<!-- ═══════ GOVERNANCE ═══════ -->
-
-<div class="asset">
-  <h2>The Governance Layer: 8 Hooks, 1,334 Lines of Rules</h2>
-
-  <p>Eight hooks across four event types. They run deterministically — can't be skipped, can't be overridden. Each one exists because of a specific production incident. The bottom-up analysis hook exists because I spent months making decisions based on a database field called <code>client_stage_progression.stage_name</code> that turned out to be garbage. The pre-bash safeguard exists because the AI tried to DROP TABLE on a production database. The session-end hook exists because I lost $4-5K per day for 8 days because sessions had no memory of what was deployed.</p>
-
-  <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# 8 hooks, 4 event types — each one is a scar
-
-SessionStart:
-  pre-session-read-state.sh
-  → "Read what's deployed. Read what broke. Then start."
-
-PreToolUse (Bash):
-  pre-bash-safeguard.sh
-  → Blocks DROP TABLE, TRUNCATE, DELETE FROM on production
-  → "Either BLOCKS or ALLOWS. That's it."
-
-PreToolUse (SQL):
-  pre-sql-bottomup.sh
-  → Blocks aggregate queries before you've sampled raw records
-  → "Classifiers lie. Summary fields are stale."
-
-PostToolUse (Edit/Write):
-  post-edit-lint.sh
-  → Auto-lints Python. Blocks syntax errors. Detects secrets.
-
-Stop:
-  session-end-save.sh (126 lines)
-  → Auto-saves session memory + git state. Detects deploys.
-
-  stop-fresh-eyes-check.sh
-  → Logs unreviewed changes. Forces review next session.
-
-  ralph-wiggum/hooks/stop-hook.sh (178 lines)
-  → Autonomous loop controller. If you promised to finish
-    something and try to exit, it feeds the prompt back in.
-  → Named after a Simpsons character because humor in
-    infrastructure is how you stay sane at 2 AM.</pre>
-</div>
-
-<!-- ═══════ QUOTING ENGINE ═══════ -->
-
-<div class="asset">
-  <h2>The Quoting Engine (PE-Backed Portfolio Company)</h2>
-  <p>Before HomeEasy, I deployed this same architecture into a PE-backed portfolio company — commercial electrical distribution. AI trained on 180,000+ SKUs. Roughly 90% accuracy on quote generation. Built a CRM by mining 4,298 email threads — 657 net-new contacts extracted without anyone doing data entry.</p>
-  <p>The system found a $2.2M SUSOL arbitrage opportunity by identifying imported circuit breakers that could be sourced at 40% below the manufacturer's price. The AI read the emails. The AI found the pattern. The margin was sitting in the inbox for years.</p>
-  <p>Different SKUs, same pattern. Same decomposition. The apartment locating machine and the quoting engine are structurally identical — conversational intake, inventory match, qualification, fulfillment. The interface stays the same. The executors swap out.</p>
+  <h2>Deep Dives</h2>
+  <p style="margin-bottom:2rem;">Each article below is a full technical breakdown &mdash; real function signatures, actual thresholds, production regex patterns, and the reasoning behind every decision.</p>
+
+  <div style="display:grid; gap:1.5rem;">
+
+    <a href="/assets/lead-intelligence/" style="display:block; padding:1.2rem 1.5rem; border:1px solid #222; background:#0a0a0a; text-decoration:none; transition: border-color 0.2s;">
+      <div style="font-size:1.1rem; font-weight:600; color:#e8e4de; margin-bottom:0.3rem;">Lead Intelligence</div>
+      <div style="font-size:0.85rem; color:#666; font-style:italic;">Five signals extracted before the first message sends</div>
+      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">Phone area codes, employer extraction, ZIP demographics, financial capacity, credit estimation, background awareness, qualification lanes, confidence cases.</div>
+    </a>
+
+    <a href="/assets/tonality/" style="display:block; padding:1.2rem 1.5rem; border:1px solid #222; background:#0a0a0a; text-decoration:none; transition: border-color 0.2s;">
+      <div style="font-size:1.1rem; font-weight:600; color:#e8e4de; margin-bottom:0.3rem;">Tonality Engine</div>
+      <div style="font-size:0.85rem; color:#666; font-style:italic;">How a renter's first text changes everything the agent says next</div>
+      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">Renter profiling, five tone maps, style detection, ghost nudge strategies, commitment tracking, over-spam detection, stakeholder awareness.</div>
+    </a>
+
+    <a href="/assets/cooperating-network/" style="display:block; padding:1.2rem 1.5rem; border:1px solid #222; background:#0a0a0a; text-decoration:none; transition: border-color 0.2s;">
+      <div style="font-size:1.1rem; font-weight:600; color:#e8e4de; margin-bottom:0.3rem;">The Cooperating Network</div>
+      <div style="font-size:0.85rem; color:#666; font-style:italic;">83,191 buildings, five decay classes, and the forensic pipeline that matches leads to units</div>
+      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">Apartment Locator infrastructure. JSONB knowledge store, 7 source lanes, commission verification, matching pipeline, 3-market gap analysis, Bland AI building calls.</div>
+    </a>
+
+    <a href="/assets/inventory/" style="display:block; padding:1.2rem 1.5rem; border:1px solid #222; background:#0a0a0a; text-decoration:none; transition: border-color 0.2s;">
+      <div style="font-size:1.1rem; font-weight:600; color:#e8e4de; margin-bottom:0.3rem;">The Managed Portfolio</div>
+      <div style="font-size:0.85rem; color:#666; font-style:italic;">35 units, dual pricing, and the leasing office with zero staff</div>
+      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">Landlord Rep infrastructure. 8 buildings in South Shore, Chatham, and Chicago Heights. Section 8 vs market rate. Vacancy management. Unit selection.</div>
+    </a>
+
+    <a href="/assets/agent-brain/" style="display:block; padding:1.2rem 1.5rem; border:1px solid #222; background:#0a0a0a; text-decoration:none; transition: border-color 0.2s;">
+      <div style="font-size:1.1rem; font-weight:600; color:#e8e4de; margin-bottom:0.3rem;">The Agent Brain</div>
+      <div style="font-size:0.85rem; color:#666; font-style:italic;">One loop runs every agent. The LLM decides. Guardrails catch.</div>
+      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">Universal 7-step loop, tool execution, Gemini fallback, rate limiting, message guard with 9 blocking categories, duplicate suppression, reasoning traces.</div>
+    </a>
+
+    <a href="/assets/deployment/" style="display:block; padding:1.2rem 1.5rem; border:1px solid #222; background:#0a0a0a; text-decoration:none; transition: border-color 0.2s;">
+      <div style="font-size:1.1rem; font-weight:600; color:#e8e4de; margin-bottom:0.3rem;">Deployment</div>
+      <div style="font-size:0.85rem; color:#666; font-style:italic;">Four containers in one pod, Cloud Build, and 16 Discord channels</div>
+      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">GKE architecture, container sizing, LoadBalancer config, CI/CD pipeline, environment variables, error logging, SLA monitoring.</div>
+    </a>
+
+    <a href="/assets/landlord-rep/" style="display:block; padding:1.2rem 1.5rem; border:1px solid #222; background:#0a0a0a; text-decoration:none; transition: border-color 0.2s;">
+      <div style="font-size:1.1rem; font-weight:600; color:#e8e4de; margin-bottom:0.3rem;">Landlord Rep</div>
+      <div style="font-size:0.85rem; color:#666; font-style:italic;">Operating as the leasing office for 8 buildings with zero staff</div>
+      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">Cooperativeness scoring, document pipeline, deal state machine, approval engine, followup cadence, address validation, SMS/call windows.</div>
+    </a>
+
+    <a href="/assets/ken-insurance/" style="display:block; padding:1.2rem 1.5rem; border:1px solid #222; background:#0a0a0a; text-decoration:none; transition: border-color 0.2s;">
+      <div style="font-size:1.1rem; font-weight:600; color:#e8e4de; margin-bottom:0.3rem;">Ken Insurance</div>
+      <div style="font-size:0.85rem; color:#666; font-style:italic;">14 intents, one state machine, and the Stripe checkout that binds the policy</div>
+      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">Intent classification with exact word lists, 7-status state machine, Assurant API flow, Stripe checkout, followup scheduler, policy generation, database schema.</div>
+    </a>
+
+    <a href="/assets/financial-analysis/" style="display:block; padding:1.2rem 1.5rem; border:1px solid #222; background:#0a0a0a; text-decoration:none; transition: border-color 0.2s;">
+      <div style="font-size:1.1rem; font-weight:600; color:#e8e4de; margin-bottom:0.3rem;">Financial Analysis</div>
+      <div style="font-size:0.85rem; color:#666; font-style:italic;">367 PDFs, the balance method, and why every CSV parser lied</div>
+      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">PDF balance method, 4-tier payment verification, 6 bank accounts, horizontal truth pattern, real lifetime P&L numbers.</div>
+    </a>
+
+  </div>
 </div>
 
 <!-- ═══════ STATS ═══════ -->
@@ -749,7 +118,7 @@ Stop:
 119 session memory files
 4 business units
 3 AI agents in production
-36 units across 8 buildings (Landlord Rep)
+35 units across 8 buildings (Landlord Rep)
 5 lead intelligence signals per inbound lead
 14 intent classifiers (Ken Insurance)
 5 renter types with distinct tone maps

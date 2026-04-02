@@ -1,0 +1,826 @@
+---
+layout: base.njk
+title: "Lead Intelligence"
+navActive: assets
+---
+
+<p style="margin-bottom:0.5rem;"><a href="/assets/" style="color:#666; font-size:0.85rem; text-decoration:none;">&larr; Back to Assets</a></p>
+<h1>Lead Intelligence</h1>
+<p style="color:#999; font-size:1.05rem; margin-bottom:3rem;">Five signals extracted before the first message sends. Not from a credit bureau. Not from a background check. From whatever data we already have.</p>
+
+<!-- ═══════ OPENING ═══════ -->
+
+<div class="asset">
+
+<p>Every inbound lead gets profiled before the agent sends a single word. A name, a phone number, and the address of the ad they clicked. Three inputs. From those three inputs, five independent signals build a financial picture of the person on the other end of the conversation.</p>
+
+<p>The profile does not gate the conversation. Nobody gets rejected because of a phone area code or a ZIP median income. What it does is shape HOW the agent talks. A Section 8 voucher holder in Englewood gets a different opening than a relocating professional from Dallas. Not different quality. Different relevance. The voucher holder needs to know we accept vouchers within the first two messages or they stop responding. The Dallas transplant needs neighborhood context and commute times.</p>
+
+<p>This is 995 lines of Python. Most of the complexity is not in the extraction itself. It is in what happens when extraction fails, when signals contradict each other, and when the data we have is not enough to conclude anything.</p>
+
+</div>
+
+<!-- ═══════ SIGNAL 1: PHONE AREA CODE ═══════ -->
+
+<div class="asset">
+<h2>Signal 1: Phone Area Code</h2>
+
+<p>The cheapest signal. Zero API calls. Zero latency. The first three digits of a phone number tell you where the number was originally issued. Not where the person lives now, but where they were when they got the number. That distinction matters.</p>
+
+<p>The AREA_CODE_STATE dictionary contains 50+ state mappings. The ones that matter most are the local clusters:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+AREA_CODE_STATE = {
+    # Chicago metro
+    "312": "IL",  # Chicago proper
+    "773": "IL",  # Chicago neighborhoods
+    "872": "IL",  # Chicago overlay
+    "708": "IL",  # South/West suburbs
+    "630": "IL",  # Western suburbs (DuPage)
+    "224": "IL",  # North suburbs overlay
+    "847": "IL",  # North suburbs
+
+    # Dallas-Fort Worth
+    "214": "TX",  # Dallas
+    "972": "TX",  # Dallas suburbs
+    "469": "TX",  # Dallas overlay
+
+    # Houston
+    "713": "TX",  # Houston proper
+    "832": "TX",  # Houston overlay
+    "281": "TX",  # Houston suburbs
+
+    # Other major markets
+    "404": "GA",  # Atlanta
+    "678": "GA",  # Atlanta overlay
+    "770": "GA",  # Atlanta suburbs
+    "313": "MI",  # Detroit
+    "216": "OH",  # Cleveland
+    "614": "OH",  # Columbus
+    "317": "IN",  # Indianapolis
+    "219": "IN",  # Northwest Indiana / Gary
+    # ... 30+ more state mappings
+}
+</pre>
+
+<p>The analyze_phone function does one thing: compare the area code state to the inquiry state. If they match, local lead. If they do not match, relocation lead. The agent changes its opening accordingly.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+def analyze_phone(phone: str, inquiry_state: str) -> dict:
+    """Extract area code and determine local vs relocation."""
+    area_code = phone.strip().replace("+1", "")[:3]
+    state = AREA_CODE_STATE.get(area_code)
+
+    if not state:
+        return {
+            "area_code": area_code,
+            "state": None,
+            "is_local": None,
+            "note": "Unknown area code - cannot determine origin"
+        }
+
+    # Critical exception: 219 (NW Indiana/Gary) + IL inquiry = local
+    if area_code == "219" and inquiry_state == "IL":
+        return {
+            "area_code": area_code,
+            "state": "IN",
+            "is_local": True,
+            "note": "NW Indiana - common South Side pattern"
+        }
+
+    is_local = (state == inquiry_state)
+    return {
+        "area_code": area_code,
+        "state": state,
+        "is_local": is_local,
+        "note": f"{'Local' if is_local else 'Relocation'} lead"
+    }
+</pre>
+
+<p>The 219 exception is the one that earns this function its existence. Northwest Indiana, specifically the Gary/Hammond/East Chicago corridor, shares a labor market with Chicago's South Side. A 219 number inquiring about an apartment in Chicago Heights is not a relocation lead. They are moving twelve miles, not twelve hundred. Treating them as a relocation, sending neighborhood overviews and commute breakdowns, makes you sound like you have never met a Gary resident.</p>
+
+<p>When the area code is not in the dictionary, the function returns <code>is_local: None</code>. The agent does not guess. It opens neutrally and waits for the lead to reveal context through conversation. The worst thing an agent can do is assume incorrectly. A lead who just moved from Atlanta to Chicago and kept their 404 number does not want to hear "So you're looking to relocate from Georgia?"</p>
+
+</div>
+
+<!-- ═══════ SIGNAL 2: EMPLOYER EXTRACTION ═══════ -->
+
+<div class="asset">
+<h2>Signal 2: Employer Extraction</h2>
+
+<p>Income determines everything. Can they afford the unit? Do they need a cosigner? Will the landlord approve the application? The problem is that nobody volunteers their income in the first text message. But people do mention where they work, sometimes in passing, sometimes because you asked.</p>
+
+<p>Four regex patterns scan every inbound message looking for employer mentions:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+EMPLOYER_PATTERNS = [
+    r"i (?:work|am|been) (?:at|for|with)\s+(.+?)(?:\.|\n|$)",
+    r"(?:employed|working) (?:at|for|with|by)\s+(.+?)(?:\.|\n|$)",
+    r"my (?:job|employer|company) (?:is|at)\s+(.+?)(?:\.|\n|$)",
+    r"(?:i do|i drive for|i deliver for)\s+(.+?)(?:\.|\n|$)",
+]
+</pre>
+
+<p>The fourth pattern is the one that matters for our market. "I drive for Uber." "I deliver for Amazon." "I do hair." Gig workers and self-employed people describe their work differently than W-2 employees. They say what they DO, not where they ARE.</p>
+
+<p>If regex finds a match, it goes to Gemini Flash for verification. Temperature 0.1. Ten second timeout. The prompt asks one question: is this a plausible employer name? Gemini returns a structured response with four fields: plausible (boolean), sector (string), size (small/medium/large/unknown), and typical_income_range (tuple).</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+# Gemini verification call
+response = await gemini_flash(
+    prompt=f"Is '{employer_name}' a plausible employer? "
+           f"Return JSON: plausible, sector, size, typical_income_range",
+    temperature=0.1,
+    timeout=10
+)
+</pre>
+
+<p>Why Gemini and not Claude? Cost. This runs on every single lead. Thousands per day. Gemini Flash at 0.1 temperature is deterministic enough for employer verification and costs a fraction of a cent per call. Claude is for the conversation itself where nuance matters. Gemini is for bulk mechanical classification.</p>
+
+<p>If regex finds nothing, which is the common case for first-contact messages like "Is the 2br still available?", Gemini reads the full chat context and attempts extraction from surrounding conversation. This usually returns nothing too. That is fine. We move to the next signal.</p>
+
+<p>When no employer can be extracted at all, the system falls back to income category estimation. Nine categories, each with floor and ceiling:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+JOB_INCOME_ESTIMATES = {
+    "section8_voucher":  (15000, 30000),
+    "employed_stable":   (35000, 65000),
+    "professional":      (55000, 120000),
+    "self_employed":     (25000, 60000),
+    "disability":        (12000, 24000),
+    "cash_worker":       (20000, 35000),
+    "student":           (8000, 25000),
+    "gig_worker":        (20000, 45000),
+    "retired":           (18000, 40000),
+}
+</pre>
+
+<p>Notice the ranges overlap. A self-employed person at $60,000 and a professional at $55,000 are functionally identical for our purposes. The categories are not tax brackets. They are conversation strategies. A "student" at $8,000 annual income cannot afford a $1,200/month apartment on their own, full stop. The agent needs to ask about cosigners or parental support early, not after three days of back-and-forth.</p>
+
+<p>When the Gemini call times out, and it does timeout, roughly 3% of the time, the system does not retry. It marks employer extraction as "unavailable" and moves on. A ten-second timeout on a verification call is already generous. If Gemini cannot respond in ten seconds, the answer was not going to be useful anyway. The agent will gather income information through conversation, the way a human agent would.</p>
+
+</div>
+
+<!-- ═══════ SIGNAL 3: ZIP CODE DEMOGRAPHICS ═══════ -->
+
+<div class="asset">
+<h2>Signal 3: ZIP Code Demographics</h2>
+
+<p>Fifteen South Side ZIP codes are hardcoded from Census data. Not fetched from an API. Not updated dynamically. Hardcoded. Because Census data changes every ten years and the American Community Survey updates are not granular enough to justify an API dependency for fifteen numbers.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+ZIP_DEMOGRAPHICS = {
+    "60617": {
+        "neighborhood": "South Shore",
+        "median_income": 32000,
+        "poverty_rate": 0.28,
+        "renter_pct": 0.65,
+    },
+    "60619": {
+        "neighborhood": "Chatham",
+        "median_income": 30000,
+        "poverty_rate": 0.31,
+        "renter_pct": 0.55,
+    },
+    "60620": {
+        "neighborhood": "Auburn Gresham",
+        "median_income": 33000,
+        "poverty_rate": 0.25,
+        "renter_pct": 0.48,
+    },
+    "60621": {
+        "neighborhood": "Englewood",
+        "median_income": 22000,
+        "poverty_rate": 0.42,
+        "renter_pct": 0.72,
+    },
+    "60628": {
+        "neighborhood": "Roseland",
+        "median_income": 35000,
+        "poverty_rate": 0.24,
+        "renter_pct": 0.52,
+    },
+    "60629": {
+        "neighborhood": "Chicago Lawn",
+        "median_income": 38000,
+        "poverty_rate": 0.22,
+        "renter_pct": 0.55,
+    },
+    "60636": {
+        "neighborhood": "West Englewood",
+        "median_income": 25000,
+        "poverty_rate": 0.38,
+        "renter_pct": 0.68,
+    },
+    "60637": {
+        "neighborhood": "Woodlawn",
+        "median_income": 28000,
+        "poverty_rate": 0.35,
+        "renter_pct": 0.70,
+    },
+    "60643": {
+        "neighborhood": "Morgan Park",
+        "median_income": 48000,
+        "poverty_rate": 0.15,
+        "renter_pct": 0.38,
+    },
+    "60649": {
+        "neighborhood": "South Shore East",
+        "median_income": 27000,
+        "poverty_rate": 0.33,
+        "renter_pct": 0.72,
+    },
+    "60652": {
+        "neighborhood": "Ashburn",
+        "median_income": 55000,
+        "poverty_rate": 0.12,
+        "renter_pct": 0.35,
+    },
+    "60653": {
+        "neighborhood": "Bronzeville",
+        "median_income": 30000,
+        "poverty_rate": 0.30,
+        "renter_pct": 0.65,
+    },
+    "60655": {
+        "neighborhood": "Calumet Heights",
+        "median_income": 42000,
+        "poverty_rate": 0.18,
+        "renter_pct": 0.45,
+    },
+    "60827": {
+        "neighborhood": "Chicago Heights",
+        "median_income": 35000,
+        "poverty_rate": 0.25,
+        "renter_pct": 0.60,
+    },
+}
+</pre>
+
+<p>There are only fourteen entries in that dict. We operate in fourteen ZIP codes. Adding San Francisco or Brooklyn demographics would be architecture tourism. You build for the territory you serve.</p>
+
+<p>The critical thing to understand: the inquiry ZIP is the address of the ad they clicked, NOT where the lead currently lives. People browse aspirationally. Someone living in Englewood at $22,000 median income clicks on a unit in Morgan Park at $48,000. That is not a data error. That is a person trying to move up. The system uses inquiry ZIP as a demographic anchor point, but it is the LAST RESORT signal. If we have a stated income, an employer, or even a phone area code, those all take priority.</p>
+
+<p>When the inquiry ZIP is not in the dictionary, it means the ad is outside our core territory. The system returns no demographic data and the agent operates without this signal. No guessing. No extrapolation from neighboring ZIPs. The absence of data is itself a signal: this lead came from an ad we are running outside our usual geography, which might mean market expansion or might mean ad targeting drift.</p>
+
+</div>
+
+<!-- ═══════ SIGNAL 4: FINANCIAL CAPACITY ═══════ -->
+
+<div class="asset">
+<h2>Signal 4: Financial Capacity</h2>
+
+<p>The core rule: <code>max_affordable_rent = annual_income / 36</code>. That is the 33% ratio. A person making $55,000 per year can afford $1,527 per month before they start eating into grocery money and transit costs. The math is simple. The sourcing is not.</p>
+
+<p>Five sources of income data, in priority order:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+INCOME_HIERARCHY = [
+    # 1. Stated income in chat
+    #    "I make $55K" / "my income is around 4500 a month"
+    #    Highest confidence. The lead told us directly.
+
+    # 2. Employer category midpoint
+    #    If we extracted "Amazon warehouse" -> employed_stable
+    #    Midpoint of (35000, 65000) = $50,000
+
+    # 3. ZIP median income
+    #    From ZIP_DEMOGRAPHICS dict
+    #    e.g. South Shore 60617 -> $32,000
+
+    # 4. State median income
+    #    IL = $55,000 (hardcoded from Census)
+
+    # 5. National default
+    #    $55,000 (used when we know literally nothing)
+]
+</pre>
+
+<p>The function walks down the hierarchy until it finds a non-null value. Most leads land on source 4 or 5 in their first interaction because they have not mentioned income or employment yet. That is fine. The estimate gets revised upward or downward as the conversation progresses and more signals emerge.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+def estimate_financial_capacity(
+    stated_income: float | None,
+    employer_category: str | None,
+    inquiry_zip: str | None,
+    inquiry_state: str = "IL",
+    renter_type: str | None = None,
+) -> dict:
+    """
+    Returns estimated annual income, max affordable rent,
+    income source used, and affordability assessment for
+    a given unit price.
+    """
+    # Section 8 exception: Housing Authority pays the gap
+    if renter_type == "section8_voucher":
+        return {
+            "annual_income": stated_income or 18000,
+            "max_rent": None,  # HA covers difference
+            "source": "section8_voucher",
+            "note": "Section 8 - affordability determined by voucher amount"
+        }
+
+    # Walk the hierarchy
+    if stated_income:
+        annual = stated_income
+        source = "stated"
+    elif employer_category and employer_category in JOB_INCOME_ESTIMATES:
+        low, high = JOB_INCOME_ESTIMATES[employer_category]
+        annual = (low + high) / 2
+        source = "employer_midpoint"
+    elif inquiry_zip and inquiry_zip in ZIP_DEMOGRAPHICS:
+        annual = ZIP_DEMOGRAPHICS[inquiry_zip]["median_income"]
+        source = "zip_median"
+    elif inquiry_state == "IL":
+        annual = 55000
+        source = "state_median"
+    else:
+        annual = 55000
+        source = "national_default"
+
+    max_rent = annual / 36  # 33% ratio
+    # 15% wiggle room
+    max_rent_with_wiggle = max_rent * 1.15
+
+    return {
+        "annual_income": annual,
+        "max_rent": round(max_rent, 2),
+        "max_rent_flexible": round(max_rent_with_wiggle, 2),
+        "source": source,
+        "note": f"Based on {source}"
+    }
+</pre>
+
+<p>The 15% wiggle room exists because housing costs are not the only variable. Someone making $48,000 per year has a strict max of $1,333 per month. But if they have a partner contributing, or low car payments, or savings, $1,533 might work. The agent does not reject leads at the boundary. It mentions the stretch and lets the lead decide.</p>
+
+<p>The Section 8 exception is the most important branch in this function. When a lead has a Housing Authority voucher, the affordability calculation is irrelevant. The voucher covers the gap between what the tenant can pay (typically 30% of their income) and the contract rent. A person making $18,000 per year can live in a $1,400/month apartment if their voucher covers $950 of it. Applying the 33% ratio to their gross income would disqualify them from every unit in the portfolio, which would be exactly wrong.</p>
+
+<p>When the function falls through to the national default, it means we know almost nothing about this person. $55,000 is a deliberately neutral assumption. It does not restrict the agent from showing any unit, and it does not inflate confidence in affordability. The agent treats default-income leads with appropriate caution: show the unit, gauge interest, ask about income naturally before pushing toward an application.</p>
+
+</div>
+
+<!-- ═══════ SIGNAL 5: CREDIT ESTIMATION ═══════ -->
+
+<div class="asset">
+<h2>Signal 5: Credit Estimation</h2>
+
+<p>Nobody texts their credit score to a leasing agent. What they do is telegraph their confidence level. Six signal types feed into credit estimation, each with different reliability:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+CREDIT_SIGNAL_TYPES = [
+    "explicit_score",       # "My credit is 720"
+    "self_reported_quality", # "My credit is good" / "not great"
+    "cosigner_inquiry",     # "Can I have a cosigner?"
+    "eviction_history",     # "I had an eviction 3 years ago"
+    "bankruptcy",           # "I filed Chapter 7"
+    "zip_based_inference",  # Last resort: ZIP median credit
+]
+</pre>
+
+<p>Explicit scores are rare. Maybe 2% of leads volunteer a number. Self-reported quality is far more common, and the language patterns reveal more than people realize.</p>
+
+<p>The confident asserter patterns:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+CONFIDENT_ASSERTER_PATTERNS = [
+    # Credit confidence
+    r"my credit is good",
+    r"credit is fine",
+    r"no problem there",
+    r"credit is not an issue",
+    r"good credit",
+
+    # Income confidence
+    r"I make good money",
+    r"money is not an issue",
+    r"I can afford it",
+
+    # General confidence
+    r"I got steady income",
+    r"don't worry about it",
+    r"I'm good for it",
+    r"not a problem",
+]
+</pre>
+
+<p>A person who says "my credit is good" without being asked is making a preemptive assertion. They have been through this process before. They know credit matters. They are trying to signal strength early. This is a positive indicator, not because the statement is necessarily true, but because the behavior pattern correlates with people who have actually checked their credit recently.</p>
+
+<p>Contrast that with "Can I have a cosigner?" — a question that nobody with a 720 score asks. The cosigner inquiry is not a disqualifier. It is an indicator that the lead already knows they will have trouble qualifying alone. The agent adjusts: instead of asking about credit later, it proactively mentions that cosigners are accepted and explains the requirements upfront.</p>
+
+<p>The confidence case emerges when signals align. If a lead matches the confident asserter pattern AND we have verified their employer AND the unit is within their affordable range, the system generates:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+CONFIDENCE CASE: STRONG
+
+Signals:
+  - Confident asserter language detected
+  - Employer verified: Amazon Fulfillment Center (employed_stable)
+  - Unit rent $1,100 within max affordable $1,388
+
+Recommendation: Show unit. Schedule tour. Do not wait
+for full document package before engaging.
+</pre>
+
+<p>That recommendation matters. The default pipeline requires documents before scheduling a tour. But a strong confidence case says: this person is likely to qualify, do not slow them down with paperwork gates that make them think you are not interested. Get them into the building. Documents can follow.</p>
+
+<p>The opposite case is equally important. A lead with no employer data, no credit signals, and a ZIP median of $22,000 looking at a $1,400/month unit gets:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+CONFIDENCE CASE: WEAK
+
+Signals:
+  - No employer data
+  - No credit indicators
+  - Unit rent $1,400 exceeds estimated max affordable $611
+  - Income source: zip_median (lowest confidence)
+
+Recommendation: Gather income verification before proceeding.
+Ask about employment and voucher status early in conversation.
+</pre>
+
+<p>This is not a rejection. The agent still talks to them. But the conversation steers toward qualification questions earlier. "Do you have a Housing Authority voucher?" becomes the second or third message instead of the eighth.</p>
+
+</div>
+
+<!-- ═══════ BACKGROUND AWARENESS ═══════ -->
+
+<div class="asset">
+<h2>Background Awareness</h2>
+
+<p>This is not a background check. No criminal records are pulled. No databases are queried. This is language detection in the conversation itself, and it exists for one reason: to change the agent's tone, not the agent's decision.</p>
+
+<p>Three concern types, each with a distinct response protocol:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+BACKGROUND_CONCERN_TYPES = {
+    "reentry": {
+        "triggers": ["released", "incarceration", "parole",
+                     "probation", "halfway house", "just got out"],
+        "approach": "compassionate",
+        "protocol": [
+            "Acknowledge without judgment",
+            "Focus on current stability (job, income)",
+            "Mention SAFER Foundation housing resources",
+            "Do NOT ask about the offense",
+            "Standard qualification applies - no different criteria",
+        ]
+    },
+    "dv_safety": {
+        "triggers": ["domestic", "abuse", "restraining order",
+                     "flee", "escape", "safety", "shelter",
+                     "hiding", "protective order"],
+        "approach": "safety_first",
+        "protocol": [
+            "SAFETY protocol activated",
+            "Prioritize speed and privacy",
+            "Do NOT ask why they are moving",
+            "Do NOT ask about current living situation",
+            "Minimize information collection to essentials only",
+            "Offer to communicate via alternate channel if needed",
+        ]
+    },
+    "crisis": {
+        "triggers": ["renter_type == 'crisis'"],
+        "approach": "minimal_friction",
+        "protocol": [
+            "Skip standard qualification interrogation",
+            "Mention HPRP (Homelessness Prevention and Rapid Re-Housing)",
+            "Mention ERA (Emergency Rental Assistance) programs",
+            "Fast-track to available units",
+            "Reduce documentation requirements where landlord allows",
+        ]
+    },
+}
+</pre>
+
+<p>The DV/safety protocol is the one that cannot fail. When someone texts "I need to get out of my current situation" or "I have a restraining order against my ex", the absolute worst thing an agent can do is follow the standard script. "Great! Can you tell me about your current living situation?" becomes a dangerous question. The agent does not need to know why they are leaving. It needs to know what they can afford and how fast they need to move.</p>
+
+<p>The reentry protocol exists because we operate on the South Side of Chicago. People coming out of incarceration are a real and significant part of our applicant pool. They have jobs. They have income. They have the same right to housing as anyone else. The agent mentions SAFER Foundation, which provides reentry housing support in Chicago, as a resource. It does not change the qualification criteria. Credit score requirements are the same. Income requirements are the same. The tone changes, nothing else.</p>
+
+<p>When these triggers fire incorrectly, and they do, the damage is minimal. If someone says "I just got released from the hospital" and the reentry protocol activates, the worst outcome is that the agent is slightly more compassionate than necessary. That is an acceptable failure mode. The alternative, missing a genuine reentry or DV situation and responding with boilerplate, is not acceptable.</p>
+
+</div>
+
+<!-- ═══════ QUALIFICATION LANES ═══════ -->
+
+<div class="asset">
+<h2>Qualification Lanes</h2>
+
+<p>Every signal collapses into one of six lanes. The lane determines priority, follow-up cadence, and how aggressively the agent pursues the lead.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+QUALIFICATION_LANES = {
+    "00": {
+        "label": "VOUCHER ATTACK IMMEDIATELY",
+        "description": "Section 8 voucher holder with documents submitted",
+        "priority": "CRITICAL",
+        "sla": "Process within 24 hours",
+        "follow_up": "Same day, then every 12 hours until response",
+        "criteria": [
+            "Has active Section 8 voucher",
+            "Documents submitted or in progress",
+            "Voucher amount covers unit rent",
+        ],
+    },
+    "01": {
+        "label": "SLAM DUNK",
+        "description": "Strong income, good credit indicators, docs nearly complete",
+        "priority": "HIGH",
+        "sla": "First response within 2 hours",
+        "follow_up": "Daily until tour scheduled",
+        "criteria": [
+            "Income >= 3x rent (or close with wiggle)",
+            "Positive credit signals",
+            "Most documents already submitted",
+            "Responsive to messages",
+        ],
+    },
+    "02": {
+        "label": "QUALIFIED",
+        "description": "Active lead, has some docs, needs specific remaining items",
+        "priority": "MEDIUM-HIGH",
+        "sla": "First response within 4 hours",
+        "follow_up": "Every 48 hours",
+        "criteria": [
+            "Income likely sufficient",
+            "Engaged in conversation",
+            "Missing 1-3 specific documents",
+        ],
+    },
+    "03": {
+        "label": "WORKS WITH MITIGATION",
+        "description": "Qualified but has a complicating factor",
+        "priority": "MEDIUM",
+        "sla": "First response within 8 hours",
+        "follow_up": "Every 72 hours",
+        "criteria": [
+            "Income borderline or credit concerns",
+            "May need cosigner",
+            "May need additional deposit",
+            "Willing to provide mitigation docs",
+        ],
+    },
+    "04": {
+        "label": "EDGE CASE",
+        "description": "Missing critical documentation, uncertain qualification",
+        "priority": "LOW",
+        "sla": "First response within 24 hours",
+        "follow_up": "Weekly",
+        "criteria": [
+            "Insufficient income data",
+            "No documents submitted",
+            "Unclear housing situation",
+            "Not yet responsive to qualification questions",
+        ],
+    },
+    "DEAD": {
+        "label": "Do Not Contact",
+        "description": "Opted out or explicitly uninterested",
+        "priority": "NONE",
+        "sla": "N/A",
+        "follow_up": "NEVER",
+        "criteria": [
+            "Said 'stop', 'unsubscribe', or equivalent",
+            "Explicitly stated not interested",
+            "Requested removal from contact list",
+        ],
+    },
+}
+</pre>
+
+<p>Lane 00 exists because voucher holders are the highest-value leads in the Landlord Rep portfolio. Section 8 pays market rate or above, pays on time every month (it is a government check), and the tenant stays for years because transferring a voucher is a bureaucratic nightmare. A voucher holder with documents ready is a guaranteed lease if the unit passes inspection. Twenty-four hour SLA is not aggressive. It is defensive. If we do not move fast, the next landlord will.</p>
+
+<p>Lane 01 is the lead every agent dreams about. Strong income, good credit language, documents already flowing in. These leads close themselves if you do not get in their way. The follow-up cadence is daily because these people are actively shopping. They will sign with whoever responds fastest and makes the process easiest.</p>
+
+<p>The gap between Lane 02 and Lane 03 is where judgment lives. A lead making $45,000 looking at a $1,200 unit with no credit signals is Lane 02 — probably fine, needs docs. The same lead with a mentioned eviction from three years ago is Lane 03 — probably fine with mitigation (larger deposit, cosigner letter), needs careful handling. The eviction does not kill the deal. It changes the path.</p>
+
+<p>Lane DEAD is the only lane that is permanent. Every other lane is a snapshot. A Lane 04 lead who suddenly sends three documents and mentions their voucher jumps to Lane 00. The lanes are recalculated on every new message, not assigned once and forgotten.</p>
+
+</div>
+
+<!-- ═══════ CONFIDENCE CASE BUILDER ═══════ -->
+
+<div class="asset">
+<h2>Confidence Case Builder</h2>
+
+<p>The confidence score is a 0-to-10 composite. It is not a credit score. It is not a qualification decision. It is the system's answer to one question: how confident are we that this person will successfully lease a unit?</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+def build_confidence_case(signals: dict) -> dict:
+    """
+    Score 0-10 across multiple dimensions.
+
+    Dimensions:
+      - income_verified:    0-3 points
+      - credit_positive:    0-2 points
+      - employer_confirmed: 0-2 points
+      - affordability:      0-2 points
+      - responsiveness:     0-1 point
+
+    Thresholds:
+      >= 7 with verified employer + affordable = STRONG
+      4-6 = MODERATE (proceed with standard process)
+      < 4 = WEAK (gather more before proceeding)
+    """
+    score = 0
+    evidence = []
+
+    # Income verification (0-3)
+    if signals.get("stated_income"):
+        score += 3
+        evidence.append("Income stated directly")
+    elif signals.get("employer_category"):
+        score += 2
+        evidence.append(f"Employer: {signals['employer_category']}")
+    elif signals.get("zip_income"):
+        score += 1
+        evidence.append("ZIP median income only")
+
+    # Credit signals (0-2)
+    if signals.get("explicit_credit_score"):
+        if signals["explicit_credit_score"] >= 650:
+            score += 2
+            evidence.append(f"Credit score: {signals['explicit_credit_score']}")
+        else:
+            score += 1
+            evidence.append(f"Credit score: {signals['explicit_credit_score']} (below 650)")
+    elif signals.get("confident_asserter"):
+        score += 1
+        evidence.append("Confident language about credit/income")
+
+    # Employer confirmed (0-2)
+    if signals.get("employer_verified"):
+        score += 2
+        evidence.append(f"Employer verified: {signals['employer_name']}")
+    elif signals.get("employer_extracted"):
+        score += 1
+        evidence.append(f"Employer mentioned: {signals['employer_name']}")
+
+    # Affordability (0-2)
+    if signals.get("rent_to_income_ratio"):
+        ratio = signals["rent_to_income_ratio"]
+        if ratio <= 0.30:
+            score += 2
+            evidence.append(f"Rent is {ratio:.0%} of income (comfortable)")
+        elif ratio <= 0.40:
+            score += 1
+            evidence.append(f"Rent is {ratio:.0%} of income (stretched)")
+
+    # Responsiveness (0-1)
+    if signals.get("response_count", 0) >= 3:
+        score += 1
+        evidence.append("Actively engaged (3+ responses)")
+
+    # Determine case strength
+    if score >= 7 and signals.get("employer_verified") and signals.get("affordable"):
+        strength = "STRONG"
+        recommendation = ("Show unit. Schedule tour. Do not wait for "
+                         "full document package before engaging.")
+    elif score >= 4:
+        strength = "MODERATE"
+        recommendation = ("Standard process. Continue gathering documents "
+                         "while maintaining engagement.")
+    else:
+        strength = "WEAK"
+        recommendation = ("Gather income verification before proceeding. "
+                         "Ask about employment and voucher status early.")
+
+    return {
+        "score": score,
+        "max_score": 10,
+        "strength": strength,
+        "evidence": evidence,
+        "recommendation": recommendation,
+    }
+</pre>
+
+<p>The 7-point threshold for STRONG is deliberately high. Seven out of ten means we have income data from a direct statement or verified employer, positive credit signals, the unit is affordable, and the lead is actively responding. That combination is rare on first contact. Most leads start at 1-3 and climb as the conversation develops. The score is recalculated after every message.</p>
+
+<p>Why does responsiveness only count for one point? Because responding to texts is necessary but not sufficient. A lead who responds twenty times but never sends a document is not a strong case. They are an engaged case with no forward motion. The system tracks that distinction.</p>
+
+<p>The MODERATE band (4-6) is where most qualified leads live for the majority of their journey. They have some signals but not all. They have mentioned income but not sent pay stubs. They said their credit is fine but have not provided a score. Standard process means: keep the conversation going, ask for documents when the moment is natural, do not push so hard that they ghost.</p>
+
+</div>
+
+<!-- ═══════ WHAT THE AGENT SEES ═══════ -->
+
+<div class="asset">
+<h2>What the Agent Actually Sees</h2>
+
+<p>All five signals collapse into a single intelligence block that gets injected into the system prompt before the agent generates its response. The agent does not see the raw function outputs. It sees a formatted summary designed to be consumed in one glance during the 2-3 seconds between receiving a message and generating a reply.</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+═══════════════════════════════════════════
+LEAD INTELLIGENCE PROFILE
+═══════════════════════════════════════════
+
+Lead: Deshawn Williams
+Phone: (773) 555-0147
+Inquiry: 7830 S Essex Ave, Unit 2R ($1,100/mo)
+Time: 2026-03-15 14:23 CST
+
+───────────────────────────────────────────
+SIGNAL 1: PHONE
+  Area code: 773 (Chicago neighborhoods)
+  State: IL
+  Match: LOCAL LEAD
+  Note: Same metro — no relocation context needed
+
+SIGNAL 2: EMPLOYER
+  Extracted: "Amazon" from "I work at Amazon"
+  Verified: Yes (Gemini Flash, 0.3s)
+  Sector: Logistics/Fulfillment
+  Category: employed_stable
+  Estimated income: $35,000 - $65,000
+
+SIGNAL 3: ZIP DEMOGRAPHICS
+  Inquiry ZIP: 60617 (South Shore)
+  Median income: $32,000
+  Poverty rate: 28%
+  Renter percentage: 65%
+  Note: ZIP is ad location, not lead residence
+
+SIGNAL 4: FINANCIAL CAPACITY
+  Annual income (est): $50,000 (employer midpoint)
+  Max affordable rent: $1,388/mo
+  Max with wiggle (15%): $1,597/mo
+  Unit rent: $1,100/mo
+  Affordability: COMFORTABLE (ratio: 26.4%)
+  Source: employer_midpoint
+
+SIGNAL 5: CREDIT
+  Explicit score: None
+  Self-reported: "my credit is decent"
+  Cosigner inquiry: No
+  Eviction/bankruptcy: None detected
+  Assessment: NEUTRAL-POSITIVE
+
+───────────────────────────────────────────
+BACKGROUND: No concerns detected
+LANE: 02 — QUALIFIED
+CONFIDENCE: 6/10 MODERATE
+
+Evidence:
+  - Employer mentioned and verified (Amazon)
+  - Unit affordable at estimated income
+  - Neutral-positive credit language
+  - First message — responsiveness TBD
+
+Recommendation: Standard process. Continue
+gathering documents while maintaining engagement.
+Ask about move-in timeline and current lease status.
+═══════════════════════════════════════════
+</pre>
+
+<p>That block is approximately 1,200 tokens. It fits inside the system prompt without crowding out the agent's instructions, conversation history, or tool definitions. Every field is labeled. Every inference is sourced. The agent knows the confidence level is MODERATE and knows exactly why: verified employer, affordable unit, but no direct income statement and no credit score.</p>
+
+<p>When signals are missing, the block shows it explicitly. No data is not hidden. It is stated:</p>
+
+<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
+SIGNAL 2: EMPLOYER
+  Extracted: None
+  Verified: N/A
+  Category: unknown
+  Estimated income: N/A
+  Note: No employer information available yet
+</pre>
+
+<p>The agent sees "No employer information available yet" and knows to work employment into the conversation naturally. Not "What is your employer?" as the opening line. Something like "Just so I can get an idea of what might work for you — are you working in the area?" Three messages in, after rapport is established. The intelligence block shapes timing, not just content.</p>
+
+<p>One more thing that is easy to miss: the profile is recalculated on every inbound message. If the lead's second text says "I work at UChicago Medical Center", the next agent response will see an updated intelligence block with employer_verified, an income estimate bumped to the "professional" category ($55,000-$120,000 midpoint = $87,500), and the confidence score jumped from 2 to 6. The agent's entire posture shifts. It stops qualifying and starts selling.</p>
+
+</div>
+
+<!-- ═══════ WHAT GOES WRONG ═══════ -->
+
+<div class="asset">
+<h2>What Goes Wrong</h2>
+
+<p>The system fails in predictable ways.</p>
+
+<p>The employer regex matches too broadly. "I work at getting my life together" triggers the first pattern and sends "getting my life together" to Gemini for employer verification. Gemini correctly returns <code>plausible: false</code>, but that is a wasted API call and 300 milliseconds of latency. The regex cannot distinguish between literal and figurative uses of "I work at." Natural language is not a solved problem. It is a managed problem.</p>
+
+<p>The ZIP demographics become less useful as our ad targeting expands. When every ad points to a South Side building, fourteen ZIP codes cover the universe. When we start running ads on Zillow that pull from across the metro, a lead clicking from Naperville (60540) gets no demographic signal at all. The system degrades gracefully — it just skips that signal — but it means financial capacity falls back to state median, which is less useful than knowing the inquiry neighborhood.</p>
+
+<p>Credit estimation is the weakest signal. Self-reported credit quality has almost no correlation with actual credit scores in our population. People who say "my credit is good" range from 580 to 780. People who say nothing about credit are just as likely to have a 700 as people who bring it up proactively. The confident asserter patterns are better than nothing, but "better than nothing" is a low bar. The real credit check happens when the landlord runs the application. Everything before that is estimation theater.</p>
+
+<p>The confidence case builder over-weights employer verification. A lead who says "I work at Walmart" and gets verified by Gemini jumps to a higher confidence score than a lead who says "I make $85,000 a year" but does not name their employer. The stated income is a stronger signal — the person literally told us their number — but the scoring gives more points to the combination of employer extraction plus Gemini verification. This is a known imbalance. It has not been fixed because in practice, the difference rarely changes the agent's behavior. Both leads end up in the same lane.</p>
+
+<p>The Section 8 exception in financial capacity can mask problems. When a lead mentions a voucher, the system skips affordability analysis entirely. But voucher amounts vary. A lead with a voucher worth $1,000/month looking at a $1,400/month unit still has a $400 gap plus their tenant portion. The system currently does not model this gap. It treats all vouchers as "Housing Authority covers it." That is correct for most of our units, where rents are within voucher limits, but it would break if we moved into higher-rent inventory.</p>
+
+</div>
+
+<!-- ═══════ CLOSING ═══════ -->
+
+<div class="asset" style="margin-top:4rem; border-top:1px solid #333; padding-top:3rem;">
+<h2>The Point</h2>
+
+<p>995 lines of code. Five signals. None of them definitive. All of them together create a picture that is more useful than any single data source.</p>
+
+<p>The intelligence layer does not make decisions. It does not approve or reject. It does not score people on a scale that determines their worthiness. It answers one question for the agent: given what we know right now, what is the most useful thing to say next?</p>
+
+<p>A human leasing agent does this intuitively. They hear a Gary area code and know this person works at the steel mill or the casino. They see an Englewood address and know to ask about vouchers early. They notice confident language about credit and relax their pitch. The intelligence layer is that intuition, extracted into five functions that run in under two seconds.</p>
+
+<p>The lead does not know any of this is happening. They texted "Is the 2br still available?" and got back a response that felt like it was written by someone who understood their situation. That is the entire point.</p>
+
+</div>

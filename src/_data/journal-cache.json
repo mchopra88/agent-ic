@@ -4,6 +4,34 @@
     "displayDate": "April 2, 2026",
     "commits": [
       {
+        "hash": "378c90b",
+        "dateStr": "2026-04-02",
+        "message": "v16: assets rewrite — plain English, real code depth, intelligence pipeline explained signal by signal",
+        "tag": "build",
+        "repo": "agent-ic"
+      },
+      {
+        "hash": "affe95b",
+        "dateStr": "2026-04-02",
+        "message": "chore: journal cron daily at midnight CT instead of every 6h",
+        "tag": "build",
+        "repo": "agent-ic"
+      },
+      {
+        "hash": "310a4ba",
+        "dateStr": "2026-04-02",
+        "message": "feat: auto-update journal every 6 hours from all 16 production repos",
+        "tag": "feature",
+        "repo": "agent-ic"
+      },
+      {
+        "hash": "6c7ea35",
+        "dateStr": "2026-04-02",
+        "message": "fix: journal now pulls from all 16 production repos (1,689 commits)",
+        "tag": "fix",
+        "repo": "agent-ic"
+      },
+      {
         "hash": "305bfa6",
         "dateStr": "2026-04-02",
         "message": "v15: massive assets rewrite with production code depth, fix lead volume to 30K/day",
@@ -130,17 +158,17 @@
         "repo": "agent-ic"
       }
     ],
-    "commitCount": 18,
+    "commitCount": 22,
     "tags": [
-      "fix",
       "build",
       "feature",
+      "fix",
       "deploy"
     ],
     "repos": [
       "agent-ic"
     ],
-    "summary": "3 features, 4 fixes, 1 deploy in agent-ic"
+    "summary": "4 features, 5 fixes, 1 deploy in agent-ic"
   },
   {
     "date": "2026-04-01",
