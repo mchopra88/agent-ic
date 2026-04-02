@@ -3,40 +3,50 @@ const path = require('path');
 const fs = require('fs');
 
 module.exports = function() {
-  const entries = [];
+  const allCommits = [];
+  const pregenPath = path.resolve(__dirname, 'journal-cache.json');
 
-  // Try multiple repo locations: homeeasy-hq (local dev), then current repo
+  // All production repositories — the REAL work, not just this site
   const repoDirs = [
-    '/Users/mukundchopra/homeeasy-hq',
-    path.resolve(__dirname, '../..')
+    { dir: '/Users/mukundchopra/homeeasy-hq', label: 'homeeasy-hq' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/Agentic-Client-Service', label: 'Locator + Landlord Rep' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/Agentic-Service-v3', label: 'Agent Service v3' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/Twilio-Service-Homeeasy', label: 'Twilio Service' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/SLA-AGENTIC-CODEBASE', label: 'SLA Agentic' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/homeeasy-site-v2', label: 'HomeEasy Site' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/Homeeasy_TextingService_v1', label: 'Texting Service' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/jamboree-insurance', label: 'Ken Insurance' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/cooperating_voice_agent', label: 'Voice Agent' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/cooperating_email_agent', label: 'Email Agent' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/agentic-cognee-service', label: 'Cognee Service' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/Inventory_trigger', label: 'Inventory Trigger' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/Streamlit-HomeEasy', label: 'Streamlit Dashboard' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/leads-monitoring-dashboard', label: 'Leads Dashboard' },
+    { dir: '/Users/mukundchopra/homeeasy-hq/repos/sales_progression_dashboard', label: 'Sales Dashboard' },
+    { dir: path.resolve(__dirname, '../..'), label: 'agent-ic' },
   ];
 
-  // Also check for pre-generated data (for CI/CD where homeeasy-hq doesn't exist)
-  const pregenPath = path.resolve(__dirname, 'journal-cache.json');
-  let usePregen = false;
+  let foundAny = false;
 
-  for (const repoDir of repoDirs) {
+  for (const { dir, label } of repoDirs) {
     try {
-      // Verify it's a git repo
-      execSync('git rev-parse --git-dir', { cwd: repoDir, encoding: 'utf-8', timeout: 5000 });
+      execSync('git rev-parse --git-dir', { cwd: dir, encoding: 'utf-8', timeout: 5000 });
 
       const log = execSync(
-        `git log --all --since="90 days ago" --pretty=format:"%H|%ai|%s" --no-merges`,
-        { cwd: repoDir, encoding: 'utf-8', timeout: 10000 }
+        `git log --all --since="365 days ago" --pretty=format:"%H|%ai|%s" --no-merges`,
+        { cwd: dir, encoding: 'utf-8', timeout: 30000 }
       );
 
       const lines = log.trim().split('\n').filter(Boolean);
       if (lines.length === 0) continue;
 
-      const byDate = {};
+      foundAny = true;
       for (const line of lines) {
         const parts = line.split('|');
         if (parts.length < 3) continue;
         const hash = parts[0].substring(0, 7);
         const dateStr = parts[1].substring(0, 10);
         const message = parts.slice(2).join('|');
-
-        if (!byDate[dateStr]) byDate[dateStr] = [];
 
         let tag = 'build';
         const msg = message.toLowerCase();
@@ -45,35 +55,53 @@ module.exports = function() {
         else if (msg.includes('incident') || msg.includes('revert') || msg.includes('emergency')) tag = 'incident';
         else if (msg.includes('feat') || msg.includes('add') || msg.includes('implement') || msg.includes('new')) tag = 'feature';
 
-        byDate[dateStr].push({ hash, message, tag });
+        allCommits.push({ hash, dateStr, message, tag, repo: label });
       }
-
-      const dates = Object.keys(byDate).sort().reverse();
-      for (const date of dates) {
-        const commits = byDate[date];
-        const tags = [...new Set(commits.map(c => c.tag))];
-        entries.push({
-          date,
-          displayDate: formatDate(date),
-          commits,
-          commitCount: commits.length,
-          tags,
-          summary: generateSummary(commits)
-        });
-      }
-
-      // Cache the data for CI builds
-      if (entries.length > 0) {
-        try { fs.writeFileSync(pregenPath, JSON.stringify(entries, null, 2)); } catch(e) {}
-      }
-
-      break; // Found a working repo
     } catch (e) {
       continue;
     }
   }
 
-  // If no git repo worked, try pre-generated cache
+  // Deduplicate by hash (same commit can appear in nested repos)
+  const seen = new Set();
+  const unique = [];
+  for (const c of allCommits) {
+    if (!seen.has(c.hash)) {
+      seen.add(c.hash);
+      unique.push(c);
+    }
+  }
+
+  // Group by date
+  const byDate = {};
+  for (const c of unique) {
+    if (!byDate[c.dateStr]) byDate[c.dateStr] = [];
+    byDate[c.dateStr].push(c);
+  }
+
+  const entries = [];
+  const dates = Object.keys(byDate).sort().reverse();
+  for (const date of dates) {
+    const commits = byDate[date];
+    const tags = [...new Set(commits.map(c => c.tag))];
+    const repos = [...new Set(commits.map(c => c.repo))];
+    entries.push({
+      date,
+      displayDate: formatDate(date),
+      commits,
+      commitCount: commits.length,
+      tags,
+      repos,
+      summary: generateSummary(commits, repos)
+    });
+  }
+
+  // Cache for CI builds
+  if (entries.length > 0) {
+    try { fs.writeFileSync(pregenPath, JSON.stringify(entries, null, 2)); } catch(e) {}
+  }
+
+  // If nothing found locally, try cache
   if (entries.length === 0) {
     try {
       if (fs.existsSync(pregenPath)) {
@@ -91,7 +119,7 @@ function formatDate(dateStr) {
   return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-function generateSummary(commits) {
+function generateSummary(commits, repos) {
   const fixes = commits.filter(c => c.tag === 'fix').length;
   const features = commits.filter(c => c.tag === 'feature').length;
   const deploys = commits.filter(c => c.tag === 'deploy').length;
@@ -103,6 +131,7 @@ function generateSummary(commits) {
   if (deploys > 0) parts.push(`${deploys} deploy${deploys > 1 ? 's' : ''}`);
   if (incidents > 0) parts.push(`${incidents} incident${incidents > 1 ? 's' : ''}`);
 
-  if (parts.length === 0) return `${commits.length} commit${commits.length > 1 ? 's' : ''}`;
-  return parts.join(', ');
+  const summary = parts.length > 0 ? parts.join(', ') : `${commits.length} commits`;
+  const repoStr = repos.length > 1 ? ` across ${repos.length} repos` : ` in ${repos[0]}`;
+  return summary + repoStr;
 }
