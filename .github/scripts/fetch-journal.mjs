@@ -1,36 +1,90 @@
 /**
- * Fetch commits from all production repos via GitHub API.
+ * Fetch commits from ALL production repos via GitHub API.
+ * Dynamically discovers repos in the homeeasy-repo org.
  * Runs in GitHub Actions with JOURNAL_PAT secret for cross-org access.
  * Generates src/_data/journal-cache.json for the 11ty build.
  */
 
-import { writeFileSync, readFileSync } from 'fs';
-
-const REPOS = [
-  // Core production
-  { owner: 'homeeasy-repo', repo: 'Agentic-Client-Service', label: 'Locator + Landlord Rep' },
-  { owner: 'homeeasy-repo', repo: 'homeeasy-hq', label: 'homeeasy-hq' },
-  { owner: 'homeeasy-repo', repo: 'homeeasy-site-v2', label: 'HomeEasy Site' },
-  { owner: 'homeeasy-repo', repo: 'Agentic-Service-v3', label: 'Agent Service v3' },
-  { owner: 'homeeasy-repo', repo: 'Twilio-Service-Homeeasy', label: 'Twilio Service' },
-  { owner: 'homeeasy-repo', repo: 'SLA-AGENTIC-CODEBASE', label: 'SLA Agentic' },
-  { owner: 'homeeasy-repo', repo: 'Homeeasy_TextingService_v1', label: 'Texting Service' },
-  { owner: 'homeeasy-repo', repo: 'agentic-cognee-service', label: 'Cognee Service' },
-  { owner: 'homeeasy-repo', repo: 'cooperating_voice_agent', label: 'Voice Agent' },
-  { owner: 'homeeasy-repo', repo: 'cooperating_email_agent', label: 'Email Agent' },
-  { owner: 'homeeasy-repo', repo: 'Inventory_trigger', label: 'Inventory Trigger' },
-  { owner: 'homeeasy-repo', repo: 'Streamlit-HomeEasy', label: 'Streamlit Dashboard' },
-  { owner: 'homeeasy-repo', repo: 'leads-monitoring-dashboard', label: 'Leads Dashboard' },
-  { owner: 'homeeasy-repo', repo: 'sales_progression_dashboard', label: 'Sales Dashboard' },
-  // Insurance
-  { owner: 'JamboreeInsurance', repo: 'ken-agent', label: 'Ken Insurance' },
-  // This site
-  { owner: 'mchopra88', repo: 'agent-ic', label: 'agent-ic' },
-];
+import { writeFileSync } from 'fs';
 
 const TOKEN = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
 const SINCE = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+// Extra repos outside the homeeasy-repo org
+const EXTRA_REPOS = [
+  { owner: 'JamboreeInsurance', repo: 'ken-agent' },
+  { owner: 'mchopra88', repo: 'agent-ic' },
+];
+
+// Map repo names to business unit labels
+function labelRepo(repoName) {
+  const n = repoName.toLowerCase();
+
+  // Apartment Locator
+  if (n.includes('agent-v4') || n.includes('amy-agent-v4')) return 'Locator Agent (V4)';
+  if (n.includes('agent-v3') || n.includes('amy-agent-v3') || n === 'agentic-service-v3') return 'Locator Agent (V3)';
+  if (n === 'agentic-client-service') return 'Locator + Landlord Rep';
+  if (n.includes('inventory') || n.includes('sparkapt') || n.includes('zillow') || n.includes('apartments.com')) return 'Inventory & Scraping';
+  if (n.includes('cooperating_voice') || n.includes('voice_agent') || n.includes('cartesia')) return 'Voice Agent';
+  if (n.includes('cooperating_email') || n.includes('email_agent')) return 'Email Agent';
+
+  // Landlord Rep
+  if (n === 'landlord-rep') return 'Landlord Rep';
+  if (n.includes('bluelake')) return 'Blue Lake';
+  if (n.includes('sla-agentic') || n.includes('sla_agentic')) return 'SLA Agentic';
+
+  // Ken Insurance
+  if (n === 'ken-agent' || n.includes('jamboree')) return 'Ken Insurance';
+
+  // CRM & Dashboard
+  if (n.includes('crm') || n === 'homeeasy-crm') return 'CRM';
+  if (n.includes('streamlit') || n.includes('dashboard') || n.includes('reporting')) return 'Dashboards';
+  if (n.includes('leads-monitoring') || n.includes('sales_progression')) return 'Dashboards';
+
+  // Infrastructure
+  if (n.includes('twilio') || n.includes('texting')) return 'Twilio / SMS';
+  if (n.includes('cognee')) return 'Cognee Service';
+  if (n.includes('database') || n.includes('readonly-api')) return 'Database';
+  if (n.includes('cloud_functions')) return 'Cloud Functions';
+
+  // Site
+  if (n === 'homeeasy-site-v2' || n === 'homeeasy_blog_website') return 'HomeEasy Site';
+  if (n === 'agent-ic') return 'agent-ic';
+  if (n === 'homeeasy-hq') return 'homeeasy-hq';
+
+  // Everything else
+  return repoName;
+}
+
+async function apiFetch(url) {
+  const headers = {
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+  if (TOKEN) headers['Authorization'] = `Bearer ${TOKEN}`;
+  return fetch(url, { headers });
+}
+
+async function discoverOrgRepos(org) {
+  const repos = [];
+  let page = 1;
+  while (true) {
+    const resp = await apiFetch(`https://api.github.com/orgs/${org}/repos?per_page=100&page=${page}&sort=pushed&direction=desc`);
+    if (!resp.ok) {
+      console.error(`Failed to list ${org} repos: HTTP ${resp.status}`);
+      break;
+    }
+    const data = await resp.json();
+    if (!Array.isArray(data) || data.length === 0) break;
+    for (const r of data) {
+      repos.push({ owner: org, repo: r.name, pushedAt: r.pushed_at });
+    }
+    if (data.length < 100) break;
+    page++;
+  }
+  return repos;
+}
 
 async function fetchCommits(owner, repo) {
   const commits = [];
@@ -39,16 +93,12 @@ async function fetchCommits(owner, repo) {
 
   while (true) {
     const url = `https://api.github.com/repos/${owner}/${repo}/commits?since=${SINCE}&per_page=${perPage}&page=${page}`;
-    const headers = {
-      'Accept': 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    };
-    if (TOKEN) headers['Authorization'] = `Bearer ${TOKEN}`;
-
     try {
-      const resp = await fetch(url, { headers });
+      const resp = await apiFetch(url);
       if (!resp.ok) {
-        console.error(`  ${owner}/${repo}: HTTP ${resp.status}`);
+        if (resp.status !== 409) { // 409 = empty repo
+          console.error(`  ${owner}/${repo}: HTTP ${resp.status}`);
+        }
         break;
       }
       const data = await resp.json();
@@ -60,7 +110,7 @@ async function fetchCommits(owner, repo) {
         commits.push({
           hash: c.sha.substring(0, 7),
           date: c.commit.author.date.substring(0, 10),
-          message: c.commit.message.split('\n')[0], // first line only
+          message: c.commit.message.split('\n')[0],
         });
       }
 
@@ -77,10 +127,10 @@ async function fetchCommits(owner, repo) {
 
 function categorize(msg) {
   const m = msg.toLowerCase();
-  if (m.includes('fix') || m.includes('hotfix') || m.includes('bug')) return 'fix';
   if (m.includes('deploy') || m.includes('release') || m.includes('rollout')) return 'deploy';
-  if (m.includes('incident') || m.includes('revert') || m.includes('emergency')) return 'incident';
-  if (m.includes('feat') || m.includes('add') || m.includes('implement') || m.includes('new')) return 'feature';
+  if (m.includes('incident') || m.includes('revert') || m.includes('emergency') || m.includes('rollback')) return 'incident';
+  if (m.includes('fix') || m.includes('hotfix') || m.includes('bug') || m.includes('patch')) return 'fix';
+  if (m.includes('feat') || m.includes('add') || m.includes('implement') || m.includes('new') || m.includes('introduce')) return 'feature';
   return 'build';
 }
 
@@ -107,13 +157,34 @@ function generateSummary(commits, repos) {
 }
 
 async function main() {
-  console.log(`Fetching commits since ${SINCE.substring(0, 10)} from ${REPOS.length} repos...`);
+  if (!TOKEN) {
+    console.error('WARNING: No GH_TOKEN or GITHUB_TOKEN set. API rate limit will be 60 req/hr.');
+  }
 
+  // Step 1: Discover ALL repos in the org
+  console.log('Discovering repos in homeeasy-repo org...');
+  const orgRepos = await discoverOrgRepos('homeeasy-repo');
+  console.log(`Found ${orgRepos.length} repos in homeeasy-repo`);
+
+  // Add extra repos (other orgs/users)
+  const allRepos = [...orgRepos, ...EXTRA_REPOS.map(r => ({ ...r, pushedAt: null }))];
+
+  // Skip repos not pushed in the last 365 days
+  const cutoff = SINCE.substring(0, 10);
+  const activeRepos = allRepos.filter(r => {
+    if (!r.pushedAt) return true; // always include extras
+    return r.pushedAt.substring(0, 10) >= cutoff;
+  });
+  console.log(`${activeRepos.length} repos active in the last 365 days\n`);
+
+  // Step 2: Fetch commits from each
   const allCommits = [];
-
-  for (const { owner, repo, label } of REPOS) {
+  for (const { owner, repo } of activeRepos) {
+    const label = labelRepo(repo);
     const commits = await fetchCommits(owner, repo);
-    console.log(`  ${label}: ${commits.length} commits`);
+    if (commits.length > 0) {
+      console.log(`  ${label} (${repo}): ${commits.length} commits`);
+    }
     for (const c of commits) {
       allCommits.push({
         hash: c.hash,
@@ -125,7 +196,7 @@ async function main() {
     }
   }
 
-  // Deduplicate by hash
+  // Step 3: Deduplicate by hash
   const seen = new Set();
   const unique = [];
   for (const c of allCommits) {
@@ -135,7 +206,7 @@ async function main() {
     }
   }
 
-  // Group by date
+  // Step 4: Group by date
   const byDate = {};
   for (const c of unique) {
     if (!byDate[c.dateStr]) byDate[c.dateStr] = [];
@@ -159,7 +230,8 @@ async function main() {
     });
   }
 
-  console.log(`\nTotal: ${unique.length} unique commits across ${dates.length} days`);
+  const totalReposWithCommits = new Set(unique.map(c => c.repo)).size;
+  console.log(`\nTotal: ${unique.length} unique commits across ${dates.length} days from ${totalReposWithCommits} repos`);
 
   const outPath = 'src/_data/journal-cache.json';
   writeFileSync(outPath, JSON.stringify(entries, null, 2));

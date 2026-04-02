@@ -4,6 +4,20 @@
     "displayDate": "April 2, 2026",
     "commits": [
       {
+        "hash": "0e599a2",
+        "dateStr": "2026-04-02",
+        "message": "infra: fix production control plane rollout",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "47bd308",
+        "dateStr": "2026-04-02",
+        "message": "v17: split assets into 9 deep dives by business unit",
+        "tag": "build",
+        "repo": "agent-ic"
+      },
+      {
         "hash": "378c90b",
         "dateStr": "2026-04-02",
         "message": "v16: assets rewrite — plain English, real code depth, intelligence pipeline explained signal by signal",
@@ -158,22 +172,37 @@
         "repo": "agent-ic"
       }
     ],
-    "commitCount": 22,
+    "commitCount": 24,
     "tags": [
+      "fix",
       "build",
       "feature",
-      "fix",
       "deploy"
     ],
     "repos": [
+      "HomeEasy Site",
       "agent-ic"
     ],
-    "summary": "4 features, 5 fixes, 1 deploy in agent-ic"
+    "summary": "4 features, 6 fixes, 1 deploy across 2 repos"
   },
   {
     "date": "2026-04-01",
     "displayDate": "April 1, 2026",
     "commits": [
+      {
+        "hash": "ebfdd7a",
+        "dateStr": "2026-04-01",
+        "message": "fix(prompt): origination building rule — remove keyword guard, fix business model",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "6bd9c79",
+        "dateStr": "2026-04-01",
+        "message": "fix(anti-cannibalization): prevent locator agent from claiming to represent buildings",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
       {
         "hash": "48381b4",
         "dateStr": "2026-04-01",
@@ -189,15 +218,475 @@
         "repo": "agent-ic"
       }
     ],
-    "commitCount": 2,
+    "commitCount": 4,
     "tags": [
+      "fix",
       "feature",
       "build"
     ],
     "repos": [
+      "Locator + Landlord Rep",
       "agent-ic"
     ],
-    "summary": "1 feature in agent-ic"
+    "summary": "1 feature, 2 fixes across 2 repos"
+  },
+  {
+    "date": "2026-03-31",
+    "displayDate": "March 31, 2026",
+    "commits": [
+      {
+        "hash": "8726170",
+        "dateStr": "2026-03-31",
+        "message": "infra: add production control plane",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      }
+    ],
+    "commitCount": 1,
+    "tags": [
+      "feature"
+    ],
+    "repos": [
+      "HomeEasy Site"
+    ],
+    "summary": "1 feature in HomeEasy Site"
+  },
+  {
+    "date": "2026-03-30",
+    "displayDate": "March 30, 2026",
+    "commits": [
+      {
+        "hash": "c267c84",
+        "dateStr": "2026-03-30",
+        "message": "fix(outreach): remove 250/day cap that was dropping 60%+ of leads",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "3276952",
+        "dateStr": "2026-03-30",
+        "message": "infra: require explicit staging runtime config",
+        "tag": "build",
+        "repo": "HomeEasy Site"
+      }
+    ],
+    "commitCount": 2,
+    "tags": [
+      "fix",
+      "build"
+    ],
+    "repos": [
+      "Locator + Landlord Rep",
+      "HomeEasy Site"
+    ],
+    "summary": "1 fix across 2 repos"
+  },
+  {
+    "date": "2026-03-28",
+    "displayDate": "March 28, 2026",
+    "commits": [
+      {
+        "hash": "614df70",
+        "dateStr": "2026-03-28",
+        "message": "feat(crm): inventory intel panel — hyperlinks + source badges + needs-call",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "d9be678",
+        "dateStr": "2026-03-28",
+        "message": "fix: match-inventories endpoint handles UUID building_knowledge IDs",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      }
+    ],
+    "commitCount": 2,
+    "tags": [
+      "feature",
+      "fix"
+    ],
+    "repos": [
+      "HomeEasy Site"
+    ],
+    "summary": "1 feature, 1 fix in HomeEasy Site"
+  },
+  {
+    "date": "2026-03-27",
+    "displayDate": "March 27, 2026",
+    "commits": [
+      {
+        "hash": "66ca372",
+        "dateStr": "2026-03-27",
+        "message": "fix: normalize staging Cloud Run traffic targets",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "e9364f4",
+        "dateStr": "2026-03-27",
+        "message": "fix: split CRM staging render and deploy steps",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "a222eb6",
+        "dateStr": "2026-03-27",
+        "message": "fix: use a venv in staging deploy step",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "7cc4738",
+        "dateStr": "2026-03-27",
+        "message": "fix: install pyyaml in staging deploy step",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "09b06ac",
+        "dateStr": "2026-03-27",
+        "message": "chore: add staging deployment pipeline",
+        "tag": "deploy",
+        "repo": "HomeEasy Site"
+      }
+    ],
+    "commitCount": 5,
+    "tags": [
+      "fix",
+      "deploy"
+    ],
+    "repos": [
+      "HomeEasy Site"
+    ],
+    "summary": "4 fixes, 1 deploy in HomeEasy Site"
+  },
+  {
+    "date": "2026-03-25",
+    "displayDate": "March 25, 2026",
+    "commits": [
+      {
+        "hash": "defa4ed",
+        "dateStr": "2026-03-25",
+        "message": "feat: add hourly health monitor workflow",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "8947a69",
+        "dateStr": "2026-03-25",
+        "message": "feat: standardize Dockerfile, add CI and deploy workflows",
+        "tag": "deploy",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "60124bd",
+        "dateStr": "2026-03-25",
+        "message": "feat: email open tracking pixel for TTW alerts (#104)",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      }
+    ],
+    "commitCount": 3,
+    "tags": [
+      "feature",
+      "deploy"
+    ],
+    "repos": [
+      "HomeEasy Site"
+    ],
+    "summary": "2 features, 1 deploy in HomeEasy Site"
+  },
+  {
+    "date": "2026-03-24",
+    "displayDate": "March 24, 2026",
+    "commits": [
+      {
+        "hash": "d659ef7",
+        "dateStr": "2026-03-24",
+        "message": "fix(types): make toast description optional to match usage pattern (#103)",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "d67af5a",
+        "dateStr": "2026-03-24",
+        "message": "feat(crm): unified ticketing + board system with 15 bug fixes",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      }
+    ],
+    "commitCount": 2,
+    "tags": [
+      "fix"
+    ],
+    "repos": [
+      "HomeEasy Site"
+    ],
+    "summary": "2 fixes in HomeEasy Site"
+  },
+  {
+    "date": "2026-03-23",
+    "displayDate": "March 23, 2026",
+    "commits": [
+      {
+        "hash": "13773b8",
+        "dateStr": "2026-03-23",
+        "message": "feat(buildings): unit intelligence, image carousel, signals, timeline enrichment",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "a7c4570",
+        "dateStr": "2026-03-23",
+        "message": "fix(buildings): use authenticatedFetch so API call includes auth token",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "0660f2c",
+        "dateStr": "2026-03-23",
+        "message": "fix(buildings): replace building_v2 with inventory across all buildings API routes",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      }
+    ],
+    "commitCount": 3,
+    "tags": [
+      "feature",
+      "fix"
+    ],
+    "repos": [
+      "HomeEasy Site"
+    ],
+    "summary": "1 feature, 2 fixes in HomeEasy Site"
+  },
+  {
+    "date": "2026-03-22",
+    "displayDate": "March 22, 2026",
+    "commits": [
+      {
+        "hash": "49fc376",
+        "dateStr": "2026-03-22",
+        "message": "fix(crm): remove duplicate AttemptSummaryCard + add missing AttemptSummary type",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "2465420",
+        "dateStr": "2026-03-22",
+        "message": "feat(crm): inventory strategy fallback synthesis from live tables",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      }
+    ],
+    "commitCount": 2,
+    "tags": [
+      "fix",
+      "feature"
+    ],
+    "repos": [
+      "HomeEasy Site"
+    ],
+    "summary": "1 feature, 1 fix in HomeEasy Site"
+  },
+  {
+    "date": "2026-03-20",
+    "displayDate": "March 20, 2026",
+    "commits": [
+      {
+        "hash": "f9d67c1",
+        "dateStr": "2026-03-20",
+        "message": "fix(crm-ygl-dashboard): update KPI card subtitle and onClick action for document submissions",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "0f1f8a5",
+        "dateStr": "2026-03-20",
+        "message": "feat(crm-ygl-dashboard): enhance SQL logic to include clients with sent media and submitted documents",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "436bfd5",
+        "dateStr": "2026-03-20",
+        "message": "feat(auth-helpers): add engineer role to authenticated user session data",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "567465d",
+        "dateStr": "2026-03-20",
+        "message": "feat(crm-ygl-dashboard): introduce YGL dashboard component with data fetching and access control",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "b43c44c",
+        "dateStr": "2026-03-20",
+        "message": "feat(crm-top-navigation): add engineer access to performance management navigation",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "893b299",
+        "dateStr": "2026-03-20",
+        "message": "feat(crm-dashboard): add YGL dashboard view with access control logic",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "4b88ed0",
+        "dateStr": "2026-03-20",
+        "message": "feat(ygl-dashboard): implement API route for YGL dashboard metrics and client data retrieval",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "5e479e8",
+        "dateStr": "2026-03-20",
+        "message": "feat: add 'AFH' as a new lead source across multiple components and API routes",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      }
+    ],
+    "commitCount": 8,
+    "tags": [
+      "fix",
+      "feature"
+    ],
+    "repos": [
+      "HomeEasy Site"
+    ],
+    "summary": "7 features, 1 fix in HomeEasy Site"
+  },
+  {
+    "date": "2026-03-18",
+    "displayDate": "March 18, 2026",
+    "commits": [
+      {
+        "hash": "df75af3",
+        "dateStr": "2026-03-18",
+        "message": "fix(dashboard): filter correctly by date, source, stage - YGL only",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "c1bd064",
+        "dateStr": "2026-03-18",
+        "message": "feat(dashboard): add comprehensive YGL analytics admin panel",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      }
+    ],
+    "commitCount": 2,
+    "tags": [
+      "fix",
+      "feature"
+    ],
+    "repos": [
+      "Locator + Landlord Rep"
+    ],
+    "summary": "1 feature, 1 fix in Locator + Landlord Rep"
+  },
+  {
+    "date": "2026-03-17",
+    "displayDate": "March 17, 2026",
+    "commits": [
+      {
+        "hash": "acc5a59",
+        "dateStr": "2026-03-17",
+        "message": "Buildings timeline UI: show data completeness and low-signal warning",
+        "tag": "build",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "a3aa8e9",
+        "dateStr": "2026-03-17",
+        "message": "Buildings timeline: harden optional table queries against schema drift",
+        "tag": "build",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "1218fe4",
+        "dateStr": "2026-03-17",
+        "message": "Buildings: add per-building timeline landing page and evidence API",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "4771571",
+        "dateStr": "2026-03-17",
+        "message": "CRM: split notes into human/internal lanes and add building search tab",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "8274c89",
+        "dateStr": "2026-03-17",
+        "message": "added for desktop",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "be03b7c",
+        "dateStr": "2026-03-17",
+        "message": "feat(inventory-intel-panel): enhance inventory panel with attempt summary and improved badge display",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "9a74109",
+        "dateStr": "2026-03-17",
+        "message": "feat(inventory-strategy): implement fallback strategy synthesis and freshness computation for inventory",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      }
+    ],
+    "commitCount": 7,
+    "tags": [
+      "build",
+      "feature"
+    ],
+    "repos": [
+      "HomeEasy Site"
+    ],
+    "summary": "5 features in HomeEasy Site"
+  },
+  {
+    "date": "2026-03-13",
+    "displayDate": "March 13, 2026",
+    "commits": [
+      {
+        "hash": "695127a",
+        "dateStr": "2026-03-13",
+        "message": "fix(app): implement smart follow-up rate limit in message replies",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "aae5acb",
+        "dateStr": "2026-03-13",
+        "message": "fix(app): update lead_id usage in message processing and  follow-up rate limit",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "223f90a",
+        "dateStr": "2026-03-13",
+        "message": "fix(email_monitor): improve name extraction from staff forwarded emails",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      }
+    ],
+    "commitCount": 3,
+    "tags": [
+      "fix"
+    ],
+    "repos": [
+      "Locator + Landlord Rep"
+    ],
+    "summary": "3 fixes in Locator + Landlord Rep"
   },
   {
     "date": "2026-03-12",
@@ -230,19 +719,480 @@
         "message": "fix(bland): use `is not None` for numeric field checks",
         "tag": "fix",
         "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "823d596",
+        "dateStr": "2026-03-12",
+        "message": "fix(ygl): fresh-eyes fixes for doc persistence and dead detection",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "387668d",
+        "dateStr": "2026-03-12",
+        "message": "fix(ygl): persist doc classification results to lead_memory.documents",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "be1ba77",
+        "dateStr": "2026-03-12",
+        "message": "fix(ygl): 4 critical bugs + forensic audit (Codex Phase 0-2)",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "bcc044a",
+        "dateStr": "2026-03-12",
+        "message": "fix(app): exclude YGL leads from Amy's message processing loop",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "248b8e0",
+        "dateStr": "2026-03-12",
+        "message": "fix(leads): reassign employee_id for YGL leads on upsert",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "3aee459",
+        "dateStr": "2026-03-12",
+        "message": "fix(pipeline): correct ApprovalStatus.APPROVED to READY_TO_SUBMIT",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "27d8607",
+        "dateStr": "2026-03-12",
+        "message": "feat(tests): add tests for email loop prevention and staff forward matching",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "81bc4da",
+        "dateStr": "2026-03-12",
+        "message": "feat(email_notifications): update document notification email recipients",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "aa96e42",
+        "dateStr": "2026-03-12",
+        "message": "feat(email_monitor): enhance email filtering and matching logic",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "70775b0",
+        "dateStr": "2026-03-12",
+        "message": "feat(tests): add comprehensive tests for document pipeline components",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "88e02cd",
+        "dateStr": "2026-03-12",
+        "message": "feat(email_monitor): add document notification email functionality",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "7f53a0e",
+        "dateStr": "2026-03-12",
+        "message": "feat(email_monitor): implement fuzzy matching for email-to-name and name similarity",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "aa11ff2",
+        "dateStr": "2026-03-12",
+        "message": "feat(drive): enhance Drive service initialization with fallback authentication",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "6222a0d",
+        "dateStr": "2026-03-12",
+        "message": "feat(docs): update document requirements and communication for leads",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "ab0e769",
+        "dateStr": "2026-03-12",
+        "message": "test commit",
+        "tag": "build",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "23ec758",
+        "dateStr": "2026-03-12",
+        "message": "test commit for deployment",
+        "tag": "deploy",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "a0a8625",
+        "dateStr": "2026-03-12",
+        "message": "feat(sms): add sms_suppression_unblock_tracking model for tracking unblocked messages",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "eeb9b77",
+        "dateStr": "2026-03-12",
+        "message": "feat(sms): add SMS suppression blocked dialog component for unblocking clients",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "13bf950",
+        "dateStr": "2026-03-12",
+        "message": "feat(sms): integrate SMS suppression blocked dialog and unblocking functionality in client chat component",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "c1f42e5",
+        "dateStr": "2026-03-12",
+        "message": "fix(inventory-intel-panel): update onToggle prop to accept boolean parameter for better state management",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "3722ef5",
+        "dateStr": "2026-03-12",
+        "message": "feat(sms): enhance SMS suppression handling with dialog for unblocking clients in inbox view",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "083a583",
+        "dateStr": "2026-03-12",
+        "message": "feat(sms): add SMS suppression unblock dialog and handling logic in client detail view",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "5c17ea5",
+        "dateStr": "2026-03-12",
+        "message": "fix(authenticated-image): update onLoad and onError props to accept synthetic event parameters",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "151c94e",
+        "dateStr": "2026-03-12",
+        "message": "feat(sms): implement SMS unblocking route to remove clients from suppression list and allow message delivery",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "8239c91",
+        "dateStr": "2026-03-12",
+        "message": "feat(sms): add SMS suppression check before sending messages to prevent delivery to blocked numbers",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
       }
     ],
-    "commitCount": 4,
+    "commitCount": 29,
     "tags": [
       "fix",
       "feature",
-      "build"
+      "build",
+      "deploy"
     ],
     "repos": [
       "homeeasy-hq",
+      "Locator + Landlord Rep",
+      "HomeEasy Site"
+    ],
+    "summary": "16 features, 10 fixes, 1 deploy across 3 repos"
+  },
+  {
+    "date": "2026-03-11",
+    "displayDate": "March 11, 2026",
+    "commits": [
+      {
+        "hash": "af5e219",
+        "dateStr": "2026-03-11",
+        "message": "refactor(app): disable Bland AI calling across multiple tasks",
+        "tag": "build",
+        "repo": "Locator + Landlord Rep"
+      }
+    ],
+    "commitCount": 1,
+    "tags": [
+      "build"
+    ],
+    "repos": [
       "Locator + Landlord Rep"
     ],
-    "summary": "1 feature, 2 fixes across 2 repos"
+    "summary": "1 commits in Locator + Landlord Rep"
+  },
+  {
+    "date": "2026-03-09",
+    "displayDate": "March 9, 2026",
+    "commits": [
+      {
+        "hash": "a0ee8ef",
+        "dateStr": "2026-03-09",
+        "message": "fix(tests): update Celery task configuration tests for accuracy",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "c1aecef",
+        "dateStr": "2026-03-09",
+        "message": "fix(celery): update task configurations for improved reliability",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      }
+    ],
+    "commitCount": 2,
+    "tags": [
+      "fix"
+    ],
+    "repos": [
+      "Locator + Landlord Rep"
+    ],
+    "summary": "2 fixes in Locator + Landlord Rep"
+  },
+  {
+    "date": "2026-03-07",
+    "displayDate": "March 7, 2026",
+    "commits": [
+      {
+        "hash": "74d3465",
+        "dateStr": "2026-03-07",
+        "message": "fix(asana): add missing token guard on upload_file_to_task",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "ec40b2b",
+        "dateStr": "2026-03-07",
+        "message": "fix(agent): resolve Gemini thought_signature error on multi-round tool calls",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "6ac0f00",
+        "dateStr": "2026-03-07",
+        "message": "fix(agent): resolve Gemini thought_signature error on multi-round tool calls",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      }
+    ],
+    "commitCount": 3,
+    "tags": [
+      "fix"
+    ],
+    "repos": [
+      "Locator + Landlord Rep"
+    ],
+    "summary": "3 fixes in Locator + Landlord Rep"
+  },
+  {
+    "date": "2026-03-06",
+    "displayDate": "March 6, 2026",
+    "commits": [
+      {
+        "hash": "ad4e70b",
+        "dateStr": "2026-03-06",
+        "message": "fix(email): unpack dict body_text before phone extraction in match_sender_to_client",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      }
+    ],
+    "commitCount": 1,
+    "tags": [
+      "fix"
+    ],
+    "repos": [
+      "Locator + Landlord Rep"
+    ],
+    "summary": "1 fix in Locator + Landlord Rep"
+  },
+  {
+    "date": "2026-03-05",
+    "displayDate": "March 5, 2026",
+    "commits": [
+      {
+        "hash": "5678b3a",
+        "dateStr": "2026-03-05",
+        "message": "feat(app): enhance action execution and email matching logic",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "af2bdd5",
+        "dateStr": "2026-03-05",
+        "message": "Revert \"feat(leads): prevent email conflicts during client updates\"",
+        "tag": "incident",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "809cebd",
+        "dateStr": "2026-03-05",
+        "message": "Revert \"feat(service): enhance SMS response handling with rate limit exemption\"",
+        "tag": "incident",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "c82f1d6",
+        "dateStr": "2026-03-05",
+        "message": "fix(ygl/celery): correct soft time limit comment (200s not 300s)",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "5c67f7d",
+        "dateStr": "2026-03-05",
+        "message": "fix(ygl/celery): add soft time limit to prevent RabbitMQ ack timeout",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "f1a49ae",
+        "dateStr": "2026-03-05",
+        "message": "fix(ygl/actions): handle JSON-formatted agent_next_action in action executor",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "74260ae",
+        "dateStr": "2026-03-05",
+        "message": "feat(service): enhance SMS response handling with rate limit exemption",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "1ae6105",
+        "dateStr": "2026-03-05",
+        "message": "feat(leads): prevent email conflicts during client updates",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      }
+    ],
+    "commitCount": 8,
+    "tags": [
+      "feature",
+      "incident",
+      "fix"
+    ],
+    "repos": [
+      "Locator + Landlord Rep"
+    ],
+    "summary": "3 features, 3 fixes, 2 incidents in Locator + Landlord Rep"
+  },
+  {
+    "date": "2026-03-04",
+    "displayDate": "March 4, 2026",
+    "commits": [
+      {
+        "hash": "1f13ddb",
+        "dateStr": "2026-03-04",
+        "message": "direct push - fixed TX cap giving space for other source to go in as well",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "31818ae",
+        "dateStr": "2026-03-04",
+        "message": "feat(approval): update document request messaging for clarity and engagement",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "d288b74",
+        "dateStr": "2026-03-04",
+        "message": "feat(service): implement message duplication and rate limiting guards",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      }
+    ],
+    "commitCount": 3,
+    "tags": [
+      "fix",
+      "feature"
+    ],
+    "repos": [
+      "Locator + Landlord Rep"
+    ],
+    "summary": "2 features, 1 fix in Locator + Landlord Rep"
+  },
+  {
+    "date": "2026-03-03",
+    "displayDate": "March 3, 2026",
+    "commits": [
+      {
+        "hash": "5229768",
+        "dateStr": "2026-03-03",
+        "message": "feat(app): add YGL initial outreach task for new leads",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      }
+    ],
+    "commitCount": 1,
+    "tags": [
+      "feature"
+    ],
+    "repos": [
+      "Locator + Landlord Rep"
+    ],
+    "summary": "1 feature in Locator + Landlord Rep"
+  },
+  {
+    "date": "2026-03-02",
+    "displayDate": "March 2, 2026",
+    "commits": [
+      {
+        "hash": "709ce5b",
+        "dateStr": "2026-03-02",
+        "message": "ygl fixes",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "82d28df",
+        "dateStr": "2026-03-02",
+        "message": "feat(app): enhance lead management and call dispatching",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      }
+    ],
+    "commitCount": 2,
+    "tags": [
+      "fix",
+      "feature"
+    ],
+    "repos": [
+      "Locator + Landlord Rep"
+    ],
+    "summary": "1 feature, 1 fix in Locator + Landlord Rep"
+  },
+  {
+    "date": "2026-02-25",
+    "displayDate": "February 25, 2026",
+    "commits": [
+      {
+        "hash": "cf04258",
+        "dateStr": "2026-02-25",
+        "message": "feat(outreach): enhance lead ingestion and outreach scheduling",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      }
+    ],
+    "commitCount": 1,
+    "tags": [
+      "feature"
+    ],
+    "repos": [
+      "Locator + Landlord Rep"
+    ],
+    "summary": "1 feature in Locator + Landlord Rep"
   },
   {
     "date": "2026-02-24",
@@ -254,16 +1204,67 @@
         "message": "add architecture map, deployment state, update CLAUDE.md with mandatory session workflow",
         "tag": "deploy",
         "repo": "homeeasy-hq"
+      },
+      {
+        "hash": "2f16a70",
+        "dateStr": "2026-02-24",
+        "message": "fix: improve error and handling in useTwilioDialer hook and preventing system to crash down",
+        "tag": "fix",
+        "repo": "HomeEasy Site"
+      }
+    ],
+    "commitCount": 2,
+    "tags": [
+      "deploy",
+      "fix"
+    ],
+    "repos": [
+      "homeeasy-hq",
+      "HomeEasy Site"
+    ],
+    "summary": "1 fix, 1 deploy across 2 repos"
+  },
+  {
+    "date": "2026-02-23",
+    "displayDate": "February 23, 2026",
+    "commits": [
+      {
+        "hash": "19425e1",
+        "dateStr": "2026-02-23",
+        "message": "fix(app, asana_ygl): disable periodic tasks and Asana access token per user request",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
       }
     ],
     "commitCount": 1,
     "tags": [
-      "deploy"
+      "fix"
     ],
     "repos": [
-      "homeeasy-hq"
+      "Locator + Landlord Rep"
     ],
-    "summary": "1 deploy in homeeasy-hq"
+    "summary": "1 fix in Locator + Landlord Rep"
+  },
+  {
+    "date": "2026-02-21",
+    "displayDate": "February 21, 2026",
+    "commits": [
+      {
+        "hash": "c04421c",
+        "dateStr": "2026-02-21",
+        "message": "Updated the assignee field in asana_ygl.py and daily_qual_report.py to reflect the primary assignee as Adam Kent, following user feedback to stop assigning tasks to Zalmy. This change ensures clarity in task assignments while maintaining functionality.",
+        "tag": "build",
+        "repo": "Locator + Landlord Rep"
+      }
+    ],
+    "commitCount": 1,
+    "tags": [
+      "build"
+    ],
+    "repos": [
+      "Locator + Landlord Rep"
+    ],
+    "summary": "1 commits in Locator + Landlord Rep"
   },
   {
     "date": "2026-02-20",
@@ -275,6 +1276,55 @@
         "message": "prd: CRM three-feature design — notes layers, ticketing, inventory intel",
         "tag": "feature",
         "repo": "homeeasy-hq"
+      },
+      {
+        "hash": "f422b80",
+        "dateStr": "2026-02-20",
+        "message": "fix(email): commit email_monitor.py with mark_message_processed",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "37cd3a6",
+        "dateStr": "2026-02-20",
+        "message": "fix(asana_ygl, daily_qual_report): disable assignee for tasks per user request",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "34d9505",
+        "dateStr": "2026-02-20",
+        "message": "fix(app): disable smart follow-up call logic as per user request",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "a13d6e2",
+        "dateStr": "2026-02-20",
+        "message": "feat(email_monitor): add mark_message_processed function and update inbox data structure",
+        "tag": "feature",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "e5589b9",
+        "dateStr": "2026-02-20",
+        "message": "fix(asana_ygl):  reminders for overdue tickets, log only",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "7848b83",
+        "dateStr": "2026-02-20",
+        "message": "refactor(asana):  reminders for overdue tickets and update logging",
+        "tag": "build",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "c31d79c",
+        "dateStr": "2026-02-20",
+        "message": "fix(ygl/asana): reassign tickets from Zalmy to Adam Kent",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
       },
       {
         "hash": "6a3935e",
@@ -298,17 +1348,18 @@
         "repo": "HomeEasy Site"
       }
     ],
-    "commitCount": 4,
+    "commitCount": 11,
     "tags": [
       "feature",
-      "fix"
+      "fix",
+      "build"
     ],
     "repos": [
       "homeeasy-hq",
       "Locator + Landlord Rep",
       "HomeEasy Site"
     ],
-    "summary": "2 features, 2 fixes across 3 repos"
+    "summary": "3 features, 7 fixes across 3 repos"
   },
   {
     "date": "2026-02-19",
@@ -355,6 +1406,20 @@
         "message": " lint fix",
         "tag": "fix",
         "repo": "homeeasy-hq"
+      },
+      {
+        "hash": "78014a0",
+        "dateStr": "2026-02-19",
+        "message": "fix(ygl/core): remove dead orchestrator_agent init, add .gcloudignore",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "e19215e",
+        "dateStr": "2026-02-19",
+        "message": "fix: Gemini event loop + leadupload queue + PYTHONPATH (#125)",
+        "tag": "fix",
+        "repo": "Locator + Landlord Rep"
       },
       {
         "hash": "c4271df",
@@ -420,7 +1485,7 @@
         "repo": "Locator + Landlord Rep"
       }
     ],
-    "commitCount": 15,
+    "commitCount": 17,
     "tags": [
       "fix",
       "build",
@@ -430,7 +1495,7 @@
       "homeeasy-hq",
       "Locator + Landlord Rep"
     ],
-    "summary": "1 feature, 13 fixes across 2 repos"
+    "summary": "1 feature, 15 fixes across 2 repos"
   },
   {
     "date": "2026-02-18",
@@ -579,18 +1644,69 @@
         "message": "fix(loc/core): disable V3 canned welcome SMS -- V4 handles initial outreach",
         "tag": "fix",
         "repo": "Locator + Landlord Rep"
+      },
+      {
+        "hash": "18110dd",
+        "dateStr": "2026-02-17",
+        "message": "refactor(crm): remove console logs from useTabSleep hook for cleaner output",
+        "tag": "build",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "d5bdc62",
+        "dateStr": "2026-02-17",
+        "message": "feat(crm): add useTabSleep hook to manage polling during tab inactivity",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "0ddc093",
+        "dateStr": "2026-02-17",
+        "message": "feat(crm): integrate tab sleep functionality in NotificationCenter to pause auto-refresh during inactivity",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "332d0f2",
+        "dateStr": "2026-02-17",
+        "message": "feat(crm): implement tab sleep functionality in LayoutWrapper to optimize polling behavior",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "3e31bcd",
+        "dateStr": "2026-02-17",
+        "message": "feat(crm): enhance email notification scheduler to pause during tab sleep",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "a52afe6",
+        "dateStr": "2026-02-17",
+        "message": "feat(crm): integrate tab sleep functionality to optimize online status polling in TopNavigation",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
+      },
+      {
+        "hash": "14a54b1",
+        "dateStr": "2026-02-17",
+        "message": "feat(crm): implement tab sleep functionality to pause polling in ClientDetailView",
+        "tag": "feature",
+        "repo": "HomeEasy Site"
       }
     ],
-    "commitCount": 4,
+    "commitCount": 11,
     "tags": [
       "feature",
-      "fix"
+      "fix",
+      "build"
     ],
     "repos": [
       "homeeasy-hq",
-      "Locator + Landlord Rep"
+      "Locator + Landlord Rep",
+      "HomeEasy Site"
     ],
-    "summary": "2 features, 2 fixes across 2 repos"
+    "summary": "8 features, 2 fixes across 3 repos"
   },
   {
     "date": "2026-02-16",

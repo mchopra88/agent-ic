@@ -6,33 +6,166 @@ navActive: journal
 
 <h1>Build Journal</h1>
 
-<p style="color:#999; font-size:1.05rem; margin-bottom:1rem;">What I built, what broke, and what I fixed. Updated every push.</p>
-<p style="color:#666; font-size:0.85rem; margin-bottom:3rem;">Auto-generated from the git logs of all production repositories — Locator Agent, Landlord Rep, Ken Insurance, Twilio Service, infrastructure, and more. Every entry is a real commit with a real timestamp. This is not a highlight reel. This is the actual daily texture of building and operating production AI systems.</p>
+<p style="color:#999; font-size:1.05rem; margin-bottom:1rem;">What I built, what broke, and what I fixed. Every day, across every business unit.</p>
+<p style="color:#666; font-size:0.85rem; margin-bottom:3rem;">Pulled dynamically from {{ journal[0].commits[0].repo if journal.length > 0 else "all" }} production repositories via the GitHub API. Every entry is a real commit. Incidents and deploys surface first. This is the actual daily texture of operating production AI systems that process 30,000 leads a day.</p>
 
-<div style="margin-bottom:3rem; padding:1.5rem; background:#0a0a0a; border:1px solid #222;">
-  <div style="font-size:0.8rem; color:#666; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.8rem;">Legend</div>
-  <span class="journal-tag feature">feature</span>
-  <span class="journal-tag fix">fix</span>
-  <span class="journal-tag deploy">deploy</span>
-  <span class="journal-tag incident">incident</span>
-  <span class="journal-tag">build</span>
+<!-- ═══════ STATS BAR ═══════ -->
+{%- set totalCommits = 0 %}
+{%- set totalIncidents = 0 %}
+{%- set totalDeploys = 0 %}
+{%- set allRepos = [] %}
+{%- for day in journal %}
+  {%- set totalCommits = totalCommits + day.commitCount %}
+  {%- for commit in day.commits %}
+    {%- if commit.tag == 'incident' %}{%- set totalIncidents = totalIncidents + 1 %}{%- endif %}
+    {%- if commit.tag == 'deploy' %}{%- set totalDeploys = totalDeploys + 1 %}{%- endif %}
+  {%- endfor %}
+{%- endfor %}
+
+<div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem; margin-bottom:3rem; text-align:center;">
+  <div style="padding:1rem; background:#0a0a0a; border:1px solid #222;">
+    <div style="font-size:1.4rem; font-weight:600; color:#e8e4de;">{{ journal | length }}</div>
+    <div style="font-size:0.75rem; color:#666; text-transform:uppercase; letter-spacing:0.1em;">days</div>
+  </div>
+  <div style="padding:1rem; background:#0a0a0a; border:1px solid #222;">
+    <div style="font-size:1.4rem; font-weight:600; color:#e8e4de;">{{ totalCommits }}</div>
+    <div style="font-size:0.75rem; color:#666; text-transform:uppercase; letter-spacing:0.1em;">commits</div>
+  </div>
+  <div style="padding:1rem; background:#0a0a0a; border:1px solid #222;">
+    <div style="font-size:1.4rem; font-weight:600; color:#88cc88;">{{ totalDeploys }}</div>
+    <div style="font-size:0.75rem; color:#666; text-transform:uppercase; letter-spacing:0.1em;">deploys</div>
+  </div>
+  <div style="padding:1rem; background:#0a0a0a; border:1px solid #222;">
+    <div style="font-size:1.4rem; font-weight:600; color:#cc8888;">{{ totalIncidents }}</div>
+    <div style="font-size:0.75rem; color:#666; text-transform:uppercase; letter-spacing:0.1em;">incidents</div>
+  </div>
 </div>
 
+<!-- ═══════ LEGEND ═══════ -->
+<div style="margin-bottom:3rem; padding:1rem 1.5rem; background:#0a0a0a; border:1px solid #222; font-size:0.85rem;">
+  <span class="journal-tag incident">incident</span> Something broke in production.
+  <span class="journal-tag deploy" style="margin-left:1rem;">deploy</span> Code shipped to GKE or GitHub Pages.
+  <span class="journal-tag fix" style="margin-left:1rem;">fix</span> Bug fixed.
+  <span class="journal-tag feature" style="margin-left:1rem;">feature</span> New capability added.
+  <span class="journal-tag" style="margin-left:1rem;">build</span> Infrastructure, refactoring, tests.
+</div>
+
+<!-- ═══════ DAILY ENTRIES ═══════ -->
 {%- for day in journal %}
-<div class="journal-entry">
-  <div class="journal-date">{{ day.displayDate }} &middot; {{ day.commitCount }} commit{{ 's' if day.commitCount != 1 }} &middot; {{ day.summary }}</div>
-  {%- for tag in day.tags %}
-  <span class="journal-tag {{ tag }}">{{ tag }}</span>
-  {%- endfor %}
-  <div style="margin-top:1rem;">
-    {%- for commit in day.commits %}
-    <div style="margin-bottom:0.6rem; font-size:0.95rem;">
-      <code style="color:#555; font-size:0.8rem; font-family:monospace;">{{ commit.hash }}</code>
-      <span style="color:#666; font-size:0.75rem;">[{{ commit.repo }}]</span>
-      <span style="color:#b0aca6;">{{ commit.message }}</span>
-    </div>
+<div class="journal-entry" style="margin-bottom:3rem; padding-bottom:2rem; border-bottom:1px solid #1a1a1a;">
+
+  <!-- Date header with day summary -->
+  <div style="margin-bottom:1rem;">
+    <div class="journal-date" style="font-size:1.1rem; font-weight:600; color:#e8e4de;">{{ day.displayDate }}</div>
+    <div style="font-size:0.85rem; color:#888; margin-top:0.3rem;">{{ day.summary }}</div>
+  </div>
+
+  <!-- Tags -->
+  <div style="margin-bottom:1rem;">
+    {%- for tag in day.tags %}
+    <span class="journal-tag {{ tag }}">{{ tag }}</span>
     {%- endfor %}
   </div>
+
+  <!-- INCIDENTS FIRST — red, prominent -->
+  {%- set incidents = [] %}
+  {%- for commit in day.commits %}
+    {%- if commit.tag == 'incident' %}
+      {%- set incidents = (incidents.push(commit), incidents) %}
+    {%- endif %}
+  {%- endfor %}
+  {%- if incidents.length > 0 %}
+  <div style="margin-bottom:1.5rem; padding:1rem; border-left:3px solid #cc4444; background:#1a0808;">
+    <div style="font-size:0.75rem; color:#cc8888; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">Incidents</div>
+    {%- for commit in day.commits %}
+    {%- if commit.tag == 'incident' %}
+    <div style="margin-bottom:0.5rem;">
+      <span style="color:#cc8888; font-weight:600;">{{ commit.message }}</span>
+      <span style="color:#555; font-size:0.75rem;"> &mdash; {{ commit.repo }}</span>
+    </div>
+    {%- endif %}
+    {%- endfor %}
+  </div>
+  {%- endif %}
+
+  <!-- DEPLOYS — green, prominent -->
+  {%- set hasDeploys = false %}
+  {%- for commit in day.commits %}
+    {%- if commit.tag == 'deploy' %}{%- set hasDeploys = true %}{%- endif %}
+  {%- endfor %}
+  {%- if hasDeploys %}
+  <div style="margin-bottom:1.5rem; padding:1rem; border-left:3px solid #448844; background:#081a08;">
+    <div style="font-size:0.75rem; color:#88cc88; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">Deployed</div>
+    {%- for commit in day.commits %}
+    {%- if commit.tag == 'deploy' %}
+    <div style="margin-bottom:0.5rem;">
+      <span style="color:#88cc88;">{{ commit.message }}</span>
+      <span style="color:#555; font-size:0.75rem;"> &mdash; {{ commit.repo }}</span>
+    </div>
+    {%- endif %}
+    {%- endfor %}
+  </div>
+  {%- endif %}
+
+  <!-- FIXES -->
+  {%- set hasFixes = false %}
+  {%- for commit in day.commits %}
+    {%- if commit.tag == 'fix' %}{%- set hasFixes = true %}{%- endif %}
+  {%- endfor %}
+  {%- if hasFixes %}
+  <div style="margin-bottom:1.2rem;">
+    <div style="font-size:0.75rem; color:#ccaa44; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">Fixed</div>
+    {%- for commit in day.commits %}
+    {%- if commit.tag == 'fix' %}
+    <div style="margin-bottom:0.4rem; font-size:0.95rem;">
+      <span style="color:#b0aca6;">{{ commit.message }}</span>
+      <span style="color:#444; font-size:0.75rem;"> &mdash; {{ commit.repo }}</span>
+    </div>
+    {%- endif %}
+    {%- endfor %}
+  </div>
+  {%- endif %}
+
+  <!-- FEATURES -->
+  {%- set hasFeatures = false %}
+  {%- for commit in day.commits %}
+    {%- if commit.tag == 'feature' %}{%- set hasFeatures = true %}{%- endif %}
+  {%- endfor %}
+  {%- if hasFeatures %}
+  <div style="margin-bottom:1.2rem;">
+    <div style="font-size:0.75rem; color:#6688cc; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">Built</div>
+    {%- for commit in day.commits %}
+    {%- if commit.tag == 'feature' %}
+    <div style="margin-bottom:0.4rem; font-size:0.95rem;">
+      <span style="color:#b0aca6;">{{ commit.message }}</span>
+      <span style="color:#444; font-size:0.75rem;"> &mdash; {{ commit.repo }}</span>
+    </div>
+    {%- endif %}
+    {%- endfor %}
+  </div>
+  {%- endif %}
+
+  <!-- BUILD (collapsed if many) -->
+  {%- set buildCommits = [] %}
+  {%- for commit in day.commits %}
+    {%- if commit.tag == 'build' %}
+      {%- set buildCommits = (buildCommits.push(commit), buildCommits) %}
+    {%- endif %}
+  {%- endfor %}
+  {%- if buildCommits.length > 0 %}
+  <details style="margin-top:0.5rem;" {% if day.commitCount <= 5 %}open{% endif %}>
+    <summary style="font-size:0.75rem; color:#555; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; margin-bottom:0.5rem;">{{ buildCommits.length }} other commit{{ 's' if buildCommits.length != 1 }}</summary>
+    {%- for commit in day.commits %}
+    {%- if commit.tag == 'build' %}
+    <div style="margin-bottom:0.3rem; font-size:0.85rem;">
+      <span style="color:#888;">{{ commit.message }}</span>
+      <span style="color:#333; font-size:0.7rem;"> &mdash; {{ commit.repo }}</span>
+    </div>
+    {%- endif %}
+    {%- endfor %}
+  </details>
+  {%- endif %}
+
 </div>
 {%- endfor %}
 
@@ -40,7 +173,6 @@ navActive: journal
 <p style="color:#666; font-style:italic;">No journal entries yet. Commits will appear here after the next build.</p>
 {%- endif %}
 
-<div style="margin-top:4rem; padding-top:2rem; border-top:1px solid #222; color:#666; font-size:0.9rem;">
-  <p>This page auto-generates from <code style="font-family:monospace; font-size:0.85rem;">git log</code> across all production repositories at build time. Every commit appears with its real timestamp, source repo, and message. The tags are auto-categorized from commit message keywords.</p>
-  <p style="margin-top:1rem;">Not every commit is interesting. Some days are just dependency bumps and formatting fixes. Other days have 15 commits and three incidents. That's what building looks like — not a highlight reel, but the actual daily texture of operating a system that processes 30,000 leads a day.</p>
+<div style="margin-top:4rem; padding-top:2rem; border-top:1px solid #222; color:#666; font-size:0.85rem;">
+  <p>Pulled from the GitHub API at build time. Every repo in the <code style="font-family:monospace; font-size:0.8rem;">homeeasy-repo</code> org is discovered dynamically &mdash; new repos appear automatically. Refreshes on every push to main and daily at midnight CT.</p>
 </div>
