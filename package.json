@@ -1,0 +1,11 @@
+{
+  "name": "agent-ic",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npx @11ty/eleventy",
+    "serve": "npx @11ty/eleventy --serve",
+    "clean": "rm -rf _site"
+  }
+}

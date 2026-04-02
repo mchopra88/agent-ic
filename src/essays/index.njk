@@ -1,0 +1,16 @@
+---
+layout: base.njk
+title: Essays
+navActive: essays
+---
+
+<h1>Essays</h1>
+
+<ul class="essay-list">
+{%- for essay in collections.essays %}
+  <li>
+    <a href="{{ essay.url }}">{{ essay.data.title }}</a>
+    <div class="essay-meta">{{ essay.data.status }}</div>
+  </li>
+{%- endfor %}
+</ul>
