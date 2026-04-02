@@ -6,32 +6,439 @@ navActive: assets
 
 <h1>Assets</h1>
 
+<p style="color:#999; font-size:1.05rem; margin-bottom:3rem;">Seven years of production infrastructure. No prototypes. No demos. These systems process real volume every day.</p>
+
+<!-- ═══════ SYSTEM OVERVIEW ═══════ -->
+
+<div class="asset">
+  <h2>System Overview</h2>
+  <p>Four autonomous business units running on shared infrastructure. Each unit has its own AI agent, its own conversation engine, its own state machine. They share a database, a message queue, and a deployment pipeline.</p>
+  <svg viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
+    <style>
+      .box { fill:none; stroke:#444; stroke-width:1; }
+      .box-active { fill:#111; stroke:#666; stroke-width:1; }
+      .label { fill:#e8e4de; font-family:'Cormorant Garamond',Georgia,serif; font-size:13px; }
+      .label-sm { fill:#888; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px; }
+      .label-metric { fill:#e8e4de; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px; font-weight:600; }
+      .line { stroke:#333; stroke-width:1; }
+      .line-data { stroke:#555; stroke-width:1; stroke-dasharray:4,4; }
+    </style>
+    <!-- Agent boxes row -->
+    <rect x="10" y="20" width="150" height="70" rx="3" class="box-active"/>
+    <text x="85" y="48" text-anchor="middle" class="label">Locator Agent</text>
+    <text x="85" y="64" text-anchor="middle" class="label-sm">Voice + SMS</text>
+    <text x="85" y="78" text-anchor="middle" class="label-metric">30K leads/day</text>
+
+    <rect x="178" y="20" width="150" height="70" rx="3" class="box-active"/>
+    <text x="253" y="48" text-anchor="middle" class="label">Landlord Rep</text>
+    <text x="253" y="64" text-anchor="middle" class="label-sm">YGL / Blue Lake</text>
+    <text x="253" y="78" text-anchor="middle" class="label-metric">Doc + Deal Pipeline</text>
+
+    <rect x="346" y="20" width="150" height="70" rx="3" class="box-active"/>
+    <text x="421" y="48" text-anchor="middle" class="label">Ken Agent</text>
+    <text x="421" y="64" text-anchor="middle" class="label-sm">Renters Insurance</text>
+    <text x="421" y="78" text-anchor="middle" class="label-metric">SMS Sales Engine</text>
+
+    <rect x="514" y="20" width="156" height="70" rx="3" class="box-active"/>
+    <text x="592" y="48" text-anchor="middle" class="label">Data Pipeline</text>
+    <text x="592" y="64" text-anchor="middle" class="label-sm">Building Intel</text>
+    <text x="592" y="78" text-anchor="middle" class="label-metric">10K+ buildings/day</text>
+
+    <!-- Connection lines down -->
+    <line x1="85" y1="90" x2="85" y2="140" class="line"/>
+    <line x1="253" y1="90" x2="253" y2="140" class="line"/>
+    <line x1="421" y1="90" x2="421" y2="140" class="line"/>
+    <line x1="592" y1="90" x2="592" y2="140" class="line"/>
+
+    <!-- Shared infra row -->
+    <rect x="10" y="140" width="660" height="50" rx="3" class="box"/>
+    <text x="100" y="170" text-anchor="middle" class="label">PostgreSQL</text>
+    <text x="250" y="170" text-anchor="middle" class="label">RabbitMQ + Redis</text>
+    <text x="420" y="170" text-anchor="middle" class="label">GKE Cluster</text>
+    <text x="590" y="170" text-anchor="middle" class="label">Cloud Build CI/CD</text>
+    <text x="340" y="155" text-anchor="middle" class="label-sm">Shared Infrastructure</text>
+
+    <!-- External APIs row -->
+    <line x1="340" y1="190" x2="340" y2="220" class="line-data"/>
+    <rect x="10" y="220" width="660" height="50" rx="3" class="box"/>
+    <text x="70" y="250" text-anchor="middle" class="label-sm">Twilio</text>
+    <text x="160" y="250" text-anchor="middle" class="label-sm">Claude / Gemini</text>
+    <text x="270" y="250" text-anchor="middle" class="label-sm">Bland AI</text>
+    <text x="360" y="250" text-anchor="middle" class="label-sm">Asana</text>
+    <text x="440" y="250" text-anchor="middle" class="label-sm">Stripe</text>
+    <text x="520" y="250" text-anchor="middle" class="label-sm">Assurant</text>
+    <text x="620" y="250" text-anchor="middle" class="label-sm">Gmail API</text>
+    <text x="340" y="235" text-anchor="middle" class="label-sm">External Services</text>
+
+    <!-- Bottom label -->
+    <text x="340" y="300" text-anchor="middle" class="label-sm">All systems built and maintained by one person. No engineering team.</text>
+  </svg>
+</div>
+
+<!-- ═══════ VOICE AGENT ═══════ -->
+
 <div class="asset">
   <h2>Voice Conversational Agent</h2>
-  <p>Processes tens of thousands of inbound and outbound calls daily. Gathers renter requirements through natural conversation, matches them against live apartment inventory, and presents options — an automated realtor that handles the entire top-of-funnel. Built on seven years of real conversation data.</p>
+  <p>An automated realtor. Processes tens of thousands of inbound and outbound calls daily. Takes renter requirements through natural conversation, queries live inventory, presents matching apartments, and books tours. Seven years of real conversation data training the system.</p>
+
+  <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0 1rem;">
+    <rect x="10" y="30" width="120" height="50" rx="3" class="box-active"/>
+    <text x="70" y="52" text-anchor="middle" class="label">Inbound Call</text>
+    <text x="70" y="68" text-anchor="middle" class="label-sm">Twilio / Bland AI</text>
+
+    <line x1="130" y1="55" x2="170" y2="55" class="line" marker-end="url(#arrow)"/>
+
+    <rect x="170" y="30" width="120" height="50" rx="3" class="box-active"/>
+    <text x="230" y="52" text-anchor="middle" class="label">Agent Brain</text>
+    <text x="230" y="68" text-anchor="middle" class="label-sm">Claude Opus</text>
+
+    <line x1="290" y1="55" x2="330" y2="55" class="line"/>
+
+    <rect x="330" y="30" width="120" height="50" rx="3" class="box-active"/>
+    <text x="390" y="52" text-anchor="middle" class="label">Inventory DB</text>
+    <text x="390" y="68" text-anchor="middle" class="label-sm">10K+ buildings</text>
+
+    <line x1="450" y1="55" x2="490" y2="55" class="line"/>
+
+    <rect x="490" y="30" width="140" height="50" rx="3" class="box-active"/>
+    <text x="560" y="52" text-anchor="middle" class="label">Match + Present</text>
+    <text x="560" y="68" text-anchor="middle" class="label-sm">Tour booking</text>
+
+    <!-- Feedback loop -->
+    <path d="M 560 80 L 560 120 L 230 120 L 230 80" fill="none" class="line-data"/>
+    <text x="395" y="115" text-anchor="middle" class="label-sm">Conversation state persists across sessions</text>
+
+    <!-- Stack labels -->
+    <text x="10" y="165" class="label-sm">Stack: Python 3.11 / Celery / RabbitMQ / PostgreSQL / Twilio / Bland AI ($0.09/min) / FancyHands (human escalation)</text>
+    <text x="10" y="182" class="label-sm">Pattern: Tool-use LLM agent. No decision trees. Full context window per turn. Post-generation guardrails.</text>
+
+    <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/></marker></defs>
+  </svg>
 </div>
+
+<!-- ═══════ DATA GATHERING ═══════ -->
 
 <div class="asset">
   <h2>Multi-Family Data Gathering System</h2>
   <p>Automated voice system calling tens of thousands of apartment buildings daily. Extracts commission rates, vacancy data, move-in specials, and application requirements directly from leasing offices. The calls happen every day. The data is always current.</p>
+
+  <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0 1rem;">
+    <rect x="10" y="30" width="130" height="50" rx="3" class="box-active"/>
+    <text x="75" y="52" text-anchor="middle" class="label">Building List</text>
+    <text x="75" y="68" text-anchor="middle" class="label-sm">10K+ properties</text>
+
+    <line x1="140" y1="55" x2="175" y2="55" class="line"/>
+
+    <rect x="175" y="30" width="130" height="50" rx="3" class="box-active"/>
+    <text x="240" y="52" text-anchor="middle" class="label">Voice Caller</text>
+    <text x="240" y="68" text-anchor="middle" class="label-sm">Bland AI automated</text>
+
+    <line x1="305" y1="55" x2="340" y2="55" class="line"/>
+
+    <rect x="340" y="30" width="130" height="50" rx="3" class="box-active"/>
+    <text x="405" y="52" text-anchor="middle" class="label">Extract + Parse</text>
+    <text x="405" y="68" text-anchor="middle" class="label-sm">LLM transcription</text>
+
+    <line x1="470" y1="55" x2="505" y2="55" class="line"/>
+
+    <rect x="505" y="30" width="155" height="50" rx="3" class="box-active"/>
+    <text x="582" y="52" text-anchor="middle" class="label">Building Database</text>
+    <text x="582" y="68" text-anchor="middle" class="label-sm">Updated daily</text>
+
+    <!-- Loop back -->
+    <path d="M 582 80 L 582 130 L 75 130 L 75 80" fill="none" class="line-data"/>
+    <text x="330" y="125" text-anchor="middle" class="label-sm">Daily refresh cycle — stale data triggers priority re-call</text>
+
+    <text x="10" y="170" class="label-sm">Extracts: commission %, vacancy count, move-in specials, application requirements, contact info</text>
+    <text x="10" y="187" class="label-sm">Verification: Cross-referenced against actual transaction data. Commission agreements validated against payments received.</text>
+  </svg>
 </div>
+
+<!-- ═══════ BUILDING DATABASE ═══════ -->
 
 <div class="asset">
   <h2>Apartment Building Database</h2>
   <p>The most accurate and current database of commission-paying apartment buildings in the US. Not scraped from listing sites — built from real transaction data, verified by daily automated calls, and updated continuously. Every record has a revenue history attached to it.</p>
+
+  <svg viewBox="0 0 680 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0 1rem;">
+    <!-- Data sources -->
+    <rect x="10" y="10" width="140" height="35" rx="3" class="box-active"/>
+    <text x="80" y="32" text-anchor="middle" class="label-sm">Automated voice calls</text>
+
+    <rect x="10" y="55" width="140" height="35" rx="3" class="box-active"/>
+    <text x="80" y="77" text-anchor="middle" class="label-sm">Transaction history</text>
+
+    <rect x="10" y="100" width="140" height="35" rx="3" class="box-active"/>
+    <text x="80" y="122" text-anchor="middle" class="label-sm">Commission payments</text>
+
+    <!-- Lines to center -->
+    <line x1="150" y1="27" x2="220" y2="70" class="line"/>
+    <line x1="150" y1="72" x2="220" y2="70" class="line"/>
+    <line x1="150" y1="117" x2="220" y2="70" class="line"/>
+
+    <!-- Central DB -->
+    <rect x="220" y="40" width="200" height="60" rx="3" class="box-active"/>
+    <text x="320" y="65" text-anchor="middle" class="label">Building Intelligence</text>
+    <text x="320" y="82" text-anchor="middle" class="label-metric">PostgreSQL + Embeddings</text>
+
+    <!-- Output signals -->
+    <line x1="420" y1="55" x2="480" y2="27" class="line"/>
+    <line x1="420" y1="70" x2="480" y2="72" class="line"/>
+    <line x1="420" y1="85" x2="480" y2="117" class="line"/>
+
+    <rect x="480" y="10" width="180" height="35" rx="3" class="box"/>
+    <text x="570" y="32" text-anchor="middle" class="label-sm">Commission freshness score</text>
+
+    <rect x="480" y="55" width="180" height="35" rx="3" class="box"/>
+    <text x="570" y="77" text-anchor="middle" class="label-sm">Vacancy + availability signal</text>
+
+    <rect x="480" y="100" width="180" height="35" rx="3" class="box"/>
+    <text x="570" y="122" text-anchor="middle" class="label-sm">Revenue-per-building ranking</text>
+
+    <text x="10" y="160" class="label-sm">Not a listing site. A revenue intelligence system. Every building ranked by actual dollars earned, recency of payment, and likelihood of future commission.</text>
+  </svg>
 </div>
+
+<!-- ═══════ HR AUTOMATION ═══════ -->
 
 <div class="asset">
   <h2>HR &amp; Recruiting Automation</h2>
-  <p>Processes tens of thousands of offshore candidates through automated pipelines. English proficiency testing, skill evaluation, and accent detection — all without a human recruiter touching a resume until the candidate is qualified. Built to staff a 24/7 operation without a traditional HR department.</p>
+  <p>Processes tens of thousands of offshore candidates through automated pipelines. English proficiency testing, skill evaluation, and accent detection — all without a human recruiter touching a resume until the candidate is pre-qualified. Built to staff a 24/7 operation without a traditional HR department.</p>
+
+  <svg viewBox="0 0 680 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0 1rem;">
+    <rect x="10" y="30" width="100" height="50" rx="3" class="box-active"/>
+    <text x="60" y="52" text-anchor="middle" class="label-sm">Candidate</text>
+    <text x="60" y="66" text-anchor="middle" class="label-sm">Application</text>
+
+    <line x1="110" y1="55" x2="140" y2="55" class="line"/>
+
+    <rect x="140" y="30" width="100" height="50" rx="3" class="box-active"/>
+    <text x="190" y="52" text-anchor="middle" class="label-sm">English</text>
+    <text x="190" y="66" text-anchor="middle" class="label-sm">Proficiency</text>
+
+    <line x1="240" y1="55" x2="270" y2="55" class="line"/>
+
+    <rect x="270" y="30" width="100" height="50" rx="3" class="box-active"/>
+    <text x="320" y="52" text-anchor="middle" class="label-sm">Accent</text>
+    <text x="320" y="66" text-anchor="middle" class="label-sm">Detection</text>
+
+    <line x1="370" y1="55" x2="400" y2="55" class="line"/>
+
+    <rect x="400" y="30" width="100" height="50" rx="3" class="box-active"/>
+    <text x="450" y="52" text-anchor="middle" class="label-sm">Skill</text>
+    <text x="450" y="66" text-anchor="middle" class="label-sm">Evaluation</text>
+
+    <line x1="500" y1="55" x2="530" y2="55" class="line"/>
+
+    <rect x="530" y="30" width="130" height="50" rx="3" class="box-active"/>
+    <text x="595" y="52" text-anchor="middle" class="label">Qualified Pool</text>
+    <text x="595" y="66" text-anchor="middle" class="label-sm">Human review here</text>
+
+    <!-- Drop-off indicators -->
+    <line x1="190" y1="80" x2="190" y2="105" class="line-data"/>
+    <text x="190" y="118" text-anchor="middle" class="label-sm" style="fill:#555">~60% filtered</text>
+
+    <line x1="320" y1="80" x2="320" y2="105" class="line-data"/>
+    <text x="320" y="118" text-anchor="middle" class="label-sm" style="fill:#555">~25% filtered</text>
+
+    <line x1="450" y1="80" x2="450" y2="105" class="line-data"/>
+    <text x="450" y="118" text-anchor="middle" class="label-sm" style="fill:#555">~10% filtered</text>
+
+    <text x="10" y="150" class="label-sm">Fully automated pipeline. First human touchpoint is the final interview. Designed for offshore teams across time zones.</text>
+  </svg>
 </div>
+
+<!-- ═══════ SMS AGENT ═══════ -->
 
 <div class="asset">
   <h2>SMS Conversational Agent</h2>
   <p>Multi-turn reasoning engine connected to a national apartment database. Handles complex renter conversations over SMS — qualifying needs, answering questions about specific buildings, sending floor plans and layouts from a vector store. Thousands of concurrent conversations, zero human agents.</p>
+
+  <svg viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0 1rem;">
+    <!-- Inbound -->
+    <rect x="10" y="40" width="110" height="50" rx="3" class="box-active"/>
+    <text x="65" y="62" text-anchor="middle" class="label">SMS In</text>
+    <text x="65" y="76" text-anchor="middle" class="label-sm">Twilio webhook</text>
+
+    <line x1="120" y1="65" x2="155" y2="65" class="line"/>
+
+    <!-- Agent core -->
+    <rect x="155" y="20" width="180" height="90" rx="3" class="box-active"/>
+    <text x="245" y="45" text-anchor="middle" class="label">Agent Core v2</text>
+    <text x="245" y="62" text-anchor="middle" class="label-sm">Tool-use LLM orchestrator</text>
+    <text x="245" y="78" text-anchor="middle" class="label-sm">Claude → Gemini fallback</text>
+    <text x="245" y="94" text-anchor="middle" class="label-sm">No decision trees</text>
+
+    <!-- Tools -->
+    <line x1="335" y1="45" x2="380" y2="30" class="line"/>
+    <line x1="335" y1="65" x2="380" y2="65" class="line"/>
+    <line x1="335" y1="85" x2="380" y2="100" class="line"/>
+
+    <rect x="380" y="10" width="140" height="35" rx="3" class="box"/>
+    <text x="450" y="32" text-anchor="middle" class="label-sm">Inventory search</text>
+
+    <rect x="380" y="50" width="140" height="35" rx="3" class="box"/>
+    <text x="450" y="72" text-anchor="middle" class="label-sm">Vector store (floor plans)</text>
+
+    <rect x="380" y="90" width="140" height="35" rx="3" class="box"/>
+    <text x="450" y="112" text-anchor="middle" class="label-sm">Deal state machine</text>
+
+    <!-- Guardrails -->
+    <line x1="520" y1="65" x2="545" y2="65" class="line"/>
+
+    <rect x="545" y="40" width="120" height="50" rx="3" class="box-active"/>
+    <text x="605" y="58" text-anchor="middle" class="label-sm">Guardrails</text>
+    <text x="605" y="72" text-anchor="middle" class="label-sm">TCPA / Rate / Brand</text>
+
+    <!-- State machine detail -->
+    <text x="10" y="155" class="label-sm">State machine: NEW → CONTACTED → ENGAGED → TOUR_OFFERED → APPLICATION → APPROVED → MOVED_IN</text>
+    <text x="10" y="172" class="label-sm">Qualification lanes: 00 (Voucher Attack) → 01 (Slam Dunk) → 02 (Qualified) → 03 (Mitigation) → 04 (Edge Case)</text>
+    <text x="10" y="189" class="label-sm">Integrations: Asana (ticket sync), Gmail (doc monitoring), Discord (16 alert channels), FancyHands (human escalation)</text>
+  </svg>
 </div>
+
+<!-- ═══════ QUOTING ENGINE ═══════ -->
 
 <div class="asset">
   <h2>Quoting Engine</h2>
   <p>AI trained on 180,000+ SKUs for commercial electrical distribution. Roughly 90% accuracy on quote generation. Includes a CRM built from mining 4,298 email threads — 657 net-new contacts extracted and organized without anyone doing data entry. The system that made me realize every quoting desk is the same problem.</p>
+
+  <svg viewBox="0 0 680 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0 1rem;">
+    <rect x="10" y="30" width="130" height="50" rx="3" class="box-active"/>
+    <text x="75" y="52" text-anchor="middle" class="label">Quote Request</text>
+    <text x="75" y="68" text-anchor="middle" class="label-sm">Email / form</text>
+
+    <line x1="140" y1="55" x2="175" y2="55" class="line"/>
+
+    <rect x="175" y="30" width="140" height="50" rx="3" class="box-active"/>
+    <text x="245" y="52" text-anchor="middle" class="label">SKU Matcher</text>
+    <text x="245" y="68" text-anchor="middle" class="label-sm">180K+ products</text>
+
+    <line x1="315" y1="55" x2="350" y2="55" class="line"/>
+
+    <rect x="350" y="30" width="130" height="50" rx="3" class="box-active"/>
+    <text x="415" y="52" text-anchor="middle" class="label">Price Engine</text>
+    <text x="415" y="68" text-anchor="middle" class="label-sm">~90% accuracy</text>
+
+    <line x1="480" y1="55" x2="515" y2="55" class="line"/>
+
+    <rect x="515" y="30" width="145" height="50" rx="3" class="box-active"/>
+    <text x="587" y="52" text-anchor="middle" class="label">Quote + CRM</text>
+    <text x="587" y="68" text-anchor="middle" class="label-sm">657 contacts mined</text>
+
+    <text x="10" y="115" class="label-sm">CRM built by mining 4,298 email threads. Zero manual data entry. Contact extraction, relationship mapping, quote history — all automated.</text>
+    <text x="10" y="132" class="label-sm">This is the proof-of-concept for the thesis: every quoting desk is the same pattern. Different SKUs, same architecture.</text>
+  </svg>
+</div>
+
+<!-- ═══════ DECOMPOSITION ═══════ -->
+
+<div class="asset" style="margin-top:4rem; border-top:1px solid #333; padding-top:3rem;">
+  <h2>The Decomposition</h2>
+  <p>Alex Rampell at a16z wrote an investment memo about Fly Homes that broke a real estate transaction into its component services. I read that and thought: he's describing what I already built. But I took it further — decompose the agent into special teams, then decompose the special teams into atomic tasks, then route those tasks through a ticketing architecture where every unit of work is a replaceable, measurable primitive.</p>
+  <p>This mirrors Amazon's internal architecture. Bezos mandated that every team expose its functionality as a service. I did the same thing with the sales process. The result: any piece can be replaced, measured, or scaled independently. A human can be swapped for an AI. An AI can be swapped for a better AI. The interface stays the same.</p>
+
+  <svg viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
+    <!-- Level 1: Monolith -->
+    <text x="10" y="20" class="label-sm" style="fill:#666; text-transform:uppercase; letter-spacing:0.1em;">Level 0: The Monolith</text>
+    <rect x="10" y="30" width="660" height="40" rx="3" class="box-active"/>
+    <text x="340" y="55" text-anchor="middle" class="label">Sales Agent (one person does everything)</text>
+
+    <!-- Arrow down -->
+    <line x1="340" y1="70" x2="340" y2="90" class="line-data"/>
+    <text x="360" y="85" class="label-sm" style="fill:#555;">decompose</text>
+
+    <!-- Level 2: Special Teams -->
+    <text x="10" y="105" class="label-sm" style="fill:#666; text-transform:uppercase; letter-spacing:0.1em;">Level 1: Special Teams</text>
+    <rect x="10" y="115" width="125" height="40" rx="3" class="box-active"/>
+    <text x="72" y="139" text-anchor="middle" class="label-sm">Lead Qualification</text>
+    <rect x="145" y="115" width="115" height="40" rx="3" class="box-active"/>
+    <text x="202" y="139" text-anchor="middle" class="label-sm">Inventory Match</text>
+    <rect x="270" y="115" width="100" height="40" rx="3" class="box-active"/>
+    <text x="320" y="139" text-anchor="middle" class="label-sm">Tour Booking</text>
+    <rect x="380" y="115" width="100" height="40" rx="3" class="box-active"/>
+    <text x="430" y="139" text-anchor="middle" class="label-sm">Doc Collection</text>
+    <rect x="490" y="115" width="85" height="40" rx="3" class="box-active"/>
+    <text x="532" y="139" text-anchor="middle" class="label-sm">Application</text>
+    <rect x="585" y="115" width="85" height="40" rx="3" class="box-active"/>
+    <text x="627" y="139" text-anchor="middle" class="label-sm">Follow-up</text>
+
+    <!-- Arrow down -->
+    <line x1="340" y1="155" x2="340" y2="175" class="line-data"/>
+    <text x="360" y="170" class="label-sm" style="fill:#555;">decompose further</text>
+
+    <!-- Level 3: Atomic Tasks -->
+    <text x="10" y="190" class="label-sm" style="fill:#666; text-transform:uppercase; letter-spacing:0.1em;">Level 2: Atomic Tasks (Tickets)</text>
+    <g>
+      <rect x="10" y="200" width="75" height="30" rx="2" class="box"/>
+      <text x="47" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">parse intent</text>
+      <rect x="92" y="200" width="75" height="30" rx="2" class="box"/>
+      <text x="129" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">check budget</text>
+      <rect x="174" y="200" width="75" height="30" rx="2" class="box"/>
+      <text x="211" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">query DB</text>
+      <rect x="256" y="200" width="75" height="30" rx="2" class="box"/>
+      <text x="293" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">rank results</text>
+      <rect x="338" y="200" width="75" height="30" rx="2" class="box"/>
+      <text x="375" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">draft message</text>
+      <rect x="420" y="200" width="75" height="30" rx="2" class="box"/>
+      <text x="457" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">check TCPA</text>
+      <rect x="502" y="200" width="75" height="30" rx="2" class="box"/>
+      <text x="539" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">send SMS</text>
+      <rect x="584" y="200" width="86" height="30" rx="2" class="box"/>
+      <text x="627" y="219" text-anchor="middle" class="label-sm" style="font-size:8px;">log + measure</text>
+    </g>
+
+    <!-- Arrow down -->
+    <line x1="340" y1="230" x2="340" y2="250" class="line-data"/>
+    <text x="360" y="245" class="label-sm" style="fill:#555;">route to executor</text>
+
+    <!-- Level 4: Executors -->
+    <text x="10" y="265" class="label-sm" style="fill:#666; text-transform:uppercase; letter-spacing:0.1em;">Level 3: Replaceable Executors</text>
+    <rect x="10" y="275" width="155" height="35" rx="3" class="box-active"/>
+    <text x="87" y="292" text-anchor="middle" class="label-sm" style="fill:#e8e4de;">LLM Agent (Claude/Gemini)</text>
+    <text x="87" y="304" text-anchor="middle" class="label-sm" style="fill:#555;">$0.003/task</text>
+
+    <rect x="178" y="275" width="155" height="35" rx="3" class="box-active"/>
+    <text x="255" y="292" text-anchor="middle" class="label-sm" style="fill:#e8e4de;">Voice AI (Bland)</text>
+    <text x="255" y="304" text-anchor="middle" class="label-sm" style="fill:#555;">$0.09/min</text>
+
+    <rect x="346" y="275" width="155" height="35" rx="3" class="box-active"/>
+    <text x="423" y="292" text-anchor="middle" class="label-sm" style="fill:#e8e4de;">Human (FancyHands)</text>
+    <text x="423" y="304" text-anchor="middle" class="label-sm" style="fill:#555;">$3-7/task</text>
+
+    <rect x="514" y="275" width="156" height="35" rx="3" class="box-active"/>
+    <text x="592" y="292" text-anchor="middle" class="label-sm" style="fill:#e8e4de;">Deterministic Code</text>
+    <text x="592" y="304" text-anchor="middle" class="label-sm" style="fill:#555;">$0/task</text>
+
+    <!-- Principles -->
+    <text x="10" y="340" class="label-sm">Four principles: Modularization (every function is a service). Replaceability (any executor can be swapped).</text>
+    <text x="10" y="356" class="label-sm">Sanctity (each module owns its data and contracts). Operating leverage (cost per task approaches zero as volume scales).</text>
+    <text x="10" y="372" class="label-sm">The same architecture that makes Amazon work at planetary scale. Applied to a leasing office.</text>
+  </svg>
+</div>
+
+<!-- ═══════ ENGINEERING PRACTICES ═══════ -->
+
+<div class="asset" style="margin-top:4rem; border-top:1px solid #333; padding-top:3rem;">
+  <h2>How It's Built</h2>
+  <p>This isn't a startup engineering org. It's one person with AI as the engineering team. The practices that make that work are themselves part of the asset.</p>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-top:2rem;">
+    <div>
+      <h2 style="font-size:1rem; margin-top:0; color:#999;">Adversarial Testing</h2>
+      <p style="font-size:0.95rem; color:#888;">Red team agents that attack production systems. Every conversation agent has an adversary trying to break it — prompt injection, edge cases, compliance violations. Bugs found by machines before customers hit them.</p>
+    </div>
+    <div>
+      <h2 style="font-size:1rem; margin-top:0; color:#999;">CI/CD for AI Agents</h2>
+      <p style="font-size:0.95rem; color:#888;">Cloud Build → Docker → GKE with rollback. Not just code deployment — conversation quality regression tests, guardrail validation, shadow mode for new agent versions running alongside production.</p>
+    </div>
+    <div>
+      <h2 style="font-size:1rem; margin-top:0; color:#999;">Retro → Macro → Meta Loops</h2>
+      <p style="font-size:0.95rem; color:#888;">Three feedback layers. Retro: what happened in this conversation. Macro: patterns across thousands of conversations this week. Meta: is the system that generates the system improving. Most teams never get past retro.</p>
+    </div>
+    <div>
+      <h2 style="font-size:1rem; margin-top:0; color:#999;">The Overnight Machine</h2>
+      <p style="font-size:0.95rem; color:#888;">Systems that run while I sleep. Nightly inventory refresh, lead scoring recalculation, stale data detection, automated outreach cadences. Wake up to a dashboard, not a backlog.</p>
+    </div>
+  </div>
 </div>
