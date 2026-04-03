@@ -16,7 +16,7 @@ navActive: assets
 
   <p>The Apartment Locator is a middleman. It owns no buildings. It owns a network &mdash; every rental property in three metropolitan areas, tracked, scored, and decaying at different rates depending on how old the data is.</p>
 
-  <p>A building enters the network because a lead asked about it, or a phone call confirmed vacancy, or a commission check arrived. Once it exists, it stays forever. But its usefulness decays. A building with a confirmed commission rate from Tuesday is worth more than one with a Zillow scrape from November. The system encodes that difference in every fact about every building.</p>
+  <p>A building enters the network because a lead asked about it, or a phone call confirmed vacancy, or a commission check arrived. Once it exists, it stays forever. But its usefulness decays. A building with a confirmed commission rate from Tuesday is worth more than one with a listing scrape from November. The system encodes that difference in every fact about every building.</p>
 
   <p>This page covers only the Apartment Locator business unit. The <a href="/assets/inventory/" style="color:#888;">Managed Portfolio</a> covers the 35 units I operate directly for the Landlord Rep business.</p>
 
@@ -28,7 +28,7 @@ navActive: assets
 <div class="asset">
   <h2>83,191 Buildings</h2>
 
-  <p>Every building the system has ever encountered goes into the master database. A lead inquires about a building we have never heard of &mdash; it gets created. Bland AI calls a leasing office to check vacancy &mdash; the transcript gets parsed and the building record gets updated. A commission payment arrives from a property manager &mdash; the building's commission confidence score goes to 0.95.</p>
+  <p>Every building the system has ever encountered goes into the master database. A lead inquires about a building we have never heard of &mdash; it gets created. The voice AI calls a leasing office to check vacancy &mdash; the transcript gets parsed and the building record gets updated. A commission payment arrives from a property manager &mdash; the building's commission confidence score goes to 0.95.</p>
 
   <p>The numbers:</p>
 
@@ -102,7 +102,7 @@ CREATE TABLE building_knowledge (
 );
 </pre>
 
-  <p>The JSONB structure is the key architectural decision. A traditional schema would have <code>commission_rate DECIMAL</code> as a column. But that tells you nothing about when the rate was verified, where the data came from, or whether you should trust it. A commission rate from a phone call last Tuesday is worth more than one scraped from Zillow six months ago. The JSONB structure encodes that difference.</p>
+  <p>The JSONB structure is the key architectural decision. A traditional schema would have <code>commission_rate DECIMAL</code> as a column. But that tells you nothing about when the rate was verified, where the data came from, or whether you should trust it. A commission rate from a phone call last Tuesday is worth more than one scraped from a listing site six months ago. The JSONB structure encodes that difference.</p>
 
   <h2 style="font-size:1.1rem; margin-top:2.5rem;">Decay Classes</h2>
 
@@ -118,7 +118,7 @@ SLOW        changes yearly     management company, pet policy type
 PERMANENT   never changes      physical features: balcony, pool, parking garage
 </pre>
 
-  <p>Commission rates are FAST decay. A building that paid 100% last month might be at 75% this month &mdash; market conditions shift, management companies renegotiate, new ownership takes over. If the commission data is older than 30 days, the system marks it as aging. Older than 90 days, stale. A stale commission rate triggers a Bland AI verification call before the agent promises the lead anything about that building.</p>
+  <p>Commission rates are FAST decay. A building that paid 100% last month might be at 75% this month &mdash; market conditions shift, management companies renegotiate, new ownership takes over. If the commission data is older than 30 days, the system marks it as aging. Older than 90 days, stale. A stale commission rate triggers an AI verification call before the agent promises the lead anything about that building.</p>
 
   <p>Pet policy is SLOW decay. Buildings do not change their pet policy every quarter. If they allowed dogs last year, they almost certainly still allow dogs. But a physical feature like a parking garage is PERMANENT &mdash; you cannot un-build a parking garage.</p>
 
@@ -135,16 +135,16 @@ PERMANENT   never changes      physical features: balcony, pool, parking garage
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 Source                Confidence    What It Tells You
 ──────────────────────────────────────────────────────────────
-Phone call (Bland)    0.95         Fresh: commission, availability, policies
+Phone call (voice AI) 0.95         Fresh: commission, availability, policies
 Field visit           0.95         First-hand: condition, neighborhood, parking
-ILS scrape (Zillow)   0.70         Listings, prices, photos (may be stale)
-ILS scrape (Apts.com) 0.70         Same as Zillow, different coverage
-YouGotListings        0.90         Our own listings (Landlord Rep units)
+ILS scrape            0.70         Listings, prices, photos (may be stale)
+ILS scrape (alt)      0.70         Same data, different listing service
+Internal listings     0.90         Our own listings (Landlord Rep units)
 Building website      0.75         Official but rarely updated
 Revenue history       0.98         Commission actually paid = ground truth
 </pre>
 
-  <p>Revenue history has the highest confidence. If a building paid us $1,100 in commission last month, we know for certain they cooperate and we know the exact rate. A phone call is the second-best source &mdash; a human (or Bland AI) spoke to the leasing office and confirmed the details. Zillow is the weakest because listings go stale: the unit that was available when the page was scraped might have been leased three weeks ago.</p>
+  <p>Revenue history has the highest confidence. If a building paid us $1,100 in commission last month, we know for certain they cooperate and we know the exact rate. A phone call is the second-best source &mdash; a human (or voice AI) spoke to the leasing office and confirmed the details. ILS scrapes are the weakest because listings go stale: the unit that was available when the page was scraped might have been leased three weeks ago.</p>
 
   <p>The search function prioritizes cooperating buildings &mdash; buildings that pay us commission:</p>
 
@@ -198,7 +198,7 @@ Commission &gt; 200%:   Almost certainly wrong. Do not use.
 Commission = 0 but marked "cooperating":   Verify immediately.
 </pre>
 
-  <p>When a lead asks about a building with stale commission data, the agent does not refuse to engage. It continues the conversation, qualifies the lead, and queues a Bland AI call to the leasing office in the background. By the time the lead is ready to tour, the commission data has been refreshed. The renter never sees the verification happening.</p>
+  <p>When a lead asks about a building with stale commission data, the agent does not refuse to engage. It continues the conversation, qualifies the lead, and queues a voice AI call to the leasing office in the background. By the time the lead is ready to tour, the commission data has been refreshed. The renter never sees the verification happening.</p>
 
   <p>The 150% red flag exists because of a real incident. A data import mapped a building's yearly commission to the monthly field. The system showed 1200% commission &mdash; $14,400 on a $1,200 unit. Nobody caught it for three weeks because the building never came up in a match. When it finally did, the agent promised the lead a building where we had no actual agreement. Three days of cleanup.</p>
 
@@ -224,7 +224,7 @@ Step 1: LEAD HYPOTHESIS SNAPSHOT
 Step 2: MATCH RUN
   Every search execution is persisted.
   query_payload:   exact search params sent
-  source_lanes:    ["cooperating", "zillow", "apartments_com"]
+  source_lanes:    ["cooperating", "ils_primary", "ils_secondary"]
   candidate_count: buildings returned (before filtering)
 
 Step 3: MATCH CANDIDATES
@@ -320,14 +320,14 @@ South Side supply/demand mismatch:
 <!-- ═══════ BUILDING CALLS ═══════ -->
 
 <div class="asset">
-  <h2>Building Calls: Bland AI</h2>
+  <h2>Building Calls: Voice AI</h2>
 
-  <p>When the system needs fresh data &mdash; vacancy check, commission confirmation, application requirements &mdash; it dispatches a Bland AI voice call to the building's leasing office.</p>
+  <p>When the system needs fresh data &mdash; vacancy check, commission confirmation, application requirements &mdash; it dispatches a voice AI call to the building's leasing office.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-<span style="color:#e8e4de;"># Bland AI call dispatch</span>
+<span style="color:#e8e4de;"># Voice AI call dispatch</span>
 
-POST https://api.bland.ai/v1/calls
+POST /api/v1/calls
 {
     "phone_number": building_leasing_phone,
     "task": "Check if there are any 1-bedroom apartments
@@ -337,9 +337,9 @@ POST https://api.bland.ai/v1/calls
     "max_duration": 180
 }
 
-Cost:     $0.09/minute
+Cost:     ~$0.09/minute
 Use case: Simple info retrieval (vacancy, pricing, policies)
-Fallback: FancyHands ($3-7/task) for relationship-building calls
+Fallback: Human virtual assistant ($3-7/task) for relationship-building calls
 
 <span style="color:#e8e4de;"># Callback webhook returns:</span>
 {
@@ -353,7 +353,7 @@ Fallback: FancyHands ($3-7/task) for relationship-building calls
 
   <p>The transcript gets parsed by Gemini to extract structured facts: commission rate, available units, application fees, credit requirements. Those facts update the building_knowledge table with source="phone_call" and confidence=0.95. The call recording is stored for audit.</p>
 
-  <p>If Bland cannot close the conversation after 2 attempts &mdash; the leasing agent wants to speak to a person, the voicemail is full, the number is disconnected &mdash; the task escalates to FancyHands. Same interface: "Call [building] and confirm [details]." The executor swaps. The data pipeline stays the same.</p>
+  <p>If the voice AI cannot close the conversation after 2 attempts &mdash; the leasing agent wants to speak to a person, the voicemail is full, the number is disconnected &mdash; the task escalates to a human virtual assistant service. Same interface: "Call [building] and confirm [details]." The executor swaps. The data pipeline stays the same.</p>
 
 </div>
 
@@ -439,7 +439,7 @@ Chicago:   Studio $1,100 |  1BR $1,200  |  2BR $1,600
 5 decay classes for knowledge freshness
 44% match rate in Chicago (the problem)
 68% match rate in DFW and Denver (survivable)
-$0.09/minute for Bland AI verification calls
+~$0.09/minute for AI verification calls
 3 maximum alternatives shown per match
 5 weighted matching criteria
 $280/mo Chicago 2BR structural gap</pre>

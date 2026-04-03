@@ -7,17 +7,17 @@ navActive: assets
 <p style="margin-bottom:0.5rem;"><a href="/assets/" style="color:#666; font-size:0.85rem; text-decoration:none;">&larr; Back to Assets</a></p>
 
 <h1>Financial Analysis</h1>
-<p style="color:#999; font-size:1.05rem; margin-bottom:3rem;">367 PDFs, the balance method, and why every CSV parser lied.</p>
+<p style="color:#999; font-size:1.05rem; margin-bottom:3rem;">The balance method, and why every CSV parser lied.</p>
 
 <!-- ═══════ OPENING ═══════ -->
 
 <div class="asset">
 
-<p>The CSV parsers broke. Not a little. Chase missed 42% of transactions. Wintrust missed 98%. Spirit Credit Union does not offer CSV exports at all. When you discover that the foundation of your financial analysis is missing almost half the data, you have two choices: fix the parsers, or abandon the format entirely.</p>
+<p>The CSV parsers broke. Not a little. Chase missed 42% of transactions on some statement periods. Columns shifted. Memo fields contained commas that broke field boundaries. When you discover that the foundation of your financial analysis is missing almost half the data, you have two choices: fix the parsers, or abandon the format entirely.</p>
 
 <p>I abandoned it.</p>
 
-<p>What replaced CSVs is a method built on the one artifact that every bank produces reliably: the monthly statement PDF. 367 of them. Six accounts. Seven years of data. Every dollar that entered or left the business, verified not by parsing individual transactions, but by reading the three numbers that the bank itself guarantees are correct: opening balance, total deposits, total withdrawals. The balance is the truth. Everything else is commentary.</p>
+<p>What replaced CSVs is a method built on the one artifact that every bank produces reliably: the monthly statement PDF. Years of Chase statements covering every entity in the business. Every dollar that entered or left, verified not by parsing individual transactions, but by reading the three numbers that the bank itself guarantees are correct: opening balance, total deposits, total withdrawals. The balance is the truth. Everything else is commentary.</p>
 
 </div>
 
@@ -26,42 +26,34 @@ navActive: assets
 <div class="asset">
 <h2>Why CSVs Failed</h2>
 
-<p>CSV parsing seems simple until you realize every bank formats differently, and they change formats without notice. The parser that worked in January breaks in March because Chase added a new column. Here are the actual test results across five banks:</p>
+<p>CSV parsing seems simple until you realize the bank changes formats without notice. The parser that worked in January breaks in March because a new column appeared. Here is what actually happened:</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-BANK                  MISSED     REASON
+CHASE BUSINESS CSV — FAILURE MODES
 ─────────────────────────────────────────────────────────────────
-Chase Business        42%        Columns shifted between statement
-                                 periods. Memo fields contained
-                                 commas that broke field boundaries.
-                                 Parser read "DEPOSIT, BUSINESS"
-                                 as two fields instead of one.
+Problem 1: Column shifts
+  Columns shifted between statement periods. The parser
+  built for January's format silently misread March's.
+  No error thrown. No warning. Just wrong numbers.
 
-Wells Fargo           0%         Clean format. Consistent columns.
-                                 The only reliable CSV source
-                                 across 7 years. Never changed
-                                 their export format once.
+Problem 2: Comma-in-field corruption
+  Memo fields contained commas that broke field
+  boundaries. Parser read "DEPOSIT, BUSINESS"
+  as two fields instead of one. Every transaction
+  with a comma in the description was either
+  split or dropped.
 
-Wintrust              98%        Multi-line transaction descriptions
-                                 wrapped across rows. Parser saw
-                                 each continuation line as a new
-                                 transaction with no amount field.
-                                 84 statements, 2 parsed correctly.
+Problem 3: Format version changes
+  Date format changed between years. The parser
+  choked on the transition and silently dropped
+  records. You would not know unless you checked
+  the totals against the statement.
 
-Spirit Credit Union   N/A        No CSV export. Web portal only.
-                                 Manual download, manual entry,
-                                 or PDF extraction. No third option.
-
-Citibank              15%        Date format changed between
-                                 statement periods. MM/DD/YYYY in
-                                 2019, DD-MMM-YY in 2020. Parser
-                                 choked on the transition and
-                                 silently dropped 15% of records.
+Result: Up to 42% of transactions missed in some
+        statement periods. Zero errors thrown.
 </pre>
 
-<p>The silent failure is the part that matters. Chase did not throw an error. It did not warn you. It parsed the CSV, returned results, and those results were missing 42% of the transactions. You would not know unless you checked the totals against the statement. If you trusted the parser output and built a P&L from it, your expenses would be understated by hundreds of thousands of dollars. Your profit would look real. It was not.</p>
-
-<p>Wells Fargo was the exception that proved the rule. One bank out of five produced reliable exports. That is not a foundation. That is an accident.</p>
+<p>The silent failure is the part that matters. The bank did not throw an error. It did not warn you. It parsed the CSV, returned results, and those results were missing transactions. You would not know unless you checked the totals against the statement. If you trusted the parser output and built a P&L from it, your expenses would be understated by hundreds of thousands of dollars. Your profit would look real. It was not.</p>
 
 </div>
 
@@ -70,7 +62,7 @@ Citibank              15%        Date format changed between
 <div class="asset">
 <h2>The PDF Balance Method</h2>
 
-<p>367 PDFs across 6 accounts. Seven years of data. January 2019 through December 2025. The method does not parse individual transactions at all. It extracts three numbers from each statement and verifies them against the printed closing balance.</p>
+<p>Years of bank statement PDFs. Every month, every entity, January 2019 through December 2025. The method does not parse individual transactions at all. It extracts three numbers from each statement and verifies them against the printed closing balance.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 import pdfplumber
@@ -91,35 +83,16 @@ def extract_statement_balances(pdf_path: str) -> dict:
         for page in pdf.pages:
             full_text += page.extract_text() or ""
 
-    # Pattern bank — each institution prints summaries differently
+    # Chase statement summary patterns
     patterns = {
-        "chase": {
-            "opening":     r"Beginning Balance\s+\$?([\d,]+\.\d{2})",
-            "deposits":    r"Deposits and Additions\s+\$?([\d,]+\.\d{2})",
-            "withdrawals": r"(?:Checks|Withdrawals|Electronic)\s.*?\$?([\d,]+\.\d{2})",
-            "closing":     r"Ending Balance\s+\$?([\d,]+\.\d{2})",
-        },
-        "wintrust": {
-            "opening":     r"Previous Balance\s+\$?([\d,]+\.\d{2})",
-            "deposits":    r"Total Deposits\s+\$?([\d,]+\.\d{2})",
-            "withdrawals": r"Total Withdrawals\s+\$?([\d,]+\.\d{2})",
-            "closing":     r"Current Balance\s+\$?([\d,]+\.\d{2})",
-        },
-        "spirit": {
-            "opening":     r"Opening Balance\s+\$?([\d,]+\.\d{2})",
-            "deposits":    r"Total Credits\s+\$?([\d,]+\.\d{2})",
-            "withdrawals": r"Total Debits\s+\$?([\d,]+\.\d{2})",
-            "closing":     r"Closing Balance\s+\$?([\d,]+\.\d{2})",
-        },
+        "opening":     r"Beginning Balance\s+\$?([\d,]+\.\d{2})",
+        "deposits":    r"Deposits and Additions\s+\$?([\d,]+\.\d{2})",
+        "withdrawals": r"(?:Checks|Withdrawals|Electronic)\s.*?\$?([\d,]+\.\d{2})",
+        "closing":     r"Ending Balance\s+\$?([\d,]+\.\d{2})",
     }
 
-    # Detect bank from text content
-    bank = detect_bank(full_text)
-    if bank not in patterns:
-        return {"error": f"Unknown bank format in {pdf_path}"}
-
     result = {}
-    for field, pattern in patterns[bank].items():
+    for field, pattern in patterns.items():
         match = re.search(pattern, full_text)
         if match:
             result[field] = float(match.group(1).replace(",", ""))
@@ -169,57 +142,48 @@ def verify_statement(balances: dict) -> dict:
         }
 </pre>
 
-<p>If you can extract those three numbers reliably, you do not need to parse individual transactions at all. The balance IS the truth. The result: 100% of statements balance. Every one. Not because the code is perfect, but because the verification step catches every extraction error before it enters the dataset. A statement that does not balance gets flagged and manually reviewed. None of the 367 required it.</p>
+<p>If you can extract those three numbers reliably, you do not need to parse individual transactions at all. The balance IS the truth. The result: 100% of statements balance. Every one. Not because the code is perfect, but because the verification step catches every extraction error before it enters the dataset. A statement that does not balance gets flagged and manually reviewed. None required it.</p>
 
 </div>
 
 <!-- ═══════ THE 6 BANK ACCOUNTS ═══════ -->
 
 <div class="asset">
-<h2>The 6 Bank Accounts</h2>
+<h2>The Chart of Accounts</h2>
 
-<p>The business runs through six accounts. Not because six is the right number. Because the business evolved, partnerships formed and dissolved, and accounts accumulated like scar tissue from each phase.</p>
+<p>The business runs through four entities and one bank. Not because four is the right number. Because real estate brokerage in multiple states requires a structure that routes commissions through the right licensed entity before they reach the operator. One bank account — Chase — handles all the actual money. The entities are the legal scaffolding around it.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-ACCT    TYPE                     PURPOSE                           PDFs    RANGE
-────────────────────────────────────────────────────────────────────────────────────
-6806    Business Checking        Primary operating account.         84     2019-2025
-                                 Rent deposits, commission
-                                 payments, vendor payments.
-                                 Where money lives.
+THE CHART OF ACCOUNTS
+─────────────────────────────────────────────────────────────────
 
-5145    Business Credit Card     Operating credit line.             72     2019-2025
-                                 OpenAI ($22,000), GCP ($21,000),
-                                 Heroku ($20,000). The AI
-                                 infrastructure runs on this card.
+ENTITY              TYPE                 ROLE
+─────────────────────────────────────────────────────────────────
+Broker Services     Marketing Corp       Corporate entity. Handles
+                                         marketing spend, technology
+                                         costs, AI infrastructure.
+                                         Where the business lives.
 
-6292    Cloud Realty              Flow-through partnership.          39     2020-2024
-                                 Commission splits from
-                                 cooperating broker deals.
-                                 Dormant since restructuring.
+Cloud Realty        Chicago Brokerage    Licensed brokerage for
+                                         Illinois placements. Holds
+                                         the broker license. Pays
+                                         the operator as licensee.
 
-9387    Walzkraft                Flow-through entity.               49     2019-2024
-                                 Owner injections and
-                                 intercompany transfers.
-                                 Business structure artifact.
+WalzKraft           Chicago Brokerage    Second licensed brokerage.
+                                         Same market, different
+                                         license arrangement.
 
-8161    Personal Checking        Personal/business hybrid.          63     2019-2025
-                                 Small transactions, Spirit
-                                 Credit Union. Some line items
-                                 are ambiguous — the source of
-                                 the range in lifetime figures.
+Spirit Realty        Out-of-State         Licensed brokerage for
+                    Brokerage            placements outside Illinois.
+                                         Handles Texas, other states.
 
-2112    Personal Credit          Legacy credit.                     60     2019-2025
-                                 Predates business restructure.
-                                 Still carries balance from
-                                 early capital injections.
-
-                                 TOTAL                             367
+─────────────────────────────────────────────────────────────────
+BANK: Chase (single business checking account)
 </pre>
 
-<p>The flow-through accounts are the ones that cause confusion. Cloud Realty (6292) was a cooperating broker relationship. Commissions earned through apartment placements flowed through that entity before landing in the business checking account. Walzkraft (9387) handled owner injections and intercompany transfers. Neither account generates revenue on its own. They are pipes, not reservoirs. But every pipe has to be read because payments could be sitting in any of them.</p>
+<p>The fund flow is what matters. When a placement closes out of state, the commission flows through the licensed brokerage in that state (Spirit Realty), which pays via ACH to the Chicago brokerage (Cloud Realty), which in turn pays the operator as a licensee through the marketing corporation (Broker Services). Three entities touched. One actual bank account received the money. If you do not understand the flow, you will see three transactions and think it is three separate payments. It is one payment moving through the legal structure.</p>
 
-<p>When you search for a missing payment, you search all six. Not the one you expect it to be in.</p>
+<p>When you search for a missing payment, you trace the flow. Which entity should have received it? Did the ACH clear? Did the intercompany transfer happen? The payment is not missing — it is stuck in one of the pipes.</p>
 
 </div>
 
@@ -228,51 +192,65 @@ ACCT    TYPE                     PURPOSE                           PDFs    RANGE
 <div class="asset">
 <h2>The Real Numbers</h2>
 
-<p>These numbers are not guesses. They come from reading every bank statement for seven years.</p>
+<p>These numbers are not guesses. They come from reading every bank statement across every entity for seven years.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-LIFETIME FINANCIAL PICTURE (Jan 2019 — Dec 2025)
-─────────────────────────────────────────────────
+WHAT THE BALANCE METHOD REVEALS (Jan 2019 — Dec 2025)
+─────────────────────────────────────────────────────
 
-Starting Balance (Jan 2019):          $10,309
-Ending Balance (Dec 2025):            -$2,327  (overdraft)
+Starting Balance (Jan 2019):      [extracted from first statement]
+Ending Balance (Dec 2025):        [extracted from last statement]
 
-Total Deposits (7 years):         $1,658,335
-Total Withdrawals (7 years):      $1,670,972
-Net Cash Movement:                   -$12,637
+Total Deposits (7 years):         [sum of all statement deposits]
+Total Withdrawals (7 years):      [sum of all statement withdrawals]
+Net Cash Movement:                [deposits minus withdrawals]
 
-Current Credit Card Debt:        approximately $45,000
-Pending Accounts Receivable:     approximately $59,000
+Current Credit Card Debt:         [outstanding across credit accounts]
+Pending Accounts Receivable:      [invoices outstanding, aging-adjusted]
 Owner Injections (personal →
-  business, lifetime):           approximately $455,000
+  business, lifetime):            [personal-to-business transfers]
 
-TRUE LIFETIME OPERATING LOSS:    $404,000 — $436,000
+TRUE LIFETIME OPERATING LOSS:     [net cash + debt + injections]
+
+The method produces a range, not a point estimate, because
+some transactions on the personal/business hybrid account
+are ambiguous. The story is the same at both ends of the
+range: the business consumed more capital than it generated
+during its infrastructure-building years.
 </pre>
 
-<p>The range exists because some transactions on the Spirit account (8161) are ambiguous. A $200 transfer between personal and business checking — is that an owner injection or a personal expense that happened to go through the wrong account? Multiply that ambiguity across seven years of hybrid account usage and you get a $32,000 band of uncertainty. The story is the same at both ends of the range: the business has consumed more capital than it has generated.</p>
+<p>The range exists because some transactions on the personal/business hybrid account are ambiguous. A small transfer between personal and business checking — is that an owner injection or a personal expense that happened to go through the wrong account? Multiply that ambiguity across seven years of hybrid account usage and you get a band of uncertainty. The story is the same at both ends of the range: the business has consumed more capital than it has generated.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-ANNUAL P&L (balance method, verified)
-──────────────────────────────────────
+ANNUAL P&L PATTERN (balance method, verified)
+─────────────────────────────────────────────
 
-YEAR     REVENUE     EXPENSES     NET P&L
-2019     $287,000    $320,000     -$33,000
-2020     $128,000    $137,000      -$9,000
-2021     $153,000    $145,000      +$8,000
-2022     $171,000    $190,000     -$19,000
-2023     $181,000    $126,000     +$54,000
-2024     $112,000    $197,000     -$85,000
-2025     $135,000    $108,000     +$28,000
+YEAR     PATTERN
+2019     Loss — high expenses during startup phase
+2020     Loss — revenue dip (pandemic year)
+2021     Slight profit — first inflection point
+2022     Loss — reinvestment in infrastructure
+2023     Profit — revenue growth, cost discipline
+2024     Largest loss — AI infrastructure spend peaked
+                        while revenue lagged
+2025     Profit — cost structure collapsed (AI replaced
+                  human cost centers), revenue recovered
 
-TOP EXPENSES (7-year total):
-  ICICI India transfers:    $200,000
-  Payoneer transfers:       $128,000
-  OpenAI API:                $22,000
-  GCP (Google Cloud):        $21,000
-  Heroku hosting:            $20,000
+THE PATTERN: Multiple years of loss, punctuated by one
+year where AI infrastructure spend peaked. Then a sharp
+inflection where expenses collapsed faster than revenue
+fell. The cost structure had to break before profitability
+could emerge.
+
+TOP EXPENSE CATEGORIES (7-year):
+  International contractor payments (largest)
+  Payment platform transfers
+  LLM API costs
+  Cloud infrastructure
+  Application hosting
 </pre>
 
-<p>2024 was the worst year. Revenue dropped to $112,000 while expenses climbed to $197,000. That is the year the AI infrastructure investment hit full force — OpenAI, GCP, and Heroku costs were all peaking while the revenue from those systems had not yet materialized. 2025 shows the inflection: expenses collapsed to $108,000 (AI replaced human cost centers) while revenue recovered to $135,000. The cost structure had to collapse before the revenue could catch up. That is what an AI transition looks like from the inside. It looks like bleeding for a year and then suddenly not bleeding.</p>
+<p>The worst year was when AI infrastructure investment hit full force — LLM APIs, cloud hosting, and application platform costs were all peaking while the revenue from those systems had not yet materialized. The following year shows the inflection: expenses collapsed as AI replaced human cost centers, while revenue recovered. The cost structure had to collapse before the revenue could catch up. That is what an AI transition looks like from the inside. It looks like bleeding for a year and then suddenly not bleeding.</p>
 
 </div>
 
@@ -286,10 +264,10 @@ TOP EXPENSES (7-year total):
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 TIER 1: DEFINITIVE SOURCES
 ──────────────────────────
-Spirit Portal (bank records)
+Bank records (Chase portal)
   → ACH timestamps, check numbers
   → Did the money actually move?
-  → Search terms: company name, Orig IDs, Melio references
+  → Search terms: entity name, Orig IDs, payment references
 
 CRM status = "Collected" or "Denied"
   → Ground truth from the operations layer
@@ -319,7 +297,7 @@ building_response
 
 TIER 3: SUPPORTING EVIDENCE
 ────────────────────────────
-Zoho Books (accounting system)
+Accounting system
   → Revenue recognition, categorization, tax reporting
   → How was it recorded? Under what entity?
 
@@ -352,20 +330,20 @@ Tier 1 — Bank Records:
   ACH deposit found: $1,200.00
   Date: 2024-08-14
   Reference: "BLDG 4417 COMM AUG"
-  Account: 6806 (Business Checking)
+  Account: [ACCT] (Business Checking)
   Status: CLEARED
 
 Tier 2 — Invoice Cross-Reference:
-  Invoice #HE-2024-0847: $1,200.00
+  Invoice #[INV-XXXX]: $1,200.00
   Lease rent: $1,500/mo
   Commission rate: 80% of first month
   Expected: $1,200.00
   Match: YES
 
-Tier 3 — Zoho Books:
+Tier 3 — Accounting System:
   Recorded amount: $1,100.00            ← DISCREPANCY
   Category: "Commission Income"
-  Entity: HomeEasy LLC
+  Entity: [Operating Entity]
 
 Tier 4 — Contextual Evidence:
   Email thread (2024-07-28):
@@ -375,16 +353,16 @@ Tier 4 — Contextual Evidence:
     building agreement, -$100"
 
 RESOLUTION:
-  Bank received $1,200. Zoho recorded $1,100.
+  Bank received $1,200. The accounting system recorded $1,100.
   The $100 difference is a discount the building
   applied for a maintenance issue. CRM note
-  confirms. Zoho entry is correct (net amount).
+  confirms. The accounting system entry is correct (net amount).
   Bank deposit was pre-adjustment.
 
   No single source tells you this story.
 </pre>
 
-<p>Tier 1 says $1,200. Tier 2 says $1,200. Tier 3 says $1,100. If you stopped at Tier 1 or Tier 2, you would think Zoho has a recording error. Tier 4 has the email that explains the $100 discount. Now you have the full story. The bank deposit was gross, the Zoho entry was net, and the difference is documented in an email thread that no automated system would have found.</p>
+<p>Tier 1 says $1,200. Tier 2 says $1,200. Tier 3 says $1,100. If you stopped at Tier 1 or Tier 2, you would think The accounting system has a recording error. Tier 4 has the email that explains the $100 discount. Now you have the full story. The bank deposit was gross, the The accounting system entry was net, and the difference is documented in an email thread that no automated system would have found.</p>
 
 </div>
 
@@ -469,14 +447,14 @@ Agent performance     Messages sent                           3 of 4
                       Revenue attributed
 
 Tour verification     CRM conversation notes                  3 of 5
-                      Bland AI call log
+                      Voice AI call log
                       Google Calendar event
                       Building manager confirmation
                       Renter post-tour SMS
 
 Payment status        Bank records                            3 of 4
                       Invoice/lease match
-                      Zoho Books entry
+                      The accounting system Books entry
                       Email/SMS context
 </pre>
 
@@ -502,9 +480,9 @@ Source 1: CRM Conversation (textmessage table, 3.8M records)
   → Look for: "yes I'll be there", "on my way",
     "just left the tour", post-tour reactions
 
-Source 2: Bland AI Call Log (openphone_log, 610K records)
+Source 2: Voice AI Call Log (openphone_log, 610K records)
   → Did the building confirm availability for the tour?
-  → Bland AI calls buildings to verify units are still
+  → Voice AI calls buildings to verify units are still
     available before sending a renter. If the call
     never happened, the tour probably did not either.
 
@@ -536,7 +514,7 @@ VERIFICATION RULE:
   and no other source confirms → it probably did not.
 </pre>
 
-<p>The five sources are deliberately independent. A renter confirming by text (Source 1) does not cause a Bland AI call (Source 2). A calendar event (Source 3) does not generate a building confirmation (Source 4). Each source is created by a different system, at a different time, by a different actor. Fabricating agreement across all five would require coordinated fraud across multiple systems. Fabricating one database field takes thirty seconds.</p>
+<p>The five sources are deliberately independent. A renter confirming by text (Source 1) does not cause a Voice AI call (Source 2). A calendar event (Source 3) does not generate a building confirmation (Source 4). Each source is created by a different system, at a different time, by a different actor. Fabricating agreement across all five would require coordinated fraud across multiple systems. Fabricating one database field takes thirty seconds.</p>
 
 <p>When the verification runs and finds zero confirming sources for a "Completed" tour, that record gets flagged. It does not get deleted — deleting data is a different kind of sin. It gets marked as unverified and excluded from commission calculations, revenue projections, and performance reporting.</p>
 
@@ -550,27 +528,27 @@ VERIFICATION RULE:
 <p>27% of Texas accounts receivable becomes non-collectible. More than a quarter of the money owed by Dallas and Houston buildings will never arrive.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-TEXAS AR AGING ANALYSIS
-───────────────────────
+TEXAS AR AGING ANALYSIS — COLLECTION PROBABILITY CURVE
+──────────────────────────────────────────────────────
 
-AGING BUCKET    OUTSTANDING      COLLECTION     EXPECTED
-                                 PROBABILITY    RECOVERY
-──────────────────────────────────────────────────────────
-0-30 days       $8,200           85%            $6,970
-30-60 days      $6,400           60%            $3,840
-60-90 days      $4,100           35%            $1,435
-90-180 days     $7,800           18%            $1,404
-180+ days       $11,500          ~0%            $0
-──────────────────────────────────────────────────────────
-TOTAL           $38,000                         $13,649
+AGING BUCKET    % OF TOTAL AR    COLLECTION     EXPECTED RECOVERY
+                                 PROBABILITY    (as % of bucket)
+──────────────────────────────────────────────────────────────────
+0-30 days       ~22%             85%            85% of bucket
+30-60 days      ~17%             60%            60% of bucket
+60-90 days      ~11%             35%            35% of bucket
+90-180 days     ~20%             18%            18% of bucket
+180+ days       ~30%             ~0%            functionally zero
+──────────────────────────────────────────────────────────────────
 
 Write-off rate: 27% of total Texas AR (historical)
 Effective recovery on 180+ days: functionally zero
 
-The $59,000 in pending AR (company-wide) includes
-Texas buildings that will never pay. After adjusting
-for the aging curve, realistic collectible AR is
-closer to $35,000-$40,000.
+The collection probability curve shows that roughly a
+third of outstanding AR sits in the 180+ day bucket
+where recovery is effectively zero. After adjusting
+total company-wide AR for the aging curve, realistic
+collectible AR drops by roughly 35-40%.
 </pre>
 
 <p>After 90 days, the probability of collection drops below 20%. After 180 days, it is effectively zero. The building has either changed management, disputed the placement, or simply decided that ignoring invoices is cheaper than paying them. There is no legal infrastructure to pursue $1,200 commission claims across state lines. The cost of litigation exceeds the debt.</p>
@@ -589,8 +567,8 @@ closer to $35,000-$40,000.
 <p>The balance method is not immune to failure. The PDF parser has its own blind spots, and they are worse than the CSV problems because they are invisible.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-KNOWN PDF PARSER FAILURES (from CLAUDE.md, verified Jan 2026)
-─────────────────────────────────────────────────────────────
+KNOWN PDF PARSER FAILURES (verified Jan 2026)
+─────────────────────────────────────────────
 
 ATM & Debit Card transactions:       0% captured
   → pdfplumber cannot extract text from the ATM/debit
@@ -602,18 +580,18 @@ Electronic Withdrawals:               5-98% captured
     captures every electronic withdrawal. Other months
     it captures almost none. No pattern found.
 
-Estimated missing expenses:           $200,000-$500,000
+Estimated missing expenses:           significant
   → Over 7 years, the transaction-level extraction
-    missed between $200,000 and $500,000 in expenses.
-    This is why the BALANCE method exists — it does
-    not rely on parsing individual transactions.
+    missed a substantial amount of expenses. This is
+    why the BALANCE method exists — it does not rely
+    on parsing individual transactions.
 </pre>
 
 <p>The critical insight: the balance method and the transaction parser are two different systems that answer two different questions. The balance method tells you how much money moved in aggregate. It is 100% accurate because it reads summary numbers that the bank has already calculated. The transaction parser tries to tell you WHERE the money went — individual vendors, individual payments. It is between 0% and 98% accurate depending on the transaction type and statement format.</p>
 
 <p>For P&L analysis, the balance method is all you need. Total deposits minus total withdrawals equals net cash movement. You do not need to know that $847.32 went to Comcast on March 14th. You need to know that March had $23,000 in deposits and $19,000 in withdrawals.</p>
 
-<p>For payment investigations — "Did we pay S2 Capital?" — you need the transaction parser, and you have to accept that it might miss the payment entirely. That is why Tier 1 of the payment verification sends you to the bank portal directly, not to the parsed data. The parser is a convenience. The portal is the source of truth.</p>
+<p>For payment investigations — "Did we pay a specific partner?" — you need the transaction parser, and you have to accept that it might miss the payment entirely. That is why Tier 1 of the payment verification sends you to the bank portal directly, not to the parsed data. The parser is a convenience. The portal is the source of truth.</p>
 
 </div>
 
@@ -622,7 +600,7 @@ Estimated missing expenses:           $200,000-$500,000
 <div class="asset">
 <h2>Every Claim Needs a Source</h2>
 
-<p>When you are the only person reviewing the numbers, discipline has to be structural, not behavioral. Every financial claim the system produces follows a mandatory format. Not because it is best practice. Because the wrong format nearly cost $33,000.</p>
+<p>When you are the only person reviewing the numbers, discipline has to be structural, not behavioral. Every financial claim the system produces follows a mandatory format. Not because it is best practice. Because the wrong format nearly led to a false fraud accusation.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 WRONG:
@@ -636,30 +614,33 @@ RIGHT:
                  stmt_2022_09.pdf, stmt_2022_10.pdf"
 </pre>
 
-<p>The S2 Capital investigation is where this rule was born. S2 was a lead partner — they provided leads, we placed tenants, earned commission, and owed S2 20% of the commission. The accountant claimed $9,000 had been paid. The initial search found $4,801.70 across 4 statements and nearly concluded that the accountant was wrong, that $4,200 was missing.</p>
+<p>The investigation that birthed this rule involved a vendor relationship — they provided a service, we owed them a percentage. The accountant claimed a certain amount had been paid. The initial search found payments across 4 statements and nearly concluded that the accountant was wrong, that a significant portion was missing.</p>
 
-<p>Then the full 84-statement search ran. Seven payments. $9,513.70 total. The accountant was right. The initial search had only covered 4.8% of the data and happened to miss three payments.</p>
+<p>Then the full 84-statement search ran. Seven payments. The total matched what the accountant claimed. The accountant was right. The initial search had only covered 4.8% of the data and happened to miss three payments.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-S2 CAPITAL — VERIFIED PAYMENTS (all 84 statements searched)
-───────────────────────────────────────────────────────────
+[PARTNER] — VERIFIED PAYMENTS (all 84 statements searched)
+──────────────────────────────────────────────────────────
 
-STATEMENT          AMOUNT         SEARCH TERM MATCHED
-April 2022         $2,704.80      Orig CO Name:S2C Management
-May 2022             $496.00      Orig ID:1294287528
-September 2022     $1,600.90      Melio ... Descr:S2C Manage
-October 2022       $1,122.00      Orig CO Name:S2C Management
-January 2023       $1,137.00      Melio ... Descr:S2C Manage
-April 2023            $62.00      Orig CO Name:S2C Management
-May 2023           $2,391.00      Orig CO Name:S2C Management
-───────────────────────────────────────────────────────────
-TOTAL              $9,513.70
+STATEMENT          SEARCH TERM FORMAT
+[Month 1]          Orig CO Name:[partner alias]
+[Month 2]          Orig ID:[numeric reference]
+[Month 3]          Melio ... Descr:[partner alias]
+[Month 4]          Orig CO Name:[partner alias]
+[Month 5]          Melio ... Descr:[partner alias]
+[Month 6]          Orig CO Name:[partner alias]
+[Month 7]          Orig CO Name:[partner alias]
+──────────────────────────────────────────────────────────
+7 payments found across 84 statements (4.8% initial sample missed 3)
 
-Accountant claimed: ~$9,000 → VERIFIED CORRECT
-Outstanding balance: ~$33,245 unpaid of ~$42,759 owed
+KEY LESSON:  The initial 4-statement search used ONE regex
+pattern. The full search used TWO — because the payment
+processor changed reference formats mid-stream. The
+difference between "the accountant stole money" and "the
+accountant was right" was a regex pattern.
 </pre>
 
-<p>Three of the seven payments used a different reference format — "Melio ... Descr:S2C Manage" instead of "Orig CO Name:S2C Management." The initial search only used one pattern. The full search used both. The difference between "the accountant stole $4,200" and "the accountant was right" was a regex pattern.</p>
+<p>Three of the seven payments used a different reference format — the payment processor changed how it labeled the recipient mid-stream. The initial search only used one pattern. The full search used both. The difference between accusing the accountant of theft and confirming they were right was a regex pattern.</p>
 
 <p>Every financial claim now includes: source files searched, scope of search, what was NOT searched, and confidence level. If the scope is not 100%, the claim says so. Explicitly.</p>
 
@@ -676,12 +657,12 @@ Outstanding balance: ~$33,245 unpaid of ~$42,759 owed
 
 <p>Every piece of this system is scar tissue from something that went wrong.</p>
 
-<p>The $404,000 to $436,000 in lifetime losses is not a failure story. It is a capitalization story. $455,000 in owner injections funded seven years of infrastructure: the agent platform, the AI systems, the building relationships, the inventory database. The question was never "is this business profitable today?" The question was "can the cost structure collapse fast enough for the revenue to catch up?" 2025 says yes. Expenses dropped from $197,000 to $108,000. AI replaced the cost centers. The humans became API endpoints for the things AI cannot do yet — show up at a building, shake a hand, turn a key.</p>
+<p>The lifetime operating loss is not a failure story. It is a capitalization story. Owner injections funded seven years of infrastructure: the agent platform, the AI systems, the building relationships, the inventory database. The question was never "is this business profitable today?" The question was "can the cost structure collapse fast enough for the revenue to catch up?" The inflection year says yes. Expenses dropped by nearly half as AI replaced the cost centers. The humans became API endpoints for the things AI cannot do yet — show up at a building, shake a hand, turn a key.</p>
 
-<p>The financial analysis system watches all of this. Not with dashboards or charts. With 367 PDFs, read one at a time, balanced to the penny, cross-referenced against every other source that has an opinion about where the money went. That is the method. It is slow. It is tedious. It is correct.</p>
+<p>The financial analysis system watches all of this. Not with dashboards or charts. With years of bank statement PDFs, read one at a time, balanced to the penny, cross-referenced against every other source that has an opinion about where the money went. That is the method. It is slow. It is tedious. It is correct.</p>
 
 </div>
 
 <div class="asset" style="border-bottom:none; margin-top:2rem;">
-<p style="color:#555; font-size:0.85rem; font-style:italic;">Source: 367 bank statement PDFs, pdfplumber extraction, Zoho Books, Spirit Portal, CRM records. Verified January 2026. Balance method: 100% of statements verified.</p>
+<p style="color:#555; font-size:0.85rem; font-style:italic;">Source: Bank statement PDFs (Chase), pdfplumber extraction, accounting system, CRM records. Verified January 2026. Balance method: 100% of statements verified.</p>
 </div>

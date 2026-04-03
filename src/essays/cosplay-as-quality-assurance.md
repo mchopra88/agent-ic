@@ -59,7 +59,7 @@ The most thorough cosplay session I've run was the YGL (landlord rep) simulation
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 Wave 1: First Contact (60 scenarios)
-  → "Hi, I saw a listing on Zillow for 123 Main St"
+  → "Hi, I saw a listing online for 123 Main St"
   → "Someone told me you have apartments in Humboldt Park"
   → "I need a place ASAP, what do you have?"
   → "How much are your 2-bedrooms?"
@@ -97,7 +97,7 @@ Wave 3: Qualification / Document Submission (60 scenarios)
 
 Wave 4: Objection Handling (60 scenarios)
   → "That's too expensive"
-  → "I found something cheaper on Craigslist"
+  → "I found something cheaper on a classified site"
   → "I don't want to share my social security number"
   → "My current landlord won't give me a reference"
   → "I changed my mind about moving"
@@ -176,7 +176,7 @@ Silent failures (the worst kind):
    correctly. Presented them correctly. The renter
    said "yes, I want to buy." The agent responded
    with "Great! Here's your payment link: [LINK]"
-   — a literal placeholder. The Assurant checkout URL
+   — a literal placeholder. The carrier checkout URL
    was never generated. Every insurance sale attempt
    for that cohort was a dead end.
 

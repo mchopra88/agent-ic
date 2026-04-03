@@ -78,7 +78,7 @@ spec:
 
   <p><code>--prefetch-multiplier=1</code> &mdash; each worker only grabs one task at a time from the queue. Default is 4, which means a worker pulls 4 tasks, starts processing one, and holds the other 3 hostage. If that worker OOM-kills during task 1, tasks 2-4 vanish. With multiplier=1, each task is only pulled when the worker is ready. Slower throughput, but no phantom task loss.</p>
 
-  <p><code>-c 6</code> &mdash; six concurrent workers per container. Two containers means 12 total. Each conversation takes 3-15 seconds depending on LLM response time. At peak, I've seen 40+ tasks queued simultaneously during a lead batch drop from YouGotListings. 12 workers drain that in under a minute.</p>
+  <p><code>-c 6</code> &mdash; six concurrent workers per container. Two containers means 12 total. Each conversation takes 3-15 seconds depending on LLM response time. At peak, I've seen 40+ tasks queued simultaneously during a lead batch drop from the listing aggregator. 12 workers drain that in under a minute.</p>
 </div>
 
 
@@ -123,10 +123,10 @@ steps:
       - '-c'
       - |
         gcloud container clusters get-credentials \
-          homeeasy-microservice-cluster-v1 --zone=us-central1
-        kubectl get configmap homeeasy-may-ai-service-v3-config-b4hc \
+          [CLUSTER_NAME] --zone=us-central1
+        kubectl get configmap [CONFIGMAP_NAME] \
           -o jsonpath='{.data.GOOGLE_API_KEY}' > /workspace/google_api_key.txt
-        kubectl get configmap homeeasy-may-ai-service-v3-config-b4hc \
+        kubectl get configmap [CONFIGMAP_NAME] \
           -o jsonpath='{.data.MAY_AI_MODEL}' > /workspace/may_ai_model.txt
 
   # Step 2: Run tests
@@ -146,14 +146,14 @@ steps:
   # Step 3: Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '--no-cache', '-t',
-      'us-central1-docker.pkg.dev/hep01-303921/homeeasy-repos/homeeasy-ai-service-v3:latest',
+      'us-central1-docker.pkg.dev/[PROJECT_ID]/homeeasy-repos/homeeasy-ai-service-v3:latest',
       '.', '-f', './Dockerfile.prod']
     id: Build
 
   # Step 4: Push to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push',
-      'us-central1-docker.pkg.dev/hep01-303921/homeeasy-repos/homeeasy-ai-service-v3:latest']
+      'us-central1-docker.pkg.dev/[PROJECT_ID]/homeeasy-repos/homeeasy-ai-service-v3:latest']
     id: Push
 
   # Step 5: Stamp IMAGE_TAG in deployment.yaml
@@ -171,11 +171,11 @@ steps:
       - '-c'
       - |
         gcloud container clusters get-credentials \
-          homeeasy-microservice-cluster-v1 --zone=us-central1
+          [CLUSTER_NAME] --zone=us-central1
         kubectl replace -f ./deployment.yaml || kubectl apply -f ./deployment.yaml
     env:
     - 'CLOUDSDK_COMPUTE_ZONE=us-central1'
-    - 'CLOUDSDK_CONTAINER_CLUSTER=homeeasy-microservice-cluster-v1'</pre>
+    - 'CLOUDSDK_CONTAINER_CLUSTER=[CLUSTER_NAME]'</pre>
 
   <p>Step 1 is unusual. Most CI pipelines don't reach into the live cluster during the test phase. Mine does because the tests need real API keys &mdash; specifically the Gemini API key to test the LLM fallback path. The keys live in the Kubernetes ConfigMap, not in the repo. So the pipeline pulls them from the cluster, writes them to files in <code>/workspace/</code> (shared across all Cloud Build steps), and the test step reads them.</p>
 
@@ -192,7 +192,7 @@ steps:
 <div class="asset">
   <h2>20+ Environment Variables</h2>
 
-  <p>Every container in the pod gets the same set of environment variables. They come from a Kubernetes ConfigMap named <code>homeeasy-may-ai-service-v3-config-b4hc</code>. The <code>b4hc</code> suffix is a hash &mdash; Kubernetes generates it to track ConfigMap versions.</p>
+  <p>Every container in the pod gets the same set of environment variables. They come from a Kubernetes ConfigMap named <code>[CONFIGMAP_NAME]</code>. The <code>b4hc</code> suffix is a hash &mdash; Kubernetes generates it to track ConfigMap versions.</p>
 
   <p>Separation of config from code. The Docker image contains the application. The ConfigMap contains the credentials and feature flags. Changing a flag doesn't require a rebuild. <code>kubectl edit configmap</code> and restart the pods.</p>
 
@@ -203,7 +203,7 @@ NEW_DATABASE_URL          # Newer Postgres instance (read-write)
 READONLY_DATABASE_URL     # Read-only replica (analytics, probes)
 
 # Message broker
-CELERY_BROKER_URL         # RabbitMQ: amqp://herabbitmq:rabbitmq@...
+CELERY_BROKER_URL         # RabbitMQ connection
 CELERY_RESULT_BACKEND     # Redis for task results
 
 # SMS
@@ -223,7 +223,7 @@ DISCORD_WEBHOOK           # Legacy webhook (being migrated to bot)
 FUB_API                   # Follow Up Boss CRM API key
 FUB_TEXTING_SERVICE       # FUB texting endpoint
 BUILDING_SERVICE_API      # Internal building data API
-BLAND_AI_API_KEY          # Voice call provider
+VOICE_AI_API_KEY          # Voice call provider
 ASANA_ACCESS_TOKEN        # Task management (Landlord Rep only)
 
 # Tracing
@@ -237,8 +237,8 @@ USE_AGENT_CORE            # true|false|shadow - V2 agent architecture
 HITL_ENABLED              # Human-in-the-loop gate
 
 # Staff
-OWNER_PHONE               # Mukund's phone (escalation endpoint)
-BLUELAKE_STAFF_EMAIL      # Building manager email
+OWNER_PHONE               # Escalation phone
+BLUELAKE_STAFF_EMAIL      # Staff email
 FEEDBACK_FORM_URL         # Discord feedback form URL
 HOMEEASY_DIALER_URL       # Outbound dialer endpoint
 
@@ -263,30 +263,30 @@ GMAIL_SERVICE_ACCOUNT_JSON  # Same SA for email monitoring</pre>
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 Channel ID              Function Name                     What It Receives
 ----------------------------------------------------------------------
-1451222534098784409      sendDiscordYNYErrorAlert           Unhandled exceptions, OOM context
-1451222534098784409      sendDiscordYNYEvent                Typed events: message_received,
+[CHANNEL_ID]      sendDiscordYNYErrorAlert           Unhandled exceptions, OOM context
+[CHANNEL_ID]      sendDiscordYNYEvent                Typed events: message_received,
                                                            ai_response, sms_sent, error,
                                                            dead_lead, qualification, etc.
-1367629803624071188      sendDiscordMessage                 General system messages
-1367630555235221514      sendDiscordMessageAmy              Locator agent events
-1379390986643574835      sendDiscordLangAgentAlert          Agent brain reasoning traces
-1367635290272829520      sendDiscordFollowUpMessage         Followup sequence events
-1367635613523771514      sendDiscordDeadClientAlert         Lead death events
-1402984649055014952      sendDiscordTourRequest             Tour scheduling requests
-1380340043058643096      sendDiscordBuildingOptionsAlert    Building option generation
-1375064707844669520      sendDiscordRequirementsCheck       Requirements gathering events
-1377926979155922974      sendDiscordAgentResponse           Agent responses (all agents)
-1380283563106242680      sendDiscordChatHistoryNotFound     Missing chat history warnings
-1373226159369748571      sendDiscordUnauthorizedMessage     Auth failures
-1373805249428455494      sendDiscordRequirementsNoteAlert   CRM note updates
-1373808201216163901      sendDiscordStageSuggestionNoteAlert Stage transition suggestions
-1377308566922334311      sendDiscordSanityCheckNoteAlert    Sanity check results
-1451549206585282776      sendDiscordMessageWithFeedbackButton HITL escalation w/ feedback</pre>
+[CHANNEL_ID]      sendDiscordMessage                 General system messages
+[CHANNEL_ID]      sendDiscordMessageAmy              Locator agent events
+[CHANNEL_ID]      sendDiscordLangAgentAlert          Agent brain reasoning traces
+[CHANNEL_ID]      sendDiscordFollowUpMessage         Followup sequence events
+[CHANNEL_ID]      sendDiscordDeadClientAlert         Lead death events
+[CHANNEL_ID]      sendDiscordTourRequest             Tour scheduling requests
+[CHANNEL_ID]      sendDiscordBuildingOptionsAlert    Building option generation
+[CHANNEL_ID]      sendDiscordRequirementsCheck       Requirements gathering events
+[CHANNEL_ID]      sendDiscordAgentResponse           Agent responses (all agents)
+[CHANNEL_ID]      sendDiscordChatHistoryNotFound     Missing chat history warnings
+[CHANNEL_ID]      sendDiscordUnauthorizedMessage     Auth failures
+[CHANNEL_ID]      sendDiscordRequirementsNoteAlert   CRM note updates
+[CHANNEL_ID]      sendDiscordStageSuggestionNoteAlert Stage transition suggestions
+[CHANNEL_ID]      sendDiscordSanityCheckNoteAlert    Sanity check results
+[CHANNEL_ID]      sendDiscordMessageWithFeedbackButton HITL escalation w/ feedback</pre>
 
   <p>The core posting function is the same pattern repeated 16 times:</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-def sendDiscordYNYErrorAlert(textContent, channel_id='1451222534098784409'):
+def sendDiscordYNYErrorAlert(textContent, channel_id='[CHANNEL_ID]'):
     try:
         url = f"https://discord.com/api/v10/channels/{channel_id}/messages"
         payload = {
@@ -475,7 +475,7 @@ spec:
     spec:
       containers:
       - name: homeeasy-ai-service-v3-web
-        image: us-central1-docker.pkg.dev/hep01-303921/homeeasy-repos/\
+        image: us-central1-docker.pkg.dev/[PROJECT_ID]/homeeasy-repos/\
 homeeasy-ai-service-v3:IMAGE_TAG
         command: ["gunicorn"]
         args: ["-w", "1", "-b", "0.0.0.0:5012", "app:app",
@@ -493,12 +493,12 @@ homeeasy-ai-service-v3:IMAGE_TAG
         - name: DATABASE_URL
           valueFrom:
             configMapKeyRef:
-              name: homeeasy-may-ai-service-v3-config-b4hc
+              name: [CONFIGMAP_NAME]
               key: DATABASE_URL
         # ... 25+ more env vars from ConfigMap ...
 
       - name: homeeasy-ai-service-v3-celery-beat
-        image: us-central1-docker.pkg.dev/hep01-303921/homeeasy-repos/\
+        image: us-central1-docker.pkg.dev/[PROJECT_ID]/homeeasy-repos/\
 homeeasy-ai-service-v3:IMAGE_TAG
         command: ["celery"]
         args: ["-A", "app.celery", "beat", "--loglevel=info"]
@@ -513,7 +513,7 @@ homeeasy-ai-service-v3:IMAGE_TAG
         # ... same env vars as web container ...
 
       - name: homeeasy-ai-service-v3-celery-worker
-        image: us-central1-docker.pkg.dev/hep01-303921/homeeasy-repos/\
+        image: us-central1-docker.pkg.dev/[PROJECT_ID]/homeeasy-repos/\
 homeeasy-ai-service-v3:IMAGE_TAG
         command: ["celery"]
         args: ["-A", "app.celery", "worker", "--loglevel=info",
@@ -541,7 +541,7 @@ homeeasy-ai-service-v3:IMAGE_TAG
 
   <p>February 14-21, 2026.</p>
 
-  <p>A deploy went out on the 14th. It broke the lead processing pipeline. Leads came in from Zillow, YouGotListings, Apartments.com. They landed in the database. The system acknowledged receipt. But responses didn't go out. The agent brain wasn't firing. Leads texted us and got nothing back.</p>
+  <p>A deploy went out on the 14th. It broke the lead processing pipeline. Leads came in from listing services. They landed in the database. The system acknowledged receipt. But responses didn't go out. The agent brain wasn't firing. Leads texted us and got nothing back.</p>
 
   <p>The monitoring didn't catch it because the monitoring deployed with the bad code. The Discord alert functions imported from the same codebase that was broken. When the import failed, the alert functions failed. When the alert functions failed, nobody knew the alerts were failing. The snake ate its tail.</p>
 

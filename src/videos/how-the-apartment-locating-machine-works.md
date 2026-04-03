@@ -41,11 +41,11 @@ This is how the machine works.
   <text x="10" y="15" class="s-sm" style="text-anchor:start; fill:#555; text-transform:uppercase; letter-spacing:0.1em;">Storyboard Frame: Lead Intake Flow</text>
 
   <rect x="10" y="35" width="100" height="50" class="s-box"/>
-  <text x="60" y="55" class="s-label">Zillow</text>
-  <text x="60" y="70" class="s-sm">Apartments.com</text>
+  <text x="60" y="55" class="s-label">ILS #1</text>
+  <text x="60" y="70" class="s-sm">ILS #2</text>
 
   <rect x="10" y="100" width="100" height="50" class="s-box"/>
-  <text x="60" y="120" class="s-label">Craigslist</text>
+  <text x="60" y="120" class="s-label">ILS #3</text>
   <text x="60" y="135" class="s-sm">Direct ads</text>
 
   <line x1="110" y1="60" x2="170" y2="95" class="s-arrow"/>
@@ -70,7 +70,7 @@ This is how the machine works.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.85rem; line-height:1.7; color:#888; overflow-x:auto; margin:2rem 0;">
 NARRATOR (V.O.):
-A renter in Dallas clicks a listing on Zillow.
+A renter in Dallas clicks a listing on a listing site.
 That click generates a lead — a name, a phone
 number, a city. Within seconds, it arrives.
 
@@ -82,7 +82,7 @@ apartment locating: the building the renter
 clicked on? That's almost never where they
 end up.
 
-[SHOW: The Zillow listing fading, replaced by
+[SHOW: The listing fading, replaced by
 a different building — nicer, closer, cheaper.]
 
 The lead is a signal, not a destination.
@@ -132,7 +132,7 @@ The ZIP tells you who they are.
 
 **NARRATION:** "Step 7 is where the magic is. The building someone clicked on tells you almost nothing about where they'll live. But the ZIP code they're coming FROM — their current address — tells you everything. Income bracket, household size, credit profile, price sensitivity. The inquiry is noise. The ZIP is signal."
 
-**[ANIMATION: A heat map of Dallas ZIP codes, with income brackets fading in. A dot appears on a Zillow listing in Uptown, but the renter's current ZIP is in Garland. The AI recalculates — different buildings light up.]**
+**[ANIMATION: A heat map of Dallas ZIP codes, with income brackets fading in. A dot appears on a listing in Uptown, but the renter's current ZIP is in Garland. The AI recalculates — different buildings light up.]**
 
 ---
 
@@ -192,7 +192,7 @@ if you looked at the failures, not the wins.
 message by message.]
 
 AI: Hey Marcus — I'm in leasing, you inquired
-    on a unit of mine on Zillow. When are you
+    on a unit of mine on a listing site. When are you
     looking to move?
 
 MARCUS: Next month. But that unit was too

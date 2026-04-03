@@ -94,7 +94,7 @@ class KenAgent:
     - Initial outreach to new leads
     - Response classification and handling
     - Info gathering (address, move-in date, email)
-    - Quote delivery (only after Assurant API call)
+    - Quote delivery (only after carrier API call)
     - Follow-up sequencing
     - Objection handling
     """

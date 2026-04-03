@@ -18,7 +18,7 @@ navActive: assets
   <div style="margin:2rem 0; padding:1.5rem; border:1px solid #222; background:#0a0a0a;">
     <div style="margin-bottom:1.2rem;">
       <span style="color:#88cc88; font-weight:600;">1. Apartment Locator</span><br>
-      <span style="color:#888; font-size:0.95rem;">Middleman model. Leads from Zillow, Apartments.com, Craigslist, YouGotListings, Google Ads. Remarketed to cooperating buildings for 50-100% of first month's rent. Five markets. Agent name: Amy Scott.</span>
+      <span style="color:#888; font-size:0.95rem;">Middleman model. Inbound leads from listing services and paid search. Remarketed to cooperating buildings for 50-100% of first month's rent. Five markets. Agent name: Amy Scott.</span>
     </div>
     <div style="margin-bottom:1.2rem;">
       <span style="color:#88cc88; font-weight:600;">2. Landlord Rep (Blue Lake / YNY Realty)</span><br>
@@ -26,14 +26,14 @@ navActive: assets
     </div>
     <div style="margin-bottom:1.2rem;">
       <span style="color:#88cc88; font-weight:600;">3. Ken &mdash; Renters Insurance</span><br>
-      <span style="color:#888; font-size:0.95rem;">Separate entity (Jamboree Insurance). HO4 renters insurance via Assurant. SMS-based, outbound-first. Quote, collect payment via Stripe, bind the policy. Card data never touches my servers.</span>
+      <span style="color:#888; font-size:0.95rem;">Separate entity (Jamboree Insurance). HO4 renters insurance through a Fortune 500 carrier. SMS-based, outbound-first. Quote, collect payment, bind the policy. Card data never touches my servers.</span>
     </div>
     <div>
       <span style="color:#88cc88; font-weight:600;">4. Financial Analysis</span><br>
-      <span style="color:#888; font-size:0.95rem;">P&L, payment reconciliation, revenue tracking, commission verification. 367 bank statement PDFs across 6 accounts. Seven years. The CSV parsers broke, so I read the actual PDFs.</span>
+      <span style="color:#888; font-size:0.95rem;">P&L, payment reconciliation, revenue tracking, commission verification. Years of bank statement PDFs across every business entity. The CSV parsers broke, so I read the actual PDFs.</span>
     </div>
     <div style="margin-top:1.2rem; padding-top:1rem; border-top:1px solid #222;">
-      <span style="color:#666; font-size:0.85rem;">Shared infrastructure: Cloud SQL Postgres, Celery/Redis, GKE cluster (us-central1), Twilio SMS, Bland AI voice, Claude Opus 4.6, Gemini (bulk only). Source: <a href="https://github.com/mchopra88/agent-ic" style="color:#888;">github.com/mchopra88/agent-ic</a></span>
+      <span style="color:#666; font-size:0.85rem;">Shared infrastructure: Cloud SQL Postgres, Celery/Redis, GKE cluster (us-central1), SMS, voice AI, Claude Opus 4.6, Gemini (bulk only). Source: <a href="https://github.com/mchopra88/agent-ic" style="color:#888;">github.com/mchopra88/agent-ic</a></span>
     </div>
   </div>
 </div>
@@ -61,7 +61,7 @@ navActive: assets
     <a href="/assets/cooperating-network/" style="display:block; padding:1.2rem 1.5rem; border:1px solid #222; background:#0a0a0a; text-decoration:none; transition: border-color 0.2s;">
       <div style="font-size:1.1rem; font-weight:600; color:#e8e4de; margin-bottom:0.3rem;">The Cooperating Network</div>
       <div style="font-size:0.85rem; color:#666; font-style:italic;">83,191 buildings, five decay classes, and the forensic pipeline that matches leads to units</div>
-      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">Apartment Locator infrastructure. JSONB knowledge store, 7 source lanes, commission verification, matching pipeline, 3-market gap analysis, Bland AI building calls.</div>
+      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">Apartment Locator infrastructure. JSONB knowledge store, 7 source lanes, commission verification, matching pipeline, 3-market gap analysis, AI building calls.</div>
     </a>
 
     <a href="/assets/inventory/" style="display:block; padding:1.2rem 1.5rem; border:1px solid #222; background:#0a0a0a; text-decoration:none; transition: border-color 0.2s;">
@@ -91,13 +91,13 @@ navActive: assets
     <a href="/assets/ken-insurance/" style="display:block; padding:1.2rem 1.5rem; border:1px solid #222; background:#0a0a0a; text-decoration:none; transition: border-color 0.2s;">
       <div style="font-size:1.1rem; font-weight:600; color:#e8e4de; margin-bottom:0.3rem;">Ken Insurance</div>
       <div style="font-size:0.85rem; color:#666; font-style:italic;">14 intents, one state machine, and the Stripe checkout that binds the policy</div>
-      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">Intent classification with exact word lists, 7-status state machine, Assurant API flow, Stripe checkout, followup scheduler, policy generation, database schema.</div>
+      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">Intent classification with exact word lists, 7-status state machine, carrier API flow, payment checkout, followup scheduler, policy generation, database schema.</div>
     </a>
 
     <a href="/assets/financial-analysis/" style="display:block; padding:1.2rem 1.5rem; border:1px solid #222; background:#0a0a0a; text-decoration:none; transition: border-color 0.2s;">
       <div style="font-size:1.1rem; font-weight:600; color:#e8e4de; margin-bottom:0.3rem;">Financial Analysis</div>
-      <div style="font-size:0.85rem; color:#666; font-style:italic;">367 PDFs, the balance method, and why every CSV parser lied</div>
-      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">PDF balance method, 4-tier payment verification, 6 bank accounts, horizontal truth pattern, real lifetime P&L numbers.</div>
+      <div style="font-size:0.85rem; color:#666; font-style:italic;">The balance method, and why every CSV parser lied</div>
+      <div style="font-size:0.8rem; color:#555; margin-top:0.5rem;">PDF balance method, 4-tier payment verification, chart of accounts, horizontal truth pattern, annual P&L patterns.</div>
     </a>
 
   </div>

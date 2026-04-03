@@ -15,7 +15,7 @@ But before the data underneath, the number itself has a story. It didn't start a
 Lead volume by year (approximate):
 
   2017:    ~500/month     First buildings, manual everything
-  2018:    ~2,000/month   ILS integrations online (Zillow, Apts.com)
+  2018:    ~2,000/month   ILS integrations online
   2019:    ~5,000/month   Multi-market expansion
   2020:    ~3,000/month   Covid crater — leads halved overnight
   2021:    ~8,000/month   Recovery + new source partnerships
@@ -32,16 +32,16 @@ Lead volume by year (approximate):
 
 The cumulative number is what matters. Not what we process this month — what the database contains. Hundreds of thousands of leads, each with a full conversation history, each with building preferences, geographic signals, price sensitivity, objection patterns, move dates, household composition. Every failed conversation is a training signal. Every drop-off point is a data point. Every ghosted follow-up tells you something about timing, pricing, or positioning that you can't learn from the deals that closed.
 
-The composition shifted over the years too. In 2017, leads came from one source: a single ILS (Internet Listing Service) partnership. By 2025, leads flow from Zillow, Apartments.com, Rent.com, direct web traffic, referrals, property manager partnerships, and landlord rep channels. The source matters because different sources produce different lead quality:
+The composition shifted over the years too. In 2017, leads came from one source: a single ILS (Internet Listing Service) partnership. By 2025, leads flow from multiple listing services, direct web traffic, referrals, property manager partnerships, and landlord rep channels. The source matters because different sources produce different lead quality:
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 Lead quality by source (observed patterns):
 
-  Zillow:          High intent, specific building clicked
+  ILS (high-intent): High intent, specific building clicked
                    Often aspirational — clicks Lincoln Park,
                    budget fits Rogers Park
 
-  Apartments.com:  Medium intent, broader search
+  ILS (broad):     Medium intent, broader search
                    Better geographic realism
 
   Direct/referral: Highest quality, already warm
@@ -52,7 +52,7 @@ Lead quality by source (observed patterns):
                    Doc submissions, voucher processing
 
   The insight: source determines conversation strategy.
-  A Zillow lead needs redirection (away from the
+  A listing site lead needs redirection (away from the
   aspirational building toward reality).
   A direct referral needs confirmation (they already
   know what they want).
@@ -77,7 +77,7 @@ Chicago market anomalies (discovered via bottom-up analysis):
 
   $280 gap → average delta between 2br listed price
       and actual available price on ILS platforms.
-      Zillow shows $1,400. Actual available is $1,680.
+      The listing site shows $1,400. Actual available is $1,680.
       The renter inquires expecting $1,400. We have to
       reframe the conversation around the real number.
       This is not a bug — it's the nature of ILS data.

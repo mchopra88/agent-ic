@@ -27,24 +27,7 @@ Wispr Flow — personal usage dashboard:
 
 203 words per minute. A fast typist does 80. An average one does 40-50. I'm running at roughly 3x the speed of a fast typist and 4-5x the speed of a normal one. That's not a marginal improvement. That's a different category of input speed.
 
-And I know where those words go:
-
-<pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.75rem; line-height:1.5; color:#b0aca6; overflow-x:auto; margin:2rem 0; font-family:monospace;">
-<span style="color:#666;"># Top apps by word count (from Wispr Flow local database)</span>
-
-<span style="color:#88cc88;">Claude Code (terminal):</span>    85,659 words   <span style="color:#888;">83.2%</span>
-<span style="color:#88cc88;">Claude Desktop:</span>            10,217 words   <span style="color:#888;">9.9%</span>
-<span style="color:#888;">iA Writer:</span>                  3,372 words   <span style="color:#888;">3.3%</span>
-<span style="color:#888;">Chrome:</span>                     1,867 words   <span style="color:#888;">1.8%</span>
-<span style="color:#888;">WhatsApp:</span>                   1,236 words   <span style="color:#888;">1.2%</span>
-<span style="color:#888;">ChatGPT:</span>                      439 words   <span style="color:#888;">0.4%</span>
-<span style="color:#888;">Everything else:</span>              156 words   <span style="color:#888;">0.2%</span>
-
-<span style="color:#e8e4de;">93% of everything I dictate goes to AI tools.</span>
-<span style="color:#e8e4de;">83% goes to Claude Code specifically.</span>
-</pre>
-
-Ninety-three percent. Almost everything I say goes to an AI. The other 7% is WhatsApp messages and the occasional iA Writer session when I'm drafting something long-form. (These essays, for instance. The ones you're reading right now. Dictated, not typed.)
+And I know where those words go: almost all of it into Claude Code. The vast majority of everything I dictate goes straight into the terminal — prompts, instructions, context dumps. The rest is scattered across messages and occasional long-form writing. (These essays, for instance. The ones you're reading right now. Dictated, not typed.)
 
 ## What Wispr Flow Actually Is
 

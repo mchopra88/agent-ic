@@ -117,7 +117,7 @@ Second: ARCHITECTURE.md. The system map:
 <span style="color:#666;">> architecture BEFORE making changes.</span>
 
 <span style="color:#888;">                 INTERNET / LEADS
-      (Zillow, Apartments.com, Rent.com, etc.)
+      (ILS platforms, listing services, etc.)
                       │
                       ▼
               LEAD INGESTION LAYER

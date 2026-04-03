@@ -14,7 +14,7 @@ I push more code in a day than my previous engineering team pushed in a month. T
 
 Session 1: agent-v4     → Apartment Locator Agent
 Session 2: ygl-service  → Landlord Rep Agent (Blue Lake)
-Session 3: ken-agent    → Insurance Agent (Assurant)
+Session 3: ken-agent    → Insurance Agent
 Session 4: ci-pipeline  → CI/CD, testing, deploys
 Session 5: data-pipe    → Inventory pipeline, building data
 Session 6: financial    → Revenue tracking, P&L, payments
@@ -55,8 +55,8 @@ Me: "Dallas zero-result queries are back.
 
 AI: "Reading the deploy log...
      The fix from Oct 14 is still live (commit a3f91c2).
-     But there's a new issue: the ILS feed for
-     Apartments.com changed their coordinate format
+     But there's a new issue: one of the ILS feeds
+     changed their coordinate format
      from (lat,lng) to (lng,lat) on Oct 16.
      Every Dallas building imported since then has
      inverted coordinates. 847 buildings affected."

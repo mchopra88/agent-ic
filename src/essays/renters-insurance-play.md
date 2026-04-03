@@ -56,7 +56,7 @@ Lemonade figured out the tech side of insurance. They built a beautiful app, a f
 
 ## The Carrier Negotiation
 
-We partnered with a national renters insurance carrier — one of the largest in the US, underwriting through Assurant. The negotiation was instructive because it revealed how carriers evaluate distribution partners.
+We partnered with a national renters insurance carrier — a Fortune 500 underwriter. The negotiation was instructive because it revealed how carriers evaluate distribution partners.
 
 Their standard offer was a referral commission — a flat fee per policy sold. This is how most carrier-agent relationships work: the agent refers a customer, the carrier pays a finder's fee, and the agent has no ongoing relationship with the policy.
 
@@ -109,7 +109,7 @@ class KenAgent:
         # Phase 2: Quote
         quotes = await self.get_quotes(
             profile=profile,
-            carrier="assurant",
+            carrier="default",
             coverage_options=self.standard_tiers
         )
 

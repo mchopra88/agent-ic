@@ -12,9 +12,9 @@ navActive: assets
 
 <div class="asset">
 
-<p>Ken is a separate business. Separate legal entity (Jamboree Insurance), separate codebase, separate compliance requirements. HO4 renters insurance underwritten by Assurant, a Fortune 500 carrier. The product: $100,000 liability coverage + $10,000 personal property protection, delivered via SMS to renters who need proof of insurance before their leasing office hands over keys.</p>
+<p>Ken is a separate business. Separate legal entity (Jamboree Insurance), separate codebase, separate compliance requirements. HO4 renters insurance underwritten by a Fortune 500 carrier. The product: $100,000 liability coverage + $10,000 personal property protection, delivered via SMS to renters who need proof of insurance before their leasing office hands over keys.</p>
 
-<p>The critical rule: NEVER hardcode a price. Every dollar amount comes from Assurant's rating engine. If Ken quotes a premium before calling the API, that price is a hallucination. If it is too low, the renter signs, discovers the real price at checkout, cancels, and files a complaint with the state insurance commissioner. If it is too high, they walk. Either direction: legal liability. The classifier, the state machine, the templates, the followup scheduler -- all of it exists to collect an address, call the API, and deliver the real number.</p>
+<p>The critical rule: NEVER hardcode a price. Every dollar amount comes from the carrier's rating engine. If Ken quotes a premium before calling the carrier API, that price is a hallucination. If it is too low, the renter signs, discovers the real price at checkout, cancels, and files a complaint with the state insurance commissioner. If it is too high, they walk. Either direction: legal liability. The classifier, the state machine, the templates, the followup scheduler -- all of it exists to collect an address, call the API, and deliver the real number.</p>
 
 <p>Six files. classifier.py, ken.py, templates.py, routes.py, checkout.py, followup.py.</p>
 
@@ -252,7 +252,7 @@ of date, just let me know."""
 
 <p>The "apologies if this info is out of date" is not politeness. It is compliance. We are texting people who did not ask to hear from us. The out gives them a non-confrontational exit before they say "stop" and trigger the opt-out machinery.</p>
 
-<p>The quote template. Only fires AFTER the Assurant API returns a real premium:</p>
+<p>The quote template. Only fires AFTER the carrier API returns a real premium:</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 QUOTE_STANDARD = """{first_name}, here's your quote for {address}:
@@ -277,7 +277,7 @@ it to your leasing office. One less thing."""
 what most {state} landlords require."
 
 <span style="color:#5c6370;"># "Is this a scam?"</span>
-"We're licensed in {state} and work with Assurant - one of the
+"We're licensed in {state} and work with one of the
 largest insurance carriers in the country."
 
 <span style="color:#5c6370;"># "Foxen / building provides it"</span>
@@ -300,11 +300,11 @@ your keys."
 <!-- ======= ASSURANT API FLOW ======= -->
 
 <div class="asset">
-<h2>The Assurant API Flow</h2>
+<h2>The Carrier API Flow</h2>
 
 <p>Two steps: authenticate, then quote. Card data never touches our servers.</p>
 
-<p>Step 1: OAuth 2.0. Client credentials grant. Token lasts 7200 seconds. Cached with a 300-second buffer to avoid mid-request expiry:</p>
+<p>Step 1: OAuth 2.0 authentication. Client credentials grant. Token lasts 7200 seconds. Cached with a 300-second buffer to avoid mid-request expiry:</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 async def _get_token(self) -> str:
@@ -401,17 +401,17 @@ def parse_quote_response(response):
 <span style="color:#5c6370;"># Coverage</span>
 $100,000 liability  +  $10,000 personal property
 
-<span style="color:#5c6370;"># Price (from Assurant API, NEVER hardcoded)</span>
+<span style="color:#5c6370;"># Price (from carrier API, NEVER hardcoded)</span>
 ${monthly}/mo  (${annual}/year)
 
 <span style="color:#5c6370;"># Trust badges</span>
-Secure Payment  |  Assurant Backed  |  Instant Coverage
+Secure Payment  |  Carrier Backed  |  Instant Coverage
 
-<span style="color:#5c6370;"># Payment via Spreedly -- PCI Level 1</span>
+<span style="color:#5c6370;"># Payment via PCI Level 1 tokenizer</span>
 <span style="color:#5c6370;"># Card data never touches our servers</span>
 </pre>
 
-<p>The payment gateway is Spreedly. It tokenizes card details client-side and sends a payment method token to our backend. Our backend forwards that token to Assurant for policy issuance. At no point does raw card data pass through our servers.</p>
+<p>The payment gateway is a PCI Level 1 tokenization service. It tokenizes card details client-side and sends a payment method token to our backend. Our backend forwards that token to the carrier for policy issuance. At no point does raw card data pass through our servers.</p>
 
 <p>The success page has confetti. The renter just made a purchase they did not want to make, for a product they are legally required to have. The confetti makes it feel like they accomplished something instead of paying a bill. Measurable impact on support ticket volume.</p>
 
@@ -480,7 +480,7 @@ async def process_successful_payment(lead_id, transaction_token, app):
         'premium_annual': lead_data.get('quote_premium') or 180,
         'effective_date': effective_date,
         'expiration_date': expiration_date,
-        'spreedly_transaction_id': transaction_token,
+        'payment_transaction_id': transaction_token,
     })
 
     await db.update_lead(lead_id, {
@@ -656,14 +656,14 @@ CREATE TABLE policies (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     lead_id                 UUID NOT NULL REFERENCES insurance_leads(id),
     policy_number           TEXT NOT NULL UNIQUE,
-    carrier                 TEXT DEFAULT 'Assurant',
+    carrier                 TEXT,
     premium_monthly         NUMERIC(10,2),
     premium_annual          NUMERIC(10,2),
     liability               INT DEFAULT 100000,
     personal_property       INT DEFAULT 10000,
     effective_date          DATE NOT NULL,
     expiration_date         DATE,
-    spreedly_transaction_id TEXT,
+    payment_transaction_id  TEXT,
     created_at              TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -673,7 +673,7 @@ CREATE INDEX idx_policies_expiry ON policies(expiration_date);
 
 <p>The partial index <code>idx_leads_followup</code> is the one that matters most. The followup job runs every 15 minutes and queries by status and last_outbound_at. Without it, the query scans the entire table. With it, only active leads get touched. As converted and expired leads accumulate, the partial index keeps the followup query fast.</p>
 
-<p>The <code>metadata</code> JSONB column holds everything that does not deserve its own column: statements_made, building_contact, property_lookup results, quote_data from Assurant. It is the scar tissue of the conversation -- everything Ken learned about this person, stored in a format that survives schema changes.</p>
+<p>The <code>metadata</code> JSONB column holds everything that does not deserve its own column: statements_made, building_contact, property_lookup results, quote_data from the carrier. It is the scar tissue of the conversation -- everything Ken learned about this person, stored in a format that survives schema changes.</p>
 
 </div>
 
@@ -684,10 +684,10 @@ CREATE INDEX idx_policies_expiry ON policies(expiration_date);
 
 <p>Three failure modes that matter.</p>
 
-<p>First: Assurant API timeout. The 30-second timeout. If Assurant is slow during maintenance windows (Sunday 2-6 AM CT), the renter gets "One sec, getting your numbers..." and then the fallback estimate fires. But if they already closed the conversation, that quote lands in a dead thread. The followup job picks it up 4 hours later. By then, momentum is gone.</p>
+<p>First: carrier API timeout. The 30-second timeout. If the carrier is slow during maintenance windows (Sunday 2-6 AM CT), the renter gets "One sec, getting your numbers..." and then the fallback estimate fires. But if they already closed the conversation, that quote lands in a dead thread. The followup job picks it up 4 hours later. By then, momentum is gone.</p>
 
 <p>Second: the renter gives a building name, not an address. "The Lydian." Ken triggers a property lookup in the background and asks for the unit number. If the lookup returns 3 matches, the renter gets a numbered list. If it returns 0 -- misspelling, new construction not in Maps -- they get "Can you send me the full address?" That round trip adds 2-4 messages, each one a chance to disengage.</p>
 
-<p>Third: TCPA liability. The opt-out gate in the webhook is the last line of defense. But the real risk is upstream: did the partner building have proper consent to share this renter's phone number? If a renter says "how did you get my number" and the answer is "your building gave it to us," we are one complaint away from a $500-$1,500 per-message fine. The WHO_IS_THIS handler deflects. It does not eliminate the consent question. That is a business problem, not a code problem.</p>
+<p>Third: TCPA liability. The opt-out gate in the webhook is the last line of defense. But the real risk is upstream: did the building have proper consent to share this renter's phone number? If a renter says "how did you get my number" and the answer is "your building gave it to us," we are one complaint away from a $500-$1,500 per-message fine. The WHO_IS_THIS handler deflects. It does not eliminate the consent question. That is a business problem, not a code problem.</p>
 
 </div>

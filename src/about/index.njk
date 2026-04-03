@@ -17,13 +17,13 @@ navActive: about
   <h2>What We Operate</h2>
 
   <p>
-    <strong>Apartment Locator</strong> — AI agent that takes inbound leads from Zillow, Apartments.com, Craigslist. Qualifies, matches to inventory, drives to tours and lease signings. We're the middleman — we remarket leads to cooperating buildings that pay us commission. 50% to 100%+ of first month's rent per conversion.
+    <strong>Apartment Locator</strong> — AI agent that takes inbound leads from listing services and paid search. Qualifies, matches to inventory, drives to tours and lease signings. We're the middleman — we remarket leads to cooperating buildings that pay us commission. 50% to 100%+ of first month's rent per conversion.
   </p>
   <p>
-    <strong>Landlord Rep (Blue Lake)</strong> — We operate as the actual leasing office for a portfolio of multifamily properties through YouGotListings. Document collection, tenant screening, voucher processing, application management. First contact through lease signing, fully automated.
+    <strong>Landlord Rep (Blue Lake)</strong> — We operate as the actual leasing office for a portfolio of multifamily properties. Document collection, tenant screening, voucher processing, application management. First contact through lease signing, fully automated.
   </p>
   <p>
-    <strong>Insurance Agent (Ken)</strong> — SMS-based renters insurance sales. HO4 policies via Assurant, a Fortune 500 carrier. Outbound-first. The agent collects address and move-in details through conversation, quotes via the Assurant API, and closes. Separate codebase, separate business model, separate vertical.
+    <strong>Insurance Agent (Ken)</strong> — SMS-based renters insurance sales. HO4 policies through a Fortune 500 carrier. Outbound-first. The agent collects address and move-in details through conversation, quotes via the carrier API, and closes. Separate codebase, separate business model, separate vertical.
   </p>
   <p>
     <strong>Financial Analysis</strong> — Automated P&L, payment reconciliation, revenue tracking, commission verification. Scripts and automations that run against seven years of transaction data.
@@ -32,7 +32,7 @@ navActive: about
   <h2>The Stack</h2>
 
   <p>
-    Shared infrastructure across all four units: Cloud SQL Postgres (production + legacy read replicas going back to 2021), Celery/Redis task queues, GKE cluster, Twilio for SMS, Bland AI for automated voice calls. Claude Opus as the primary LLM for all conversation and reasoning. Gemini for bulk mechanical work only — embeddings, entity extraction. Eight deterministic hooks enforce safety rules that can't be skipped or overridden. Seven CLAUDE.md governance files — 1,334 lines — encode every operational lesson from seven years of production incidents.
+    Shared infrastructure across all four units: Cloud SQL Postgres (production + legacy read replicas going back to 2021), Celery/Redis task queues, GKE cluster, SMS gateway, voice AI for automated building calls. Claude Opus as the primary LLM for all conversation and reasoning. Gemini for bulk mechanical work only — embeddings, entity extraction. Eight deterministic hooks enforce safety rules that can't be skipped or overridden. Seven CLAUDE.md governance files — 1,334 lines — encode every operational lesson from seven years of production incidents.
   </p>
   <p>
     This isn't a prototype. These systems have been in production for years, processing real volume, generating real revenue, every day.

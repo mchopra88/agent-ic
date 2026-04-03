@@ -138,8 +138,8 @@ Looking elsewhere:                        -10
 <span style="color:#e8e4de;">Stage 1: email_monitor.py</span>
   Gmail API polls every 5 minutes (Celery periodic task)
   Watches: renterdocs@homeeasy.com,
-           ralph.peterson@homeeasy.com,
-           andrew.miller@homeeasy.com
+           [agent]@homeeasy.com,
+           [agent]@homeeasy.com
   Extracts attachments: .pdf, .jpg, .png, .heic, .doc, .docx
   Matches sender email/phone to client in DB
   Marks email with YGL_PROCESSED label so it doesn't re-process
@@ -383,7 +383,7 @@ VALID_TRANSITIONS = {
 <div class="asset">
   <h2>Followup Cadence</h2>
 
-  <p>Every deal stage has its own followup schedule. The intervals are in hours, and each step is either an SMS or a voice call via Bland AI. After the last step in the path, the lead moves to COOLING_OFF automatically.</p>
+  <p>Every deal stage has its own followup schedule. The intervals are in hours, and each step is either an SMS or a voice call via voice AI. After the last step in the path, the lead moves to COOLING_OFF automatically.</p>
 
   <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 FOLLOWUP_CADENCE = {

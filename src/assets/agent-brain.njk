@@ -384,7 +384,7 @@ if round_idx > 0 and all_tool_calls:
 <span style="color:#e8e4de;">4. dispatch_call(call_type, client_phone, client_name, unit_address,</span>
 <span style="color:#e8e4de;">                 rent, tour_date, tour_time)</span>
    4 call types: tour_confirmation, reengagement, qualification, doc_reminder
-   Queues a FancyHands call (real humans making real phone calls).
+   Queues a virtual assistant call (real humans making real phone calls).
    Only during call hours: 10 AM - 7 PM CT.
    The LLM should send a heads-up SMS first.
 
@@ -401,7 +401,7 @@ if round_idx > 0 and all_tool_calls:
 
   <p>6 tools instead of 4. The landlord rep has more levers because it controls more of the process. The locator hands off to the building's leasing team. The landlord rep IS the leasing team. It can schedule tours, dispatch phone calls, create tickets for the building manager, and verify document submissions.</p>
 
-  <p>The <code>dispatch_call</code> tool is the bridge between AI and human. When the situation requires a human voice &mdash; confirming a tour, re-engaging a stalled lead, qualifying someone who will not text &mdash; the LLM dispatches a FancyHands call. A real person calls the renter. The instructions come from the AI. The human follows the script. It is AI-directed human labor.</p>
+  <p>The <code>dispatch_call</code> tool is the bridge between AI and human. When the situation requires a human voice &mdash; confirming a tour, re-engaging a stalled lead, qualifying someone who will not text &mdash; the LLM dispatches a virtual assistant call. A real person calls the renter. The instructions come from the AI. The human follows the script. It is AI-directed human labor.</p>
 </div>
 
 

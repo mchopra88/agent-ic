@@ -106,7 +106,7 @@ Early Automation (2019-2021):
 
 The quality insight was the breakthrough. Early automation was worse than a good human agent at their best. But it was better than a depleted human agent at the end of a shift. And since ego depletion happens every single day to every single agent, the average quality of automated conversations was competitive with the average quality of human conversations — because the automation never got tired, never forgot to follow up, never decided that lead wasn't worth the effort.
 
-The automation ran at 3 AM. The human agents were asleep. The leads that came in overnight — from people browsing Zillow at midnight, from people in different time zones, from people who just got home from work and finally had time to apartment-hunt — those leads got instant responses from the automation and nothing from the humans until 9 AM the next day. Response time matters more than response quality in lead engagement. A mediocre response in 30 seconds beats a perfect response in 12 hours.
+The automation ran at 3 AM. The human agents were asleep. The leads that came in overnight — from people browsing listing sites at midnight, from people in different time zones, from people who just got home from work and finally had time to apartment-hunt — those leads got instant responses from the automation and nothing from the humans until 9 AM the next day. Response time matters more than response quality in lead engagement. A mediocre response in 30 seconds beats a perfect response in 12 hours.
 
 This was the first non-linear scale moment. The system handled 10,000 conversations simultaneously. One human can handle maybe 5-8 text conversations at once before quality degrades. The ceiling wasn't skill anymore. It was architecture.
 

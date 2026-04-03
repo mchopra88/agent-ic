@@ -23,7 +23,7 @@ There are two categories of overnight work: the **scheduled automation** (predic
 SCHEDULED AUTOMATION (runs every night, no AI judgment):
 
   00:00  Inventory pipeline refresh
-         → ILS API pulls (Zillow, Apartments.com feeds)
+         → ILS API pulls (listing service feeds)
          → Automated voice calls to buildings
          → Transaction history cross-reference
          → Update availability, pricing, concessions
@@ -201,7 +201,7 @@ Top 5 CRITICAL bugs found:
 
 3. Payment link never created: Ken Agent
    insurance quotes had [LINK] placeholder
-   where the actual Assurant payment URL
+   where the actual carrier payment URL
    should be. Every lead who said "yes"
    to insurance got a broken link.
 
@@ -209,7 +209,7 @@ Top 5 CRITICAL bugs found:
    for the landlord rep pipeline silently failed.
    Not erroring — silently succeeding with no action.
 
-5. Assurant quote API never called: Ken Agent
+5. Carrier quote API never called: Ken Agent
    was asking renters for their address but never
    actually submitting it to the quoting engine.
    Every insurance conversation was a dead end.
@@ -233,7 +233,7 @@ The YGL (landlord rep) cosplay sessions in February ran 300 scenarios across 5 w
 YGL Cosplay Simulation — 5 Waves, 300 Scenarios:
 
 Wave 1-2: First Contact + Engagement (~60 scenarios each)
-  → "Hi, I saw a listing on Zillow for 123 Main St"
+  → "Hi, I saw a listing online for 123 Main St"
   → "I have a voucher and need a 2br by March 1"
   → "Do you have anything in my budget under $1,200?"
   → Pass rate: ~80%

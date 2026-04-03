@@ -12,7 +12,7 @@ $ tmux list-sessions
 
 agent-v4:     3 windows  — Apartment Locator
 ygl-service:  2 windows  — Landlord Rep (Blue Lake)
-ken-agent:    2 windows  — Insurance Agent (Assurant)
+ken-agent:    2 windows  — Insurance Agent
 ci-pipeline:  1 window   — CI/CD, testing, deploys
 data-pipe:    2 windows  — Inventory pipeline
 financial:    1 window   — Revenue, P&L, payments

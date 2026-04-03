@@ -85,7 +85,7 @@ This is how the machine works.
 
 [SECTION 2: THE LEAD ENTERS — 0:20 to 1:30]
 
-A renter in Dallas clicks a listing on Zillow.
+A renter in Dallas clicks a listing on a listing site.
 That click generates a lead — a name,
 a phone number, a city.
 Within seconds, it arrives in our system.
