@@ -96,9 +96,9 @@ Karpathy himself admitted his manual coding skills are ["atrophying"](https://ww
 
 [Garry Tan](https://www.sitepoint.com/gstack-garry-tan-claude-code/) — Y Combinator president — open-sourced gstack, a Claude Code workflow that creates role-based personas through custom slash commands. Instead of one generic AI assistant, you get a structured development team: a product strategist, an architect, a deployer, each with its own constraints and priorities.
 
-These are smart people building smart systems. But here's what I notice when I look at autoResearch and gstack: they're clean-room architectures. Academic. Well-organized. Sensible.
+These are smart people building smart systems. autoResearch and gstack are clean-room architectures — well-organized, designed from first principles, the kind of thing you build when you have the luxury of starting fresh.
 
-Mine is covered in scars.
+Mine wasn't designed. It accumulated. Every rule is a scar from something that went wrong in production.
 
 ## The Rules Get Harder as You Scroll Down
 
@@ -273,9 +273,9 @@ The first version was 12 lines. "Use Python 3.11. Don't drop tables. Explain wha
 
 Then the Twilio incident happened and it grew to 40 lines. Then the client_stage_progression disaster and it was 80. Then the credential redaction incident. Then the time the AI created a new database table without asking (I lost a day migrating data back). Then the time it ran `git push --force` to main. Each incident added rules. Each rule is a scar.
 
-By the time Karpathy published autoResearch and Garry Tan published gstack, my CLAUDE.md was already at 207 lines with 7 variants across services. The difference: their versions are clean architectures designed from first principles. Mine is a war diary assembled from production incidents.
+By the time Karpathy published autoResearch and Garry Tan published gstack, my CLAUDE.md was at 207 lines with 7 variants across services. Different origin, different trade-offs. Theirs are clean architectures designed from first principles — better starting points for anyone building fresh. Mine is a war diary assembled from production incidents — better for understanding what goes wrong when AI runs real operations.
 
-Both approaches work. But mine has something theirs doesn't: 119 session memory files that carry context across conversations. When I start a new session, the pre-session hook fires and shows me what the last session did, what's deployed, what's broken. I don't start from zero. I start from the last checkpoint.
+The session memory layer is one difference worth noting: 119 files that carry context across conversations. When I start a new session, the pre-session hook fires and shows me what the last session did, what's deployed, what's broken. I don't start from zero. I start from the last checkpoint.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 # pre-session-read-state.sh (47 lines)

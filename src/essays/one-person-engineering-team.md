@@ -7,7 +7,7 @@ date: 2025-07-20
 
 On a typical day I have eight or nine tmux sessions running on a Mac Studio with 96GB of RAM. Each session is a different workstream: CI/CD pipeline, lead matching, insurance agent, collections, alerts, deployment, YGL deals, red team testing, financial analysis. Claude Code runs in each one.
 
-I push more code in a day than my previous engineering team pushed in a month. That's not hyperbole — I can measure it in commits, in lines changed, in features shipped. But the interesting thing isn't the volume. It's the architecture of the workflow.
+The output velocity of this setup is genuinely surprising — not because I'm faster than engineers, but because the coordination overhead disappears when it's one person plus AI. The interesting thing isn't the volume. It's the architecture of the workflow.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 # My "engineering team" — 8 tmux sessions on one machine

@@ -6,7 +6,7 @@ order: 24
 date: 2026-02-15
 ---
 
-Between 2017 and 2026, I tried every version of the human model. US agents. An in-house offshore team I built myself in Bangalore. Expansion across multiple markets. BPOs. At every stage, individual humans could be extraordinary — some of my best agents generated ten to fifteen times their cost in revenue. The problem was never the individuals. The problem was the model.
+Between 2017 and 2026, I tried every version of the human model. US agents. In-house offshore teams. Expansion across multiple markets. BPOs. At every stage, individual humans could be extraordinary — some of my best agents generated ten to fifteen times their cost in revenue. The problem was never the individuals. The problem was the model.
 
 This is the thing nobody tells you about cost leadership: it's boring. Nobody writes blog posts about it. Nobody puts it in pitch decks. VCs don't get excited about "we made the same thing cheaper." They want "we invented a new category." But cost leadership is the ultimate infinite lever because it puts you in the bottom-left quadrant of every strategic matrix that matters — and once you're there, every strategic option in the game is available to you. Your competitors can only play the quadrants they can afford. You can play all four.
 
@@ -77,11 +77,11 @@ David McRaney's ego depletion research explains why. Willpower is finite. By the
 
 ## Building the Machine (2018-2021)
 
-In 2018, I went to Bangalore. Rented a space at a WeWork. Built an in-house team from scratch — not outsourced, not a BPO, but my own people. Hired them, trained them, sat in the same room. Some of them became extraordinary.
+In 2018, I built an in-house offshore team from scratch — not outsourced, not a BPO, but my own people. Hired them, trained them, sat in the same room. Some of them became extraordinary.
 
 I had agents generating ten to fifteen times their monthly cost in placement revenue. People who understood the nuance of American apartment markets from twelve time zones away because I trained them myself, because they sat next to me while I worked leads and absorbed how it was done. When they were locked in, the unit economics were absurd — sub-thousand-dollar monthly costs producing five figures of revenue.
 
-Over the next two years I expanded from Bangalore to multiple markets. Pakistan, other cities, the US. Trained people in each location. Some were stars. I could teach anyone to close deals — I'd done it a hundred times.
+Over the next two years I expanded to multiple markets. Trained people in each location. Some were stars. I could teach anyone to close deals — I'd done it a hundred times.
 
 The problem was never finding good people or training them. The problem was keeping them consistent, keeping them showing up, keeping them performing at the level I knew they could perform at — not for a month, but for a year. People burn out. People get distracted. People have lives. The best agent I ever had wrote the most heartfelt farewell email I've ever read and then left. Another was generating unreal numbers and then needed to have a conversation about unpaid commissions because the back office couldn't keep up. Another was managing a team, training new hires, closing her own deals, AND running QA — all for a fraction of what a US agent would cost for one of those functions.
 
@@ -222,7 +222,7 @@ Once you have genuine cost leadership — not "we found cheaper labor" but "our 
 
 I chose margin first. 97% contribution margins in a 20% industry gave me the capital to build everything else — the insurance vertical (Ken Agent), the inventory intelligence pipeline, the adversarial testing framework, the overnight autonomous operations. Each improvement made the next one cheaper. The margin compounded into capability, and the capability compounded into more margin.
 
-The key insight: I could have chosen any of the four quadrants. Cost leadership gives you the optionality. Everything else is a downstream decision. My competitors, operating at 20% margins with human agents, can barely afford one quadrant — and they pick the obvious one (price competition), which just erodes their already-thin margins further. They're in a death spiral they haven't recognized yet.
+The key insight: I could have chosen any of the four quadrants. Cost leadership gives you the optionality. Everything else is a downstream decision. Traditional brokerages operating at 20% margins with human agents can afford maybe one quadrant. Most pick price competition, which erodes their already-thin margins further.
 
 ## The Infinite Lever
 
@@ -242,7 +242,7 @@ The Compounding Loop:
   It has not plateaued.
   Each iteration makes the next iteration cheaper.
 
-  My competitors' loop:
+  The traditional model's loop:
     Higher volume → More agents needed
     More agents → More management needed
     More management → Higher overhead
@@ -252,8 +252,8 @@ The Compounding Loop:
     Worse tools → Lower conversion
     Lower conversion → Need more volume...
 
-  Their loop converges to zero.
-  Mine diverges to infinity.
+  The traditional loop has a ceiling.
+  The AI loop hasn't found one yet.
 </pre>
 
 Dalio's framework for paradigm shifts says to look for the assumptions that everyone in an industry shares, because those shared assumptions are usually the ones about to become obsolete. In apartment locating, the shared assumption is: "This is a people business. You need salespeople to sell apartments." Every company in the industry shares this assumption. Every company optimizes within it.
@@ -306,4 +306,4 @@ Alex Rampell at a16z [decomposed a real estate transaction](/essays/the-decompos
 
 The fact that paranoia produced the same outcome as strategy — that nine years of survival decisions compounded into genuine cost leadership — is either luck or proof that cost discipline and survival instinct converge to the same place. I don't know which. I just know the margins are 97% and I'm still checking the bank account every morning.
 
-The [operating leverage essay](/essays/operating-leverage/) covers what happens next: you take this platform and give it back to humans, but different humans — specialists in Pakistan and the US who handle the 20% the AI can't, while the platform handles everything else. The cost collapse made it possible. The operating leverage makes it matter.
+The [operating leverage essay](/essays/operating-leverage/) covers what happens next: you take this platform and give it back to humans, but different humans — specialists who handle the 20% the AI can't, while the platform handles everything else. The cost collapse made it possible. The operating leverage makes it matter.

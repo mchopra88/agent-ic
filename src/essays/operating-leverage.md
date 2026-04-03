@@ -34,7 +34,7 @@ I have three agents operating on the platform right now. Their real economics, a
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 Agent Unit Economics (2024-2026):
 
-  Agent A (woman, Pakistan):
+  Agent A (woman, offshore):
     Monthly cost:     $556
     Avg monthly rev:  $5,800
     Best months:      $8,000+
@@ -42,7 +42,7 @@ Agent Unit Economics (2024-2026):
     Deals (2024):     40+
     Revenue/cost:     10.4x
 
-  Agent B (man, Pakistan — Agent A's brother):
+  Agent B (man, offshore — Agent A's brother):
     Monthly cost:     $375
     Avg monthly rev:  $2,156
     Best month:       $6,300
@@ -65,9 +65,9 @@ Agent Unit Economics (2024-2026):
     Revenue/cost:     3-4x
 </pre>
 
-Agent A makes more revenue per dollar of cost than most SaaS companies. She's never heard of SaaS. She calls leads, builds rapport, books tours, closes deals. The platform does everything else — qualifies the lead before she ever sees it, matches it to inventory she's never had to search, writes the follow-up sequences she doesn't have to remember, tracks the compliance she doesn't have to think about.
+Agent A's revenue-to-cost ratio is extraordinary — not because she's cheap, but because the platform handles qualification, matching, follow-up, and compliance before she ever picks up the phone. She calls leads, builds rapport, books tours, closes deals. The platform does everything else — qualifies the lead before she ever sees it, matches it to inventory she's never had to search, writes the follow-up sequences she doesn't have to remember, tracks the compliance she doesn't have to think about.
 
-Two siblings in Pakistan generating more placement revenue per dollar than a US brokerage with 15 agents and a foosball table.
+Two siblings generating consistent placement revenue because the platform handles everything except the human parts.
 
 <svg viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
   <style>
@@ -87,7 +87,7 @@ Two siblings in Pakistan generating more placement revenue per dollar than a US 
   <text x="110" y="168" class="ol-sm" style="fill:#e8e4de;">revenue</text>
   <text x="110" y="257" class="ol-sm" style="fill:#e8e4de;">$556</text>
   <text x="110" y="285" class="ol-label">Agent A</text>
-  <text x="110" y="300" class="ol-sm">Pakistan</text>
+  <text x="110" y="300" class="ol-sm">Offshore</text>
 
   <!-- Agent B -->
   <rect x="240" y="149" width="100" height="114" fill="#88cc88" opacity="0.6" rx="2"/>
@@ -97,7 +97,7 @@ Two siblings in Pakistan generating more placement revenue per dollar than a US 
   <text x="290" y="218" class="ol-sm" style="fill:#e8e4de;">revenue</text>
   <text x="290" y="257" class="ol-sm" style="fill:#e8e4de;">$375</text>
   <text x="290" y="285" class="ol-label">Agent B</text>
-  <text x="290" y="300" class="ol-sm">Pakistan</text>
+  <text x="290" y="300" class="ol-sm">Offshore</text>
 
   <!-- Agent C -->
   <rect x="420" y="157" width="100" height="106" fill="#88cc88" opacity="0.6" rx="2"/>
@@ -185,4 +185,4 @@ The cost profile gets even better because you're buying 20% of a human's time, n
 
 Operating leverage isn't about replacing humans. It's about making the humans you have absurdly productive by giving them a platform that handles everything except the parts that require being human.
 
-The agents in Pakistan aren't cheap labor. I tried cheap labor — BPO agents at $800 per month who produced zero net revenue because they couldn't close. They had no platform, no matching engine, no conversation management. Just a phone and a spreadsheet. These agents produce 10x returns because the platform does the work that the BPO agents couldn't do: qualification, matching, inventory, follow-up, compliance. The humans just do the parts that require being human. The difference between "cheap labor" and "specialists enabled by technology" is the difference between zero net revenue and 90% margins. The technology is the variable that changed. Not the geography.
+The agents in Offshore aren't cheap labor. I tried cheap labor — BPO agents at $800 per month who produced zero net revenue because they couldn't close. They had no platform, no matching engine, no conversation management. Just a phone and a spreadsheet. These agents produce 10x returns because the platform does the work that the BPO agents couldn't do: qualification, matching, inventory, follow-up, compliance. The humans just do the parts that require being human. The difference between "cheap labor" and "specialists enabled by technology" is the difference between zero net revenue and 90% margins. The technology is the variable that changed. Not the geography.

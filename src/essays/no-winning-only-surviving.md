@@ -47,7 +47,7 @@ There wasn't a plan. There was paranoia.
 
 I cut costs because I was terrified of running out of money. Not because I had a framework for cost leadership. Not because I'd read Porter's Five Forces and decided to compete on cost. Because I looked at the bank account every morning and calculated how many months of runway we had, and the number was always smaller than I wanted it to be.
 
-The BPO experiment in 2024 — hiring offshore agents through providers in Pakistan — wasn't a strategic test of labor arbitrage. It was desperation. I needed more capacity and the in-house approach had run its course. The fact that it failed and taught me that cheap labor isn't cost leadership — that was an accident. The lesson was real. The strategy was retroactive.
+The BPO experiment in 2024 — hiring offshore agents through outsourced providers — wasn't a strategic test of labor arbitrage. It was desperation. I needed more capacity and the in-house approach had run its course. The fact that it failed and taught me that cheap labor isn't cost leadership — that was an accident. The lesson was real. The strategy was retroactive.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 Decisions that look strategic in retrospect

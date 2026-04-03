@@ -11,7 +11,7 @@ That was the breaking point, but not the beginning. The beginning was years of t
 
 ## The Cycle
 
-The first team was a development shop in India. They built the initial CRM integration. It worked, mostly, until it didn't — and when it didn't, I couldn't debug it because the code had no comments, no tests, and a deployment process that consisted of someone SSHing into a server and running scripts. When I asked for documentation, they sent a PDF with screenshots of the UI. Not the code. The UI.
+The first team was an outsourced development shop. They built the initial CRM integration. It worked, mostly, until it didn't — and when it didn't, I couldn't debug it because the code had no comments, no tests, and a deployment process that consisted of someone SSHing into a server and running scripts. When I asked for documentation, they sent a PDF with screenshots of the UI. Not the code. The UI.
 
 The second team was US-based freelancers. Better communication, higher rates, same fundamental problem: they built what I described, not what I needed. The gap between description and need is where software projects die. I'd say "build a lead routing system" and get a system that routed leads based on a round-robin algorithm. I needed one that routed based on geographic proximity, building commission rates, and agent availability. Same words, completely different system. By the time I realized the gap, we'd burned two months.
 

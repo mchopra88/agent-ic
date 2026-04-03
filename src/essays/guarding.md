@@ -81,7 +81,7 @@ Personnel experiments — what actually happened:
     Screaming matches about accountability.
     Terminated.
 
-  BPO agents, Pakistan (2024):
+  BPO agents (2024):
     Hired through multiple providers.
     Tour-to-close rate: 25% (vs 53% US).
     Revenue generated: zero net.
