@@ -103,6 +103,6 @@ Most organizations never get past the retro loop. They review incidents, write p
 
 I run all three loops simultaneously, on every business unit, continuously. The retro loop is the hooks and the CLAUDE.md rules. The macro loop is the data pipeline that aggregates across all conversations. The meta loop is the skill called `/audit-claude-md` that reviews the entire governance system for bloat, outdated rules, and content that should be moved or deleted.
 
-The meta loop is also this essay. Writing about the system forces me to examine it from outside. Is the three-loop framework actually making things better? Or is it just adding complexity that makes me feel productive?
+The meta loop is also this essay. Writing about the system forces me to examine it from outside. Is the three-loop framework actually making things better? Or is it just adding complexity that makes me feel productive? Is writing about feedback loops just a feedback loop about feedback loops? (Yes. This is the kind of recursive navel-gazing that makes my friends' eyes glaze over at dinner. "So you have a system that audits the system that audits the system?" Yes. And the outer system found that the middle system was generating 40% noise. That's why it exists.)
 
-The honest answer: I don't always know. But the loops keep running whether I'm confident or not.
+The honest answer: I don't always know. But the loops keep running whether I'm confident or not. The retro loop feeds the rules. The macro loop feeds the architecture. The meta loop feeds the [cosplay testing system](/essays/cosplay-as-quality-assurance/) that runs 300 fake clients through production code overnight. Everything loops into everything else. It's turtles all the way down, except the turtles have exit codes.

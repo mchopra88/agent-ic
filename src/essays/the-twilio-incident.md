@@ -98,7 +98,7 @@ It had. The evidence was in a million message logs.
 
 Twilio offered $5,119 back — 75% of the charges. I took it immediately.
 
-That was the moment I stopped trusting humans with production systems. Not because humans are bad at engineering. But because the cost of a mistake in a system processing 30,000 conversations a day is catastrophic, and humans make mistakes at a rate that's incompatible with that scale.
+That was the moment I stopped trusting humans with production systems. Not because humans are bad at engineering. But because the cost of a mistake in a system processing 30,000 conversations a month is catastrophic, and humans make mistakes at a rate that's incompatible with that scale.
 
 The engineers who manually intervened to kill the queue — the same team I was about to fire — did solid crisis response. They canceled the 33,900 queued messages via the Twilio API. I was grateful. I told them so. They went right back to doing nothing the next week. They fixed the acute crisis but never built anything to prevent the next one. That pattern — heroic firefighting, zero prevention — is why the team no longer exists.
 

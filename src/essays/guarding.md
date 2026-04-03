@@ -73,14 +73,6 @@ Personnel experiments — what actually happened:
     Revenue trended down. Cost stayed flat.
     Net by month 8: barely positive.
 
-  BPO agents, Pakistan (2018-2019):
-    Hired through 2 providers.
-    Tour-to-close rate: 25% (vs 53% US).
-    Revenue generated: zero net.
-    Cost per closed deal HIGHER than US agents
-    despite 60% lower labor cost.
-    Cut both providers.
-
   Engineering team (2019-2024):
     2 contractors, $4,350/month.
     Last 3 months: zero net revenue generated.
@@ -88,6 +80,14 @@ Personnel experiments — what actually happened:
     PR reviewer experiment: reviews caught nothing.
     Screaming matches about accountability.
     Terminated.
+
+  BPO agents, Pakistan (2024):
+    Hired through multiple providers.
+    Tour-to-close rate: 25% (vs 53% US).
+    Revenue generated: zero net.
+    Cost per closed deal HIGHER than US agents
+    despite 60% lower labor cost.
+    Cut every provider I tried.
 
   Virtual assistants (various):
     Multiple attempts with VAs for admin, follow-up.

@@ -103,4 +103,8 @@ Each intent classification was forged by the red team. The `FOXEN_MENTION` inten
 
 The red team doesn't make the agent perfect. It makes the agent's failure modes visible. And visible failure modes can be fixed. Invisible ones kill deals.
 
+The red team is the most productive employee I've never paid. It works nights, never complains, and its entire job description is "tell me I'm wrong." If I'd had this at Groupon, several very expensive meetings could have been emails.
+
+For the full methodology — including what happens when you run 300 fake clients through production code overnight and wake up to a 78-bug report — see the [cosplay testing essay](/essays/cosplay-as-quality-assurance/).
+
 This is Abraham Wald's insight applied to AI: don't study the successful conversations. Study the ones where the agent failed. The bullet holes show where the armor already works. The missing data shows where it's needed.

@@ -9,7 +9,7 @@ I run adversarial simulations against my own production systems. I call them "co
 
 When I explain this to other founders, the reaction splits cleanly in two. Technical people immediately get it — "that's just fuzzing with natural language." Non-technical people look at me like I've lost my mind. "You have the AI pretend to be customers? And then it yells at itself?"
 
-Yes. And it finds bugs that nothing else catches.
+Yes. And it finds bugs that nothing else catches. (The [adversarial testing essay](/essays/adversarial-agents/) covers the red team agents that run continuously. This essay is about what happens when you scale that approach to 300 scenarios overnight.)
 
 ## What Cosplay Actually Is
 

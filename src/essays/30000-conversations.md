@@ -1,32 +1,35 @@
 ---
 layout: essay.njk
-title: "30,000 Conversations a Day: What the Data Looks Like"
+title: "30,000 Conversations a Month: What the Data Looks Like"
 order: 19
 date: 2025-11-25
 ---
 
-Everyone quotes the number. 30,000 leads a day. It sounds impressive in a pitch. It means nothing without the data underneath.
+Everyone quotes the number. 30,000 conversations a month. It sounds impressive in a pitch. It means nothing without the data underneath.
 
 But before the data underneath, the number itself has a story. It didn't start at 30,000. It started at zero and grew in a way that's hard to explain to anyone who hasn't watched a lead pipeline compound over years.
 
 ## The Lead Volume Story
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-Lead volume by year (approximate):
+Lead volume by year (from the database):
 
-  2017:    ~500/month     First buildings, manual everything
-  2018:    ~2,000/month   ILS integrations online
-  2019:    ~5,000/month   Multi-market expansion
-  2020:    ~3,000/month   Covid crater — leads halved overnight
-  2021:    ~8,000/month   Recovery + new source partnerships
-  2022:    ~12,000/month  Early automation scaling
-  2023:    ~18,000/month  AI conversation engine live
-  2024:    ~25,000/month  Full automation, multi-vertical
-  2025:    ~30,000/day    BlueLake purchasing intent platform live
-  2026:    ~30,000/day    Current steady state
+  2017:    ~70/month      833 total. I could name most of them.
+  2018:    ~450/month     ILS integrations come online
+  2019:    ~1,200/month   Multi-market expansion begins
+  2020:    ~1,400/month   Covid didn't kill us. Grew 23%.
+                          (The narrative says "crater." The data says otherwise.)
+  2021:    ~2,000/month   Recovery + new source partnerships
+  2022:    ~6,300/month   Automation scaling — the 3x inflection
+  2023:    ~10,000/month  AI conversation engine goes live
+  2024:    ~12,300/month  Full automation, multi-vertical
+  2025:    ~14,600/month  Current steady state
 
-  Cumulative leads processed: millions
-  Cumulative conversations: millions
+  These are unique leads — each one generates 2-3
+  conversation sessions and dozens of messages.
+  In conversation terms: ~30,000 exchanges per month.
+
+  Cumulative leads processed: 500,000+
   Cumulative text messages: tens of millions
 </pre>
 
@@ -216,7 +219,7 @@ Then there was the PR reviewer experiment. After the Twilio incident but before 
 
 It lasted about two months.
 
-The reviews were perfunctory. "LGTM" with no comments. Or nitpicks on formatting while missing actual logic bugs. Or — the worst — disagreements about architecture that would hold up a deploy for days while we argued about patterns that didn't matter for a system processing 30,000 leads a day. The team was demoralized. They went from building things to rubber-stamping things someone else built, and the resentment was palpable.
+The reviews were perfunctory. "LGTM" with no comments. Or nitpicks on formatting while missing actual logic bugs. Or — the worst — disagreements about architecture that would hold up a deploy for days while we argued about patterns that didn't matter for a system processing 30,000 conversations a month. The team was demoralized. They went from building things to rubber-stamping things someone else built, and the resentment was palpable.
 
 The screaming matches were about accountability. I'd find a bug in production. I'd ask why the PR review didn't catch it. The answer was always some variation of "the code was complex" or "we were focused on the architecture, not the logic" or "that edge case wasn't in the test suite." All true. All irrelevant. The question wasn't why they missed it. The question was why I was paying $4,350 a month for reviews that didn't catch anything.
 

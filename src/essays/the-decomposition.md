@@ -132,7 +132,9 @@ Four principles govern the whole thing:
 
 4. **Operating leverage:** Cost per task approaches zero as volume scales. The 30,000th conversation costs the same fractions of a cent as the first.
 
-This is the same architecture that makes Amazon work at planetary scale. The difference is that Amazon needed millions of dollars and thousands of engineers to build each service. I needed a new prompt and a new API integration.
+This is the same architecture that makes Amazon work at planetary scale. The difference is that Amazon needed millions of dollars and thousands of engineers to build each service. I needed a new prompt and a new API integration. Jeff Bezos had the six-page memo. I have a CLAUDE.md file and a Twilio bill.
+
+The [operating leverage essay](/essays/operating-leverage/) shows what this decomposition enables in practice: agents in Pakistan generating 10x returns because they only handle the 20% of tasks that require being human, while the platform handles the other 80%.
 
 Ben Thompson would call this the aggregation theory applied to a sales organization. The platform aggregates demand (leads), owns the customer relationship (the conversation), and modularizes supply (buildings, insurance, services). The advantage accrues to the aggregator — the one who owns the conversation interface and can plug in any supplier behind it.
 

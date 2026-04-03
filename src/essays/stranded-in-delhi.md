@@ -7,7 +7,7 @@ date: 2025-10-20
 
 The Indian airspace closed while I was in Delhi. No flights out. Full stop.
 
-I was running a 30,000-lead-per-day operation from a hotel room on the other side of the planet. The systems were still processing. The agents were still conversing. The overnight machine was still running. But I needed to deploy a fix — a matching logic update that was causing leads in Dallas to miss buildings that should have been in their result set.
+I was running a 30,000-conversation-per-month operation from a hotel room on the other side of the planet. The systems were still processing. The agents were still conversing. The overnight machine was still running. But I needed to deploy a fix — a matching logic update that was causing leads in Dallas to miss buildings that should have been in their result set.
 
 The routing to get out went Delhi → Vienna → Chicago. Seventeen hours of travel. Somewhere over the Arabian Sea, the Dallas team reported the matching bug was costing us deals. I couldn't wait.
 
