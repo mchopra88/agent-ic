@@ -3,6 +3,7 @@ layout: essay.njk
 title: "The Best $4,000 I Ever Spent"
 order: 33
 date: 2026-04-01
+tier: commercial
 ---
 
 The Micro Center on Elston Avenue in Chicago does not feel like the site of a strategic inflection point. It feels like a Best Buy that gave up on aesthetics. Fluorescent lights, beige carpet, a teenager at the door who does not care about your business problems.

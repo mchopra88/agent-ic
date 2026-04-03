@@ -3,6 +3,7 @@ layout: essay.njk
 title: "My CLAUDE.md"
 order: 29
 date: 2026-03-15
+tier: commercial
 ---
 
 Every AI coding tool reads a file called CLAUDE.md at the root of your project. It's supposed to be a brief style guide — maybe some formatting preferences, a note about which test framework to use. Mine is 207 lines long. I have seven of them across different services, totaling 1,334 lines. They are the institutional knowledge of my entire engineering organization.

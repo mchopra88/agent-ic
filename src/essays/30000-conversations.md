@@ -3,6 +3,7 @@ layout: essay.njk
 title: "30,000 Conversations a Month: What the Data Looks Like"
 order: 19
 date: 2025-11-25
+tier: commercial
 ---
 
 Everyone quotes the number. 30,000 conversations a month. It sounds impressive in a pitch. It means nothing without the data underneath.

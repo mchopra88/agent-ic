@@ -29,7 +29,11 @@ jobs:
         run: node .github/scripts/fetch-journal.mjs
         continue-on-error: true
 
-      - run: npx @11ty/eleventy
+      - name: Build site with encryption
+        env:
+          ENCRYPT_COMMERCIAL: ${{ secrets.ENCRYPT_COMMERCIAL }}
+          ENCRYPT_PERSONAL: ${{ secrets.ENCRYPT_PERSONAL }}
+        run: npx @11ty/eleventy
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

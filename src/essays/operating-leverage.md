@@ -3,6 +3,7 @@ layout: essay.njk
 title: "Operating Leverage: What Happens When the Platform Does the Work"
 order: 25
 date: 2026-04-02
+tier: commercial
 ---
 
 The [cost collapse essay](/essays/the-cost-collapse/) covers how we got here — the seven-year journey from human agents to BPO to SMS automation to full AI, and what 97% margins look like in a 20% industry. This essay is about what "here" looks like.

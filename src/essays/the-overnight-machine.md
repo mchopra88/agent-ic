@@ -3,6 +3,7 @@ layout: essay.njk
 title: "The Overnight Machine: Building Systems That Run While You Sleep"
 order: 6
 date: 2025-08-28
+tier: commercial
 ---
 
 Every morning I wake up to a dashboard, not a backlog.

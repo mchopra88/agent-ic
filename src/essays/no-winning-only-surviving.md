@@ -3,6 +3,7 @@ layout: essay.njk
 title: "There Is No Winning, Only Surviving"
 order: 26
 date: 2026-03-01
+tier: personal
 ---
 
 The Bureau of Labor Statistics publishes survival rates for US businesses. The numbers are brutal, and nobody reads them because the people who start businesses are, by definition, people who believe the numbers don't apply to them.

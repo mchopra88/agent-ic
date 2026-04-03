@@ -3,6 +3,7 @@ layout: essay.njk
 title: "The Scar Tissue: How Every Fuckup Became a Hook"
 order: 31
 date: 2026-04-01
+tier: commercial
 ---
 
 People ask me about my development setup and I show them my `.claude/settings.json`. Eight hooks firing on every session start, every tool use, every session end. They ask where it came from. The answer is: every one of these hooks is scar tissue. Every line traces back to a specific disaster. I didn't design this system. I survived my way into it.

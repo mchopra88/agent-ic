@@ -4,6 +4,7 @@ title: "The Twilio Incident"
 status: "Draft"
 order: 25
 date: 2026-02-28
+tier: commercial
 ---
 
 A code bug triggered a runaway SMS process through Twilio. In five days:

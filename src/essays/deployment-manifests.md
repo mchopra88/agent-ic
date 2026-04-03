@@ -3,6 +3,7 @@ layout: essay.njk
 title: "Deployment Manifests"
 order: 34
 date: 2026-04-01
+tier: commercial
 ---
 
 Pop quiz: what's running in production right now?

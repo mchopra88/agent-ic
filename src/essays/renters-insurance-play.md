@@ -4,6 +4,7 @@ title: "The Renters Insurance Play: Vertical Expansion at Zero Marginal Cost"
 status: "Draft"
 order: 21
 date: 2026-01-10
+tier: commercial
 ---
 
 HomeEasy processes 30,000 renter leads per month. Every renter needs renters insurance. Most apartment complexes require it before move-in. Every renter is a customer we already have, in a conversation we're already having, at the exact moment when insurance is most relevant — right before they sign a lease.

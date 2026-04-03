@@ -3,57 +3,76 @@ layout: base.njk
 navActive: essays
 ---
 
-<article{% if private %} class="private-gate" id="private-gate"{% endif %}>
+{% if tier == "commercial" or tier == "personal" %}
+{# --- ENCRYPTED ESSAY --- #}
+<article>
   <h1>{{ title }}</h1>
   {% if date %}<div style="color:#666; font-size:0.9rem; margin-bottom:2rem; font-style:italic;">{{ date | isoDate }}</div>{% endif %}
-  {% if private %}
-  <div class="gate-overlay" id="gate-overlay">
-    <h3>Private Essay</h3>
-    <p>This is personal writing shared with friends and collaborators. Enter the access code to read.</p>
-    <input type="password" id="gate-password" placeholder="Access code" autocomplete="off" />
-    <button onclick="checkGatePassword()">Unlock</button>
-    <div class="gate-error" id="gate-error">Wrong code. Ask Mukund.</div>
+
+  <script type="application/json" id="essay-encrypted">
+  {{ content | encryptEssay(tier) | safe }}
+  </script>
+
+  <div class="encrypted-gate" id="encrypted-gate">
+    <div class="gate-box">
+      <h3>{% if tier == "personal" %}Personal Essay{% else %}Commercial Essay{% endif %}</h3>
+      <p>{% if tier == "personal" %}This is personal writing shared with close friends. Enter the access code to read.{% else %}This essay contains commercially sensitive content. Enter the access code to read.{% endif %}</p>
+      <input type="password" id="gate-password" placeholder="Access code" autocomplete="off" />
+      <button id="gate-unlock">Unlock</button>
+      <div class="gate-error" id="gate-error">Wrong password. Ask Mukund.</div>
+    </div>
   </div>
-  {% endif %}
+
+  <div class="essay-body" id="essay-body"></div>
+</article>
+
+<script src="/js/decrypt.js"></script>
+<script>
+(function() {
+  var TIER = '{{ tier }}';
+  var LS_KEY = 'essay-access-' + TIER;
+  var gate = document.getElementById('encrypted-gate');
+  var body = document.getElementById('essay-body');
+  var input = document.getElementById('gate-password');
+  var error = document.getElementById('gate-error');
+  var data = JSON.parse(document.getElementById('essay-encrypted').textContent);
+
+  async function unlock(pw) {
+    try {
+      var html = await window.decryptContent(pw, data);
+      body.innerHTML = html;
+      gate.style.display = 'none';
+      localStorage.setItem(LS_KEY, pw);
+    } catch (e) {
+      error.style.display = 'block';
+    }
+  }
+
+  document.getElementById('gate-unlock').addEventListener('click', function() {
+    error.style.display = 'none';
+    unlock(input.value);
+  });
+
+  input.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      error.style.display = 'none';
+      unlock(input.value);
+    }
+  });
+
+  // Auto-unlock from localStorage
+  var saved = localStorage.getItem(LS_KEY);
+  if (saved) unlock(saved);
+})();
+</script>
+
+{% else %}
+{# --- PUBLIC ESSAY --- #}
+<article>
+  <h1>{{ title }}</h1>
+  {% if date %}<div style="color:#666; font-size:0.9rem; margin-bottom:2rem; font-style:italic;">{{ date | isoDate }}</div>{% endif %}
   <div class="essay-body">
     {{ content | safe }}
   </div>
 </article>
-
-{% if private %}
-<script>
-// Simple hash — not cryptographic security, just casual gating
-function simpleHash(str) {
-  var hash = 0;
-  for (var i = 0; i < str.length; i++) {
-    var char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return hash;
-}
-
-// The hash of the password (not the password itself)
-var GATE_HASH = -859821843;
-
-function checkGatePassword() {
-  var input = document.getElementById('gate-password').value;
-  if (simpleHash(input) === GATE_HASH) {
-    localStorage.setItem('agent-ic-access', 'granted');
-    document.getElementById('private-gate').classList.add('unlocked');
-  } else {
-    document.getElementById('gate-error').style.display = 'block';
-  }
-}
-
-// Check on load
-if (localStorage.getItem('agent-ic-access') === 'granted') {
-  document.getElementById('private-gate').classList.add('unlocked');
-}
-
-// Enter key support
-document.getElementById('gate-password').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') checkGatePassword();
-});
-</script>
 {% endif %}

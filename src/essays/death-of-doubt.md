@@ -4,8 +4,7 @@ title: "The Death of Doubt"
 status: "Draft"
 order: 20
 date: 2026-02-01
-private: true
-permalink: false
+tier: personal
 ---
 
 For most of the last few years, I believed I was unemployable.

@@ -3,6 +3,7 @@ layout: essay.njk
 title: "git log --oneline | wc -l"
 order: 12
 date: 2025-10-05
+tier: commercial
 ---
 
 531 commits across two main repositories in the last 15 months. One person. No engineering team.

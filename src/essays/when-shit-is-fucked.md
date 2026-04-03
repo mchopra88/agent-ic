@@ -3,8 +3,7 @@ layout: essay.njk
 title: "When No One Will Do It, I Get the Call"
 order: 16
 date: 2025-11-01
-private: true
-permalink: false
+tier: commercial
 ---
 
 Al Goldstein was born in Uzbekistan, immigrated to Skokie at age 8, and graduated from U of I with a finance degree in 2002. He built CashNetUSA — an online payday lender — and sold it for $265 million in 2006 at age 28. Then he took that capital and started buying apartments on Chicago's South and West Sides during the depths of the Great Recession. Some buildings went for less than $20,000 a unit. By 2022, Pangea Properties controlled approximately 7,500 units across 423 buildings — nearly all of them affordable at 60% of Area Median Income. The same demographic that CashNetUSA served now lived in his buildings.

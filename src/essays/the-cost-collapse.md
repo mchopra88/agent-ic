@@ -4,6 +4,7 @@ title: "The Cost Collapse: How Cost Leadership Became the Infinite Lever"
 status: "Draft"
 order: 24
 date: 2026-02-15
+tier: commercial
 ---
 
 Between 2017 and 2026, I tried every version of the human model. US agents. In-house offshore teams. Expansion across multiple markets. BPOs. At every stage, individual humans could be extraordinary — some of my best agents generated ten to fifteen times their cost in revenue. The problem was never the individuals. The problem was the model.

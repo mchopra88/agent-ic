@@ -3,6 +3,7 @@ layout: essay.njk
 title: "Why I Replaced My Engineering Team With AI"
 order: 8
 date: 2025-09-15
+tier: commercial
 ---
 
 I didn't fire my engineering team because AI is trendy. I fired them because they sent a million text messages in a single deployment, killed the database, racked up five figures in Twilio charges, and then claimed the deploy hadn't landed in production.

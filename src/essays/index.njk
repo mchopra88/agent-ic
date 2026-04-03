@@ -11,8 +11,8 @@ navActive: essays
 <ul class="essay-list">
 {%- for essay in collections.essays %}
   <li>
-    <a href="{{ essay.url }}">{% if essay.data.private %}<span style="color:#666; font-size:0.8em;" title="Private — access code required">&#x1f512;</span> {% endif %}{{ essay.data.title }}</a>
-    <div class="essay-meta">{% if essay.data.date %}{{ essay.data.date | isoDate }}{% endif %}{% if essay.data.private %} &middot; <span style="color:#555;">Private</span>{% endif %}</div>
+    <a href="{{ essay.url }}">{% if essay.data.tier == "commercial" %}<span style="color:#666; font-size:0.8em;" title="Encrypted — access code required">&#x1f512;</span> {% endif %}{{ essay.data.title }}</a>
+    <div class="essay-meta">{% if essay.data.date %}{{ essay.data.date | isoDate }}{% endif %}{% if essay.data.tier == "commercial" %} &middot; <span style="color:#555;">Encrypted</span>{% endif %}</div>
   </li>
 {%- endfor %}
 </ul>
