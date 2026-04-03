@@ -1,61 +1,69 @@
 /**
- * Fetch commits from ALL production repos via GitHub API.
- * Dynamically discovers repos in the homeeasy-repo org.
- * Runs in GitHub Actions with JOURNAL_PAT secret for cross-org access.
- * Generates src/_data/journal-cache.json for the 11ty build.
+ * Fetch Mukund's commits from production repos referenced in agent-ic.co.
+ * Curated list — only repos the site actually covers.
+ * Filters to Mukund's commits only.
+ * NEVER overwrites the cache with less data than it already has.
  */
 
-import { writeFileSync } from 'fs';
+import { writeFileSync, readFileSync, existsSync } from 'fs';
 
 const TOKEN = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
 const SINCE = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CACHE_PATH = 'src/_data/journal-cache.json';
 
-// Extra repos outside the homeeasy-repo org
-const EXTRA_REPOS = [
-  { owner: 'JamboreeInsurance', repo: 'ken-agent' },
-  { owner: 'mchopra88', repo: 'agent-ic' },
-];
+// Mukund's known commit identities
+const MUKUND_EMAILS = new Set([
+  'mukundchopra@macbook-air.local',
+  '35270311+mchopra88@users.noreply.github.com',
+  'mukund@homeeasy.com',
+]);
+const MUKUND_NAMES = new Set([
+  'mukund chopra',
+  'mchopra88',
+]);
 
-// Map repo names to business unit labels
-function labelRepo(repoName) {
-  const n = repoName.toLowerCase();
-
-  // Apartment Locator
-  if (n.includes('agent-v4') || n.includes('amy-agent-v4')) return 'Locator Agent (V4)';
-  if (n.includes('agent-v3') || n.includes('amy-agent-v3') || n === 'agentic-service-v3') return 'Locator Agent (V3)';
-  if (n === 'agentic-client-service') return 'Locator + Landlord Rep';
-  if (n.includes('inventory') || n.includes('sparkapt') || n.includes('zillow') || n.includes('apartments.com')) return 'Inventory & Scraping';
-  if (n.includes('cooperating_voice') || n.includes('voice_agent') || n.includes('cartesia')) return 'Voice Agent';
-  if (n.includes('cooperating_email') || n.includes('email_agent')) return 'Email Agent';
-
-  // Landlord Rep
-  if (n === 'landlord-rep') return 'Landlord Rep';
-  if (n.includes('bluelake')) return 'Blue Lake';
-  if (n.includes('sla-agentic') || n.includes('sla_agentic')) return 'SLA Agentic';
-
-  // Ken Insurance
-  if (n === 'ken-agent' || n.includes('jamboree')) return 'Ken Insurance';
-
-  // CRM & Dashboard
-  if (n.includes('crm') || n === 'homeeasy-crm') return 'CRM';
-  if (n.includes('streamlit') || n.includes('dashboard') || n.includes('reporting')) return 'Dashboards';
-  if (n.includes('leads-monitoring') || n.includes('sales_progression')) return 'Dashboards';
-
-  // Infrastructure
-  if (n.includes('twilio') || n.includes('texting')) return 'Twilio / SMS';
-  if (n.includes('cognee')) return 'Cognee Service';
-  if (n.includes('database') || n.includes('readonly-api')) return 'Database';
-  if (n.includes('cloud_functions')) return 'Cloud Functions';
-
-  // Site
-  if (n === 'homeeasy-site-v2' || n === 'homeeasy_blog_website') return 'HomeEasy Site';
-  if (n === 'agent-ic') return 'agent-ic';
-  if (n === 'homeeasy-hq') return 'homeeasy-hq';
-
-  // Everything else
-  return repoName;
+function isMukund(authorName, authorEmail, fullMessage) {
+  if (MUKUND_NAMES.has((authorName || '').toLowerCase())) return true;
+  if (MUKUND_EMAILS.has((authorEmail || '').toLowerCase())) return true;
+  // Claude Code commits are Mukund's commits
+  if ((fullMessage || '').toLowerCase().includes('co-authored-by: claude')) return true;
+  return false;
 }
+
+// Only repos referenced in the site's essays and asset pages.
+// Organized by business unit.
+const REPOS = [
+  // ─── Apartment Locator ───
+  { owner: 'homeeasy-repo', repo: 'Amy-Agent-V4', label: 'Locator Agent' },
+  { owner: 'homeeasy-repo', repo: 'Amy-Agent-V3', label: 'Locator Agent (V3)' },
+  { owner: 'homeeasy-repo', repo: 'inventory-search-service', label: 'Inventory Search' },
+  { owner: 'homeeasy-repo', repo: 'sparkapt-graphql-scrapper', label: 'Inventory Scraping' },
+  { owner: 'homeeasy-repo', repo: 'Inventory_trigger', label: 'Inventory Trigger' },
+  { owner: 'homeeasy-repo', repo: 'cooperating_voice_agent', label: 'Voice Agent (Bland AI)' },
+  { owner: 'homeeasy-repo', repo: 'cooperating_email_agent', label: 'Email Agent' },
+
+  // ─── Landlord Rep ───
+  { owner: 'homeeasy-repo', repo: 'landlord-rep', label: 'Landlord Rep' },
+  { owner: 'homeeasy-repo', repo: 'bluelake-website', label: 'Blue Lake' },
+  { owner: 'homeeasy-repo', repo: 'SLA-AGENTIC-CODEBASE', label: 'SLA Agentic' },
+
+  // ─── Ken Insurance ───
+  { owner: 'JamboreeInsurance', repo: 'ken-agent', label: 'Ken Insurance' },
+
+  // ─── Infrastructure ───
+  { owner: 'homeeasy-repo', repo: 'homeeasy-hq', label: 'homeeasy-hq' },
+  { owner: 'homeeasy-repo', repo: 'Homeeasy-Twilio-Service-Backend', label: 'Twilio / SMS' },
+  { owner: 'homeeasy-repo', repo: 'Twilio-Service-Homeeasy', label: 'Twilio (legacy)' },
+  { owner: 'homeeasy-repo', repo: 'Homeeasy_TextingService_v1', label: 'Texting Service' },
+  { owner: 'homeeasy-repo', repo: 'homeeasy-crm', label: 'CRM' },
+  { owner: 'homeeasy-repo', repo: 'Homeeasy-Database-Readonly-API', label: 'Database API' },
+  { owner: 'homeeasy-repo', repo: 'Amy-Agentic-Cognee-Service', label: 'Cognee Service' },
+  { owner: 'homeeasy-repo', repo: 'Agentic-Service-v3', label: 'Agent Service v3' },
+
+  // ─── This site ───
+  { owner: 'mchopra88', repo: 'agent-ic', label: 'agent-ic' },
+];
 
 async function apiFetch(url) {
   const headers = {
@@ -64,26 +72,6 @@ async function apiFetch(url) {
   };
   if (TOKEN) headers['Authorization'] = `Bearer ${TOKEN}`;
   return fetch(url, { headers });
-}
-
-async function discoverOrgRepos(org) {
-  const repos = [];
-  let page = 1;
-  while (true) {
-    const resp = await apiFetch(`https://api.github.com/orgs/${org}/repos?per_page=100&page=${page}&sort=pushed&direction=desc`);
-    if (!resp.ok) {
-      console.error(`Failed to list ${org} repos: HTTP ${resp.status}`);
-      break;
-    }
-    const data = await resp.json();
-    if (!Array.isArray(data) || data.length === 0) break;
-    for (const r of data) {
-      repos.push({ owner: org, repo: r.name, pushedAt: r.pushed_at });
-    }
-    if (data.length < 100) break;
-    page++;
-  }
-  return repos;
 }
 
 async function fetchCommits(owner, repo) {
@@ -96,7 +84,7 @@ async function fetchCommits(owner, repo) {
     try {
       const resp = await apiFetch(url);
       if (!resp.ok) {
-        if (resp.status !== 409) { // 409 = empty repo
+        if (resp.status !== 409) {
           console.error(`  ${owner}/${repo}: HTTP ${resp.status}`);
         }
         break;
@@ -105,12 +93,15 @@ async function fetchCommits(owner, repo) {
       if (!Array.isArray(data) || data.length === 0) break;
 
       for (const c of data) {
-        // Skip merge commits
-        if (c.parents && c.parents.length > 1) continue;
+        if (c.parents && c.parents.length > 1) continue; // skip merges
+        const authorName = c.commit?.author?.name || '';
+        const authorEmail = c.commit?.author?.email || '';
+        const fullMessage = c.commit?.message || '';
+        if (!isMukund(authorName, authorEmail, fullMessage)) continue; // Mukund only
         commits.push({
           hash: c.sha.substring(0, 7),
           date: c.commit.author.date.substring(0, 10),
-          message: c.commit.message.split('\n')[0],
+          message: fullMessage.split('\n')[0],
         });
       }
 
@@ -127,10 +118,10 @@ async function fetchCommits(owner, repo) {
 
 function categorize(msg) {
   const m = msg.toLowerCase();
-  if (m.includes('deploy') || m.includes('release') || m.includes('rollout')) return 'deploy';
-  if (m.includes('incident') || m.includes('revert') || m.includes('emergency') || m.includes('rollback')) return 'incident';
-  if (m.includes('fix') || m.includes('hotfix') || m.includes('bug') || m.includes('patch')) return 'fix';
-  if (m.includes('feat') || m.includes('add') || m.includes('implement') || m.includes('new') || m.includes('introduce')) return 'feature';
+  if (m.includes('deploy') || m.includes('release') || m.includes('rollout') || m.includes('ship')) return 'deploy';
+  if (m.includes('incident') || m.includes('revert') || m.includes('emergency') || m.includes('rollback') || m.includes('hotfix')) return 'incident';
+  if (m.startsWith('fix') || m.includes(': fix') || m.includes('bug') || m.includes('patch') || m.includes('repair')) return 'fix';
+  if (m.includes('feat') || m.includes('add') || m.includes('implement') || m.includes('introduce') || m.includes('new ') || m.includes('create')) return 'feature';
   return 'build';
 }
 
@@ -146,44 +137,41 @@ function generateSummary(commits, repos) {
   const incidents = commits.filter(c => c.tag === 'incident').length;
 
   const parts = [];
+  if (incidents > 0) parts.push(`${incidents} incident${incidents > 1 ? 's' : ''}`);
+  if (deploys > 0) parts.push(`${deploys} deploy${deploys > 1 ? 's' : ''}`);
   if (features > 0) parts.push(`${features} feature${features > 1 ? 's' : ''}`);
   if (fixes > 0) parts.push(`${fixes} fix${fixes > 1 ? 'es' : ''}`);
-  if (deploys > 0) parts.push(`${deploys} deploy${deploys > 1 ? 's' : ''}`);
-  if (incidents > 0) parts.push(`${incidents} incident${incidents > 1 ? 's' : ''}`);
 
   const summary = parts.length > 0 ? parts.join(', ') : `${commits.length} commits`;
   const repoStr = repos.length > 1 ? ` across ${repos.length} repos` : ` in ${repos[0]}`;
   return summary + repoStr;
 }
 
+function loadExistingCache() {
+  try {
+    if (existsSync(CACHE_PATH)) {
+      const data = JSON.parse(readFileSync(CACHE_PATH, 'utf-8'));
+      const totalCommits = data.reduce((sum, d) => sum + d.commitCount, 0);
+      return { entries: data, totalCommits };
+    }
+  } catch (e) {}
+  return { entries: [], totalCommits: 0 };
+}
+
 async function main() {
   if (!TOKEN) {
-    console.error('WARNING: No GH_TOKEN or GITHUB_TOKEN set. API rate limit will be 60 req/hr.');
+    console.error('ERROR: No GH_TOKEN set. Cannot access private repos. Keeping existing cache.');
+    process.exit(0); // exit cleanly, do NOT overwrite cache
   }
 
-  // Step 1: Discover ALL repos in the org
-  console.log('Discovering repos in homeeasy-repo org...');
-  const orgRepos = await discoverOrgRepos('homeeasy-repo');
-  console.log(`Found ${orgRepos.length} repos in homeeasy-repo`);
+  console.log(`Fetching Mukund's commits since ${SINCE.substring(0, 10)} from ${REPOS.length} repos...\n`);
 
-  // Add extra repos (other orgs/users)
-  const allRepos = [...orgRepos, ...EXTRA_REPOS.map(r => ({ ...r, pushedAt: null }))];
-
-  // Skip repos not pushed in the last 365 days
-  const cutoff = SINCE.substring(0, 10);
-  const activeRepos = allRepos.filter(r => {
-    if (!r.pushedAt) return true; // always include extras
-    return r.pushedAt.substring(0, 10) >= cutoff;
-  });
-  console.log(`${activeRepos.length} repos active in the last 365 days\n`);
-
-  // Step 2: Fetch commits from each
   const allCommits = [];
-  for (const { owner, repo } of activeRepos) {
-    const label = labelRepo(repo);
+
+  for (const { owner, repo, label } of REPOS) {
     const commits = await fetchCommits(owner, repo);
     if (commits.length > 0) {
-      console.log(`  ${label} (${repo}): ${commits.length} commits`);
+      console.log(`  ${label}: ${commits.length} commits`);
     }
     for (const c of commits) {
       allCommits.push({
@@ -196,7 +184,7 @@ async function main() {
     }
   }
 
-  // Step 3: Deduplicate by hash
+  // Deduplicate by hash
   const seen = new Set();
   const unique = [];
   for (const c of allCommits) {
@@ -206,7 +194,7 @@ async function main() {
     }
   }
 
-  // Step 4: Group by date
+  // Group by date
   const byDate = {};
   for (const c of unique) {
     if (!byDate[c.dateStr]) byDate[c.dateStr] = [];
@@ -231,11 +219,17 @@ async function main() {
   }
 
   const totalReposWithCommits = new Set(unique.map(c => c.repo)).size;
-  console.log(`\nTotal: ${unique.length} unique commits across ${dates.length} days from ${totalReposWithCommits} repos`);
+  console.log(`\nTotal: ${unique.length} commits across ${dates.length} days from ${totalReposWithCommits} repos`);
 
-  const outPath = 'src/_data/journal-cache.json';
-  writeFileSync(outPath, JSON.stringify(entries, null, 2));
-  console.log(`Written to ${outPath}`);
+  // SAFETY: never overwrite cache with less data (unless forced)
+  const existing = loadExistingCache();
+  if (unique.length < existing.totalCommits * 0.5 && !process.env.FORCE_CACHE_UPDATE) {
+    console.error(`\nSAFETY: Fetched ${unique.length} commits but cache has ${existing.totalCommits}. Set FORCE_CACHE_UPDATE=1 to override.`);
+    process.exit(0);
+  }
+
+  writeFileSync(CACHE_PATH, JSON.stringify(entries, null, 2));
+  console.log(`Written to ${CACHE_PATH}`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

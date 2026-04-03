@@ -11,6 +11,13 @@
         "repo": "HomeEasy Site"
       },
       {
+        "hash": "ae92d5b",
+        "dateStr": "2026-04-02",
+        "message": "v18: dynamic journal — 90 repos, 3,911 commits, plain English",
+        "tag": "build",
+        "repo": "agent-ic"
+      },
+      {
         "hash": "47bd308",
         "dateStr": "2026-04-02",
         "message": "v17: split assets into 9 deep dives by business unit",
@@ -172,7 +179,7 @@
         "repo": "agent-ic"
       }
     ],
-    "commitCount": 24,
+    "commitCount": 25,
     "tags": [
       "fix",
       "build",

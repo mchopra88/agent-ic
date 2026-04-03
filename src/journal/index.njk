@@ -7,36 +7,24 @@ navActive: journal
 <h1>Build Journal</h1>
 
 <p style="color:#999; font-size:1.05rem; margin-bottom:1rem;">What I built, what broke, and what I fixed. Every day, across every business unit.</p>
-<p style="color:#666; font-size:0.85rem; margin-bottom:3rem;">Pulled dynamically from {{ journal[0].commits[0].repo if journal.length > 0 else "all" }} production repositories via the GitHub API. Every entry is a real commit. Incidents and deploys surface first. This is the actual daily texture of operating production AI systems that process 30,000 leads a day.</p>
+<p style="color:#666; font-size:0.85rem; margin-bottom:2rem;">Pulled live from the GitHub API. Only my commits. Only production repos referenced on this site — Locator Agent, Landlord Rep, Ken Insurance, CRM, infrastructure, and more.</p>
 
-<!-- ═══════ STATS BAR ═══════ -->
-{%- set totalCommits = 0 %}
-{%- set totalIncidents = 0 %}
-{%- set totalDeploys = 0 %}
-{%- set allRepos = [] %}
-{%- for day in journal %}
-  {%- set totalCommits = totalCommits + day.commitCount %}
-  {%- for commit in day.commits %}
-    {%- if commit.tag == 'incident' %}{%- set totalIncidents = totalIncidents + 1 %}{%- endif %}
-    {%- if commit.tag == 'deploy' %}{%- set totalDeploys = totalDeploys + 1 %}{%- endif %}
-  {%- endfor %}
-{%- endfor %}
-
-<div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem; margin-bottom:3rem; text-align:center;">
+<!-- ═══════ STATS BAR (filled by JS) ═══════ -->
+<div id="stats-bar" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem; margin-bottom:3rem; text-align:center;">
   <div style="padding:1rem; background:#0a0a0a; border:1px solid #222;">
-    <div style="font-size:1.4rem; font-weight:600; color:#e8e4de;">{{ journal | length }}</div>
+    <div id="stat-days" style="font-size:1.4rem; font-weight:600; color:#e8e4de;">&mdash;</div>
     <div style="font-size:0.75rem; color:#666; text-transform:uppercase; letter-spacing:0.1em;">days</div>
   </div>
   <div style="padding:1rem; background:#0a0a0a; border:1px solid #222;">
-    <div style="font-size:1.4rem; font-weight:600; color:#e8e4de;">{{ totalCommits }}</div>
+    <div id="stat-commits" style="font-size:1.4rem; font-weight:600; color:#e8e4de;">&mdash;</div>
     <div style="font-size:0.75rem; color:#666; text-transform:uppercase; letter-spacing:0.1em;">commits</div>
   </div>
   <div style="padding:1rem; background:#0a0a0a; border:1px solid #222;">
-    <div style="font-size:1.4rem; font-weight:600; color:#88cc88;">{{ totalDeploys }}</div>
+    <div id="stat-deploys" style="font-size:1.4rem; font-weight:600; color:#88cc88;">&mdash;</div>
     <div style="font-size:0.75rem; color:#666; text-transform:uppercase; letter-spacing:0.1em;">deploys</div>
   </div>
   <div style="padding:1rem; background:#0a0a0a; border:1px solid #222;">
-    <div style="font-size:1.4rem; font-weight:600; color:#cc8888;">{{ totalIncidents }}</div>
+    <div id="stat-incidents" style="font-size:1.4rem; font-weight:600; color:#cc8888;">&mdash;</div>
     <div style="font-size:0.75rem; color:#666; text-transform:uppercase; letter-spacing:0.1em;">incidents</div>
   </div>
 </div>
@@ -44,135 +32,154 @@ navActive: journal
 <!-- ═══════ LEGEND ═══════ -->
 <div style="margin-bottom:3rem; padding:1rem 1.5rem; background:#0a0a0a; border:1px solid #222; font-size:0.85rem;">
   <span class="journal-tag incident">incident</span> Something broke in production.
-  <span class="journal-tag deploy" style="margin-left:1rem;">deploy</span> Code shipped to GKE or GitHub Pages.
+  <span class="journal-tag deploy" style="margin-left:1rem;">deploy</span> Shipped to GKE or Pages.
   <span class="journal-tag fix" style="margin-left:1rem;">fix</span> Bug fixed.
-  <span class="journal-tag feature" style="margin-left:1rem;">feature</span> New capability added.
-  <span class="journal-tag" style="margin-left:1rem;">build</span> Infrastructure, refactoring, tests.
+  <span class="journal-tag feature" style="margin-left:1rem;">feature</span> New capability.
+  <span class="journal-tag" style="margin-left:1rem;">build</span> Infrastructure, refactoring.
 </div>
 
-<!-- ═══════ DAILY ENTRIES ═══════ -->
-{%- for day in journal %}
-<div class="journal-entry" style="margin-bottom:3rem; padding-bottom:2rem; border-bottom:1px solid #1a1a1a;">
+<!-- ═══════ JOURNAL ENTRIES (rendered by JS) ═══════ -->
+<div id="journal-loading" style="color:#666; font-style:italic; padding:2rem 0;">Loading build journal...</div>
+<div id="journal-entries"></div>
 
-  <!-- Date header with day summary -->
-  <div style="margin-bottom:1rem;">
-    <div class="journal-date" style="font-size:1.1rem; font-weight:600; color:#e8e4de;">{{ day.displayDate }}</div>
-    <div style="font-size:0.85rem; color:#888; margin-top:0.3rem;">{{ day.summary }}</div>
-  </div>
-
-  <!-- Tags -->
-  <div style="margin-bottom:1rem;">
-    {%- for tag in day.tags %}
-    <span class="journal-tag {{ tag }}">{{ tag }}</span>
-    {%- endfor %}
-  </div>
-
-  <!-- INCIDENTS FIRST — red, prominent -->
-  {%- set incidents = [] %}
-  {%- for commit in day.commits %}
-    {%- if commit.tag == 'incident' %}
-      {%- set incidents = (incidents.push(commit), incidents) %}
-    {%- endif %}
-  {%- endfor %}
-  {%- if incidents.length > 0 %}
-  <div style="margin-bottom:1.5rem; padding:1rem; border-left:3px solid #cc4444; background:#1a0808;">
-    <div style="font-size:0.75rem; color:#cc8888; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">Incidents</div>
-    {%- for commit in day.commits %}
-    {%- if commit.tag == 'incident' %}
-    <div style="margin-bottom:0.5rem;">
-      <span style="color:#cc8888; font-weight:600;">{{ commit.message }}</span>
-      <span style="color:#555; font-size:0.75rem;"> &mdash; {{ commit.repo }}</span>
-    </div>
-    {%- endif %}
-    {%- endfor %}
-  </div>
-  {%- endif %}
-
-  <!-- DEPLOYS — green, prominent -->
-  {%- set hasDeploys = false %}
-  {%- for commit in day.commits %}
-    {%- if commit.tag == 'deploy' %}{%- set hasDeploys = true %}{%- endif %}
-  {%- endfor %}
-  {%- if hasDeploys %}
-  <div style="margin-bottom:1.5rem; padding:1rem; border-left:3px solid #448844; background:#081a08;">
-    <div style="font-size:0.75rem; color:#88cc88; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">Deployed</div>
-    {%- for commit in day.commits %}
-    {%- if commit.tag == 'deploy' %}
-    <div style="margin-bottom:0.5rem;">
-      <span style="color:#88cc88;">{{ commit.message }}</span>
-      <span style="color:#555; font-size:0.75rem;"> &mdash; {{ commit.repo }}</span>
-    </div>
-    {%- endif %}
-    {%- endfor %}
-  </div>
-  {%- endif %}
-
-  <!-- FIXES -->
-  {%- set hasFixes = false %}
-  {%- for commit in day.commits %}
-    {%- if commit.tag == 'fix' %}{%- set hasFixes = true %}{%- endif %}
-  {%- endfor %}
-  {%- if hasFixes %}
-  <div style="margin-bottom:1.2rem;">
-    <div style="font-size:0.75rem; color:#ccaa44; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">Fixed</div>
-    {%- for commit in day.commits %}
-    {%- if commit.tag == 'fix' %}
-    <div style="margin-bottom:0.4rem; font-size:0.95rem;">
-      <span style="color:#b0aca6;">{{ commit.message }}</span>
-      <span style="color:#444; font-size:0.75rem;"> &mdash; {{ commit.repo }}</span>
-    </div>
-    {%- endif %}
-    {%- endfor %}
-  </div>
-  {%- endif %}
-
-  <!-- FEATURES -->
-  {%- set hasFeatures = false %}
-  {%- for commit in day.commits %}
-    {%- if commit.tag == 'feature' %}{%- set hasFeatures = true %}{%- endif %}
-  {%- endfor %}
-  {%- if hasFeatures %}
-  <div style="margin-bottom:1.2rem;">
-    <div style="font-size:0.75rem; color:#6688cc; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">Built</div>
-    {%- for commit in day.commits %}
-    {%- if commit.tag == 'feature' %}
-    <div style="margin-bottom:0.4rem; font-size:0.95rem;">
-      <span style="color:#b0aca6;">{{ commit.message }}</span>
-      <span style="color:#444; font-size:0.75rem;"> &mdash; {{ commit.repo }}</span>
-    </div>
-    {%- endif %}
-    {%- endfor %}
-  </div>
-  {%- endif %}
-
-  <!-- BUILD (collapsed if many) -->
-  {%- set buildCommits = [] %}
-  {%- for commit in day.commits %}
-    {%- if commit.tag == 'build' %}
-      {%- set buildCommits = (buildCommits.push(commit), buildCommits) %}
-    {%- endif %}
-  {%- endfor %}
-  {%- if buildCommits.length > 0 %}
-  <details style="margin-top:0.5rem;" {% if day.commitCount <= 5 %}open{% endif %}>
-    <summary style="font-size:0.75rem; color:#555; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; margin-bottom:0.5rem;">{{ buildCommits.length }} other commit{{ 's' if buildCommits.length != 1 }}</summary>
-    {%- for commit in day.commits %}
-    {%- if commit.tag == 'build' %}
-    <div style="margin-bottom:0.3rem; font-size:0.85rem;">
-      <span style="color:#888;">{{ commit.message }}</span>
-      <span style="color:#333; font-size:0.7rem;"> &mdash; {{ commit.repo }}</span>
-    </div>
-    {%- endif %}
-    {%- endfor %}
-  </details>
-  {%- endif %}
-
+<div style="margin-top:4rem; padding-top:2rem; border-top:1px solid #222; color:#555; font-size:0.8rem;">
+  <p>Fetched live from <code style="font-family:monospace; font-size:0.75rem;">raw.githubusercontent.com</code>. Source data refreshes daily at midnight CT and on every push to main. Only Mukund's commits. Only repos referenced on this site.</p>
 </div>
-{%- endfor %}
 
-{%- if journal.length == 0 %}
-<p style="color:#666; font-style:italic;">No journal entries yet. Commits will appear here after the next build.</p>
-{%- endif %}
+<script>
+(function() {
+  const CACHE_URL = 'https://raw.githubusercontent.com/mchopra88/agent-ic/main/src/_data/journal-cache.json';
 
-<div style="margin-top:4rem; padding-top:2rem; border-top:1px solid #222; color:#666; font-size:0.85rem;">
-  <p>Pulled from the GitHub API at build time. Every repo in the <code style="font-family:monospace; font-size:0.8rem;">homeeasy-repo</code> org is discovered dynamically &mdash; new repos appear automatically. Refreshes on every push to main and daily at midnight CT.</p>
-</div>
+  async function loadJournal() {
+    const loading = document.getElementById('journal-loading');
+    const container = document.getElementById('journal-entries');
+
+    try {
+      const resp = await fetch(CACHE_URL + '?t=' + Date.now()); // cache-bust
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
+
+      // Stats
+      let totalCommits = 0, totalDeploys = 0, totalIncidents = 0;
+      for (const day of data) {
+        totalCommits += day.commitCount;
+        for (const c of day.commits) {
+          if (c.tag === 'deploy') totalDeploys++;
+          if (c.tag === 'incident') totalIncidents++;
+        }
+      }
+      document.getElementById('stat-days').textContent = data.length;
+      document.getElementById('stat-commits').textContent = totalCommits;
+      document.getElementById('stat-deploys').textContent = totalDeploys;
+      document.getElementById('stat-incidents').textContent = totalIncidents;
+
+      // Render entries
+      let html = '';
+      for (const day of data) {
+        html += '<div style="margin-bottom:3rem; padding-bottom:2rem; border-bottom:1px solid #1a1a1a;">';
+
+        // Date header
+        html += '<div style="margin-bottom:1rem;">';
+        html += '<div style="font-size:1.1rem; font-weight:600; color:#e8e4de;">' + esc(day.displayDate) + '</div>';
+        html += '<div style="font-size:0.85rem; color:#888; margin-top:0.3rem;">' + esc(day.summary) + '</div>';
+        html += '</div>';
+
+        // Tags
+        html += '<div style="margin-bottom:1rem;">';
+        for (const tag of day.tags) {
+          html += '<span class="journal-tag ' + esc(tag) + '">' + esc(tag) + '</span> ';
+        }
+        html += '</div>';
+
+        // INCIDENTS — red, prominent
+        const incidents = day.commits.filter(c => c.tag === 'incident');
+        if (incidents.length > 0) {
+          html += '<div style="margin-bottom:1.5rem; padding:1rem; border-left:3px solid #cc4444; background:#1a0808;">';
+          html += '<div style="font-size:0.75rem; color:#cc8888; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">Incidents</div>';
+          for (const c of incidents) {
+            html += '<div style="margin-bottom:0.5rem;">';
+            html += '<span style="color:#cc8888; font-weight:600;">' + esc(c.message) + '</span>';
+            html += '<span style="color:#555; font-size:0.75rem;"> — ' + esc(c.repo) + '</span>';
+            html += '</div>';
+          }
+          html += '</div>';
+        }
+
+        // DEPLOYS — green
+        const deploys = day.commits.filter(c => c.tag === 'deploy');
+        if (deploys.length > 0) {
+          html += '<div style="margin-bottom:1.5rem; padding:1rem; border-left:3px solid #448844; background:#081a08;">';
+          html += '<div style="font-size:0.75rem; color:#88cc88; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">Deployed</div>';
+          for (const c of deploys) {
+            html += '<div style="margin-bottom:0.5rem;">';
+            html += '<span style="color:#88cc88;">' + esc(c.message) + '</span>';
+            html += '<span style="color:#555; font-size:0.75rem;"> — ' + esc(c.repo) + '</span>';
+            html += '</div>';
+          }
+          html += '</div>';
+        }
+
+        // FIXES — yellow
+        const fixes = day.commits.filter(c => c.tag === 'fix');
+        if (fixes.length > 0) {
+          html += '<div style="margin-bottom:1.2rem;">';
+          html += '<div style="font-size:0.75rem; color:#ccaa44; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">Fixed</div>';
+          for (const c of fixes) {
+            html += '<div style="margin-bottom:0.4rem; font-size:0.95rem;">';
+            html += '<span style="color:#b0aca6;">' + esc(c.message) + '</span>';
+            html += '<span style="color:#444; font-size:0.75rem;"> — ' + esc(c.repo) + '</span>';
+            html += '</div>';
+          }
+          html += '</div>';
+        }
+
+        // FEATURES — blue
+        const features = day.commits.filter(c => c.tag === 'feature');
+        if (features.length > 0) {
+          html += '<div style="margin-bottom:1.2rem;">';
+          html += '<div style="font-size:0.75rem; color:#6688cc; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">Built</div>';
+          for (const c of features) {
+            html += '<div style="margin-bottom:0.4rem; font-size:0.95rem;">';
+            html += '<span style="color:#b0aca6;">' + esc(c.message) + '</span>';
+            html += '<span style="color:#444; font-size:0.75rem;"> — ' + esc(c.repo) + '</span>';
+            html += '</div>';
+          }
+          html += '</div>';
+        }
+
+        // BUILD — collapsible
+        const builds = day.commits.filter(c => c.tag === 'build');
+        if (builds.length > 0) {
+          const open = day.commitCount <= 5 ? ' open' : '';
+          html += '<details style="margin-top:0.5rem;"' + open + '>';
+          html += '<summary style="font-size:0.75rem; color:#555; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; margin-bottom:0.5rem;">' + builds.length + ' other commit' + (builds.length !== 1 ? 's' : '') + '</summary>';
+          for (const c of builds) {
+            html += '<div style="margin-bottom:0.3rem; font-size:0.85rem;">';
+            html += '<span style="color:#888;">' + esc(c.message) + '</span>';
+            html += '<span style="color:#333; font-size:0.7rem;"> — ' + esc(c.repo) + '</span>';
+            html += '</div>';
+          }
+          html += '</details>';
+        }
+
+        html += '</div>';
+      }
+
+      loading.style.display = 'none';
+      container.innerHTML = html;
+
+    } catch (e) {
+      loading.textContent = 'Failed to load journal: ' + e.message;
+      loading.style.color = '#cc8888';
+    }
+  }
+
+  function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  loadJournal();
+})();
+</script>
