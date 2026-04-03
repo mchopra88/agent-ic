@@ -43,12 +43,12 @@ navActive: journal
 <div id="journal-entries"></div>
 
 <div style="margin-top:4rem; padding-top:2rem; border-top:1px solid #222; color:#555; font-size:0.8rem;">
-  <p>Fetched live from <code style="font-family:monospace; font-size:0.75rem;">raw.githubusercontent.com</code>. Source data refreshes daily at midnight CT and on every push to main. Only Mukund's commits. Only repos referenced on this site.</p>
+  <p>Refreshes on every deploy and daily at midnight CT. Only Mukund's commits. Only repos referenced on this site.</p>
 </div>
 
 <script>
 (function() {
-  const CACHE_URL = 'https://raw.githubusercontent.com/mchopra88/agent-ic/main/src/_data/journal-cache.json';
+  const CACHE_URL = '/journal/data.json';
 
   async function loadJournal() {
     const loading = document.getElementById('journal-loading');
