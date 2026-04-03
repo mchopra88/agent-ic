@@ -9,6 +9,63 @@ Every AI coding tool reads a file called CLAUDE.md at the root of your project. 
 
 My engineering organization is me.
 
+The file is 1,334 lines across seven services. My last lease agreement was 12 pages. The AI's operating manual is longer than the contract that governs my apartment.
+
+<svg viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
+  <style>
+    .cm-title { fill:#888; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; text-anchor:middle; }
+    .cm-label { fill:#e8e4de; font-family:'Cormorant Garamond',Georgia,serif; font-size:11px; text-anchor:middle; }
+    .cm-sm { fill:#666; font-family:'Cormorant Garamond',Georgia,serif; font-size:9px; text-anchor:middle; }
+    .cm-box { fill:#0a0a0a; stroke:#333; stroke-width:1; rx:4; }
+    .cm-core { fill:#0a1a0a; stroke:#336633; stroke-width:1.5; rx:4; }
+    .cm-conn { stroke:#333; stroke-width:0.8; fill:none; }
+  </style>
+  <text x="340" y="18" class="cm-title">The CLAUDE.md Constitution</text>
+  <!-- Core box -->
+  <rect x="245" y="35" width="190" height="60" class="cm-core"/>
+  <text x="340" y="60" class="cm-label" style="fill:#88cc88; font-weight:600;">CLAUDE.md</text>
+  <text x="340" y="78" class="cm-sm" style="fill:#88cc88;">207 lines × 7 services = 1,334 lines</text>
+  <!-- Branch: Hooks -->
+  <line x1="280" y1="95" x2="120" y2="140" class="cm-conn"/>
+  <rect x="30" y="130" width="180" height="70" class="cm-box"/>
+  <text x="120" y="152" class="cm-label">8 Hooks</text>
+  <text x="120" y="168" class="cm-sm">4 event types</text>
+  <text x="120" y="182" class="cm-sm">Deterministic — cannot be skipped</text>
+  <text x="120" y="195" class="cm-sm" style="fill:#cc6666;">Exit 2 = wall, not warning</text>
+  <!-- Branch: Skills -->
+  <line x1="340" y1="95" x2="340" y2="140" class="cm-conn"/>
+  <rect x="250" y="140" width="180" height="70" class="cm-box"/>
+  <text x="340" y="162" class="cm-label">12 Skills</text>
+  <text x="340" y="178" class="cm-sm">Loaded contextually</text>
+  <text x="340" y="192" class="cm-sm">sniff-lead, verify-commission,</text>
+  <text x="340" y="204" class="cm-sm">payment-search, building-intel...</text>
+  <!-- Branch: Commands -->
+  <line x1="400" y1="95" x2="560" y2="140" class="cm-conn"/>
+  <rect x="470" y="130" width="180" height="70" class="cm-box"/>
+  <text x="560" y="152" class="cm-label">7 Commands</text>
+  <text x="560" y="168" class="cm-sm">/session-start, /verify-deploy,</text>
+  <text x="560" y="182" class="cm-sm">/fresh-eyes, /session-save...</text>
+  <text x="560" y="195" class="cm-sm" style="fill:#8888cc;">Human-invocable workflows</text>
+  <!-- Branch: Session Memory -->
+  <line x1="120" y1="200" x2="120" y2="240" class="cm-conn"/>
+  <rect x="30" y="240" width="180" height="50" class="cm-box"/>
+  <text x="120" y="262" class="cm-label">119 Session Files</text>
+  <text x="120" y="278" class="cm-sm">Auto-saved. Cannot be forgotten.</text>
+  <!-- Branch: Laws -->
+  <line x1="340" y1="210" x2="340" y2="240" class="cm-conn"/>
+  <rect x="250" y="240" width="180" height="50" class="cm-box"/>
+  <text x="340" y="262" class="cm-label">Cross-Cutting Laws</text>
+  <text x="340" y="278" class="cm-sm">Bottom-up, anti-determinism, brand</text>
+  <!-- Branch: Ralph -->
+  <line x1="560" y1="200" x2="560" y2="240" class="cm-conn"/>
+  <rect x="470" y="240" width="180" height="50" class="cm-box" style="stroke:#cc6666;"/>
+  <text x="560" y="262" class="cm-label">Ralph Wiggum Loop</text>
+  <text x="560" y="278" class="cm-sm" style="fill:#cc6666;">"I'm in danger" — 178 lines of bash</text>
+  <!-- Punchline -->
+  <text x="340" y="325" class="cm-sm" style="fill:#888; font-style:italic;">Most CLAUDE.md files say "use tabs not spaces."</text>
+  <text x="340" y="342" class="cm-sm" style="fill:#888; font-style:italic;">Mine says "do NOT lie even if you think you should exit."</text>
+</svg>
+
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 ## Who I Am
 Mukund Chopra. I run HomeEasy - apartment locator

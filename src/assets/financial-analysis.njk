@@ -187,70 +187,86 @@ BANK: Chase (single business checking account)
 
 </div>
 
-<!-- ═══════ THE REAL NUMBERS ═══════ -->
+<!-- ═══════ COLLECTIONS AUTOMATION ═══════ -->
 
 <div class="asset">
-<h2>The Real Numbers</h2>
+<h2>Collections Automation</h2>
 
-<p>These numbers are not guesses. They come from reading every bank statement across every entity for seven years.</p>
+<p>When a building owes commission, the balance method tells you the money is missing. But finding a missing payment is not the same as collecting it. Collections is a pipeline problem — decompose the debt into discrete tickets, age them, escalate automatically, and adjust recovery expectations as time passes.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-WHAT THE BALANCE METHOD REVEALS (Jan 2019 — Dec 2025)
+COLLECTIONS TICKET LIFECYCLE
 ─────────────────────────────────────────────────────
 
-Starting Balance (Jan 2019):      [extracted from first statement]
-Ending Balance (Dec 2025):        [extracted from last statement]
+STAGE 1: TICKET CREATION
+  Balance method detects: deposits < expected commission
+  → Ticket created with: building ID, placement date,
+    expected amount, invoice reference
+  → 4-tier verification runs automatically
+  → If Tier 1 (bank records) confirms no deposit → active ticket
 
-Total Deposits (7 years):         [sum of all statement deposits]
-Total Withdrawals (7 years):      [sum of all statement withdrawals]
-Net Cash Movement:                [deposits minus withdrawals]
+STAGE 2: AGING CLOCK
+  Each ticket carries an aging counter from creation date.
+  The aging clock drives every downstream decision:
 
-Current Credit Card Debt:         [outstanding across credit accounts]
-Pending Accounts Receivable:      [invoices outstanding, aging-adjusted]
-Owner Injections (personal →
-  business, lifetime):            [personal-to-business transfers]
+  0-30 days:   "Normal" — building may be on standard pay cycle
+               → Automated reminder via email
+               → No escalation
 
-TRUE LIFETIME OPERATING LOSS:     [net cash + debt + injections]
+  30-60 days:  "Overdue" — past any reasonable pay cycle
+               → Second notice + phone follow-up trigger
+               → Expected recovery adjusts downward
 
-The method produces a range, not a point estimate, because
-some transactions on the personal/business hybrid account
-are ambiguous. The story is the same at both ends of the
-range: the business consumed more capital than it generated
-during its infrastructure-building years.
+  60-90 days:  "At risk" — collection probability dropping fast
+               → Escalation: direct contact with building manager
+               → Revenue projection removes 65% of ticket value
+
+  90-180 days: "Critical" — most buildings that pay have paid by now
+               → Final notice sequence
+               → Revenue projection removes 82% of ticket value
+
+  180+ days:   "Write-off candidate" — functionally non-collectible
+               → Ticket moves to write-off review queue
+               → Expected recovery: effectively zero
+
+STAGE 3: RESOLUTION
+  Each ticket resolves to one of four states:
+  → COLLECTED (bank deposit confirmed via Tier 1)
+  → PARTIAL (amount received ≠ amount owed — investigate)
+  → DISPUTED (building contests the placement or amount)
+  → WRITTEN OFF (aged past recovery threshold)
 </pre>
 
-<p>The range exists because some transactions on the personal/business hybrid account are ambiguous. A small transfer between personal and business checking — is that an owner injection or a personal expense that happened to go through the wrong account? Multiply that ambiguity across seven years of hybrid account usage and you get a band of uncertainty. The story is the same at both ends of the range: the business has consumed more capital than it has generated.</p>
+<p>The 4-tier verification from the previous section runs on every active ticket automatically. When a bank deposit appears that matches a ticket's expected amount, the ticket resolves. When a building disputes a placement, the ticket moves to the dispute queue where Tier 4 (contextual evidence — emails, CRM notes) becomes the deciding factor.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-ANNUAL P&L PATTERN (balance method, verified)
-─────────────────────────────────────────────
+ESCALATION TRIGGERS (automated, not behavioral)
+────────────────────────────────────────────────
 
-YEAR     PATTERN
-2019     Loss — high expenses during startup phase
-2020     Loss — revenue dip (pandemic year)
-2021     Slight profit — first inflection point
-2022     Loss — reinvestment in infrastructure
-2023     Profit — revenue growth, cost discipline
-2024     Largest loss — AI infrastructure spend peaked
-                        while revenue lagged
-2025     Profit — cost structure collapsed (AI replaced
-                  human cost centers), revenue recovered
+The system does not rely on a human remembering to follow up.
+Escalation is structural:
 
-THE PATTERN: Multiple years of loss, punctuated by one
-year where AI infrastructure spend peaked. Then a sharp
-inflection where expenses collapsed faster than revenue
-fell. The cost structure had to break before profitability
-could emerge.
+  ticket.age > 30 AND ticket.status != COLLECTED
+    → trigger: automated_reminder_email()
 
-TOP EXPENSE CATEGORIES (7-year):
-  International contractor payments (largest)
-  Payment platform transfers
-  LLM API costs
-  Cloud infrastructure
-  Application hosting
+  ticket.age > 60 AND ticket.status != COLLECTED
+    → trigger: phone_followup_queue.add(ticket)
+    → trigger: adjust_expected_recovery(ticket, 0.35)
+
+  ticket.age > 90 AND ticket.status != COLLECTED
+    → trigger: escalation_contact(ticket.building_manager)
+    → trigger: adjust_expected_recovery(ticket, 0.18)
+
+  ticket.age > 180 AND ticket.status != COLLECTED
+    → trigger: writeoff_review_queue.add(ticket)
+    → trigger: adjust_expected_recovery(ticket, 0.00)
+
+The revenue projection updates in real time as tickets age.
+The number on the balance sheet reflects what you will
+actually collect, not what you are owed.
 </pre>
 
-<p>The worst year was when AI infrastructure investment hit full force — LLM APIs, cloud hosting, and application platform costs were all peaking while the revenue from those systems had not yet materialized. The following year shows the inflection: expenses collapsed as AI replaced human cost centers, while revenue recovered. The cost structure had to collapse before the revenue could catch up. That is what an AI transition looks like from the inside. It looks like bleeding for a year and then suddenly not bleeding.</p>
+<p>The Texas AR write-off section below shows this pipeline in action. When 27% of Texas receivables become non-collectible, that is not a surprise — it is the aging pipeline doing its job, adjusting expectations as tickets cross thresholds. The pipeline does not prevent non-payment. It prevents you from counting non-payment as an asset.</p>
 
 </div>
 
@@ -589,7 +605,7 @@ Estimated missing expenses:           significant
 
 <p>The critical insight: the balance method and the transaction parser are two different systems that answer two different questions. The balance method tells you how much money moved in aggregate. It is 100% accurate because it reads summary numbers that the bank has already calculated. The transaction parser tries to tell you WHERE the money went — individual vendors, individual payments. It is between 0% and 98% accurate depending on the transaction type and statement format.</p>
 
-<p>For P&L analysis, the balance method is all you need. Total deposits minus total withdrawals equals net cash movement. You do not need to know that $847.32 went to Comcast on March 14th. You need to know that March had $23,000 in deposits and $19,000 in withdrawals.</p>
+<p>For aggregate analysis, the balance method is all you need. Total deposits minus total withdrawals equals net cash movement. You do not need to parse every individual vendor payment. You need the three numbers the bank guarantees: opening balance, deposits, withdrawals. The rest is commentary.</p>
 
 <p>For payment investigations — "Did we pay a specific partner?" — you need the transaction parser, and you have to accept that it might miss the payment entirely. That is why Tier 1 of the payment verification sends you to the bank portal directly, not to the parsed data. The parser is a convenience. The portal is the source of truth.</p>
 
@@ -657,7 +673,7 @@ accountant was right" was a regex pattern.
 
 <p>Every piece of this system is scar tissue from something that went wrong.</p>
 
-<p>The lifetime operating loss is not a failure story. It is a capitalization story. Owner injections funded seven years of infrastructure: the agent platform, the AI systems, the building relationships, the inventory database. The question was never "is this business profitable today?" The question was "can the cost structure collapse fast enough for the revenue to catch up?" The inflection year says yes. Expenses dropped by nearly half as AI replaced the cost centers. The humans became API endpoints for the things AI cannot do yet — show up at a building, shake a hand, turn a key.</p>
+<p>The lesson is structural, not behavioral. When you operate solo, discipline cannot be a personality trait — it has to be a system property. The verification runs whether you remember or not. The aging clock ticks whether you check or not. The cross-reference catches discrepancies whether you are looking or not. The system does not trust any single source, including the operator. That is what makes it work.</p>
 
 <p>The financial analysis system watches all of this. Not with dashboards or charts. With years of bank statement PDFs, read one at a time, balanced to the penny, cross-referenced against every other source that has an opinion about where the money went. That is the method. It is slow. It is tedious. It is correct.</p>
 

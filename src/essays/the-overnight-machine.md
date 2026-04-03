@@ -55,6 +55,67 @@ SCHEDULED AUTOMATION (runs every night, no AI judgment):
          → Anomaly detection (flag anything >1.5σ from norm)
 </pre>
 
+<svg viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
+  <style>
+    .tl-label { fill:#e8e4de; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px; text-anchor:middle; }
+    .tl-time { fill:#88cc88; font-family:'Cormorant Garamond',Georgia,serif; font-size:11px; text-anchor:middle; font-weight:600; }
+    .tl-sm { fill:#666; font-family:'Cormorant Garamond',Georgia,serif; font-size:8px; text-anchor:middle; }
+    .tl-title { fill:#888; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; }
+    .tl-node { fill:#0a0a0a; stroke:#88cc88; stroke-width:1; }
+    .tl-line { stroke:#333; stroke-width:1; }
+    .tl-dot { fill:#88cc88; }
+  </style>
+  <text x="10" y="18" class="tl-title">What happens between midnight and 6AM</text>
+  <!-- Timeline axis -->
+  <line x1="40" y1="70" x2="640" y2="70" class="tl-line"/>
+  <!-- Midnight -->
+  <circle cx="60" cy="70" r="4" class="tl-dot"/>
+  <text x="60" y="55" class="tl-time">00:00</text>
+  <text x="60" y="90" class="tl-label">Inventory</text>
+  <text x="60" y="102" class="tl-sm">ILS pulls, voice calls,</text>
+  <text x="60" y="112" class="tl-sm">availability refresh</text>
+  <!-- 1AM -->
+  <circle cx="160" cy="70" r="4" class="tl-dot"/>
+  <text x="160" y="55" class="tl-time">01:00</text>
+  <text x="160" y="90" class="tl-label">Lead scoring</text>
+  <text x="160" y="102" class="tl-sm">Re-score all active</text>
+  <text x="160" y="112" class="tl-sm">against fresh data</text>
+  <!-- 2AM -->
+  <circle cx="260" cy="70" r="4" class="tl-dot"/>
+  <text x="260" y="55" class="tl-time">02:00</text>
+  <text x="260" y="90" class="tl-label">Stale detection</text>
+  <text x="260" y="102" class="tl-sm">Flag phantom listings,</text>
+  <text x="260" y="112" class="tl-sm">ghost buildings</text>
+  <!-- 3AM -->
+  <circle cx="360" cy="70" r="4" class="tl-dot"/>
+  <text x="360" y="55" class="tl-time">03:00</text>
+  <text x="360" y="90" class="tl-label">Follow-ups</text>
+  <text x="360" y="102" class="tl-sm">Warm leads, cold leads,</text>
+  <text x="360" y="112" class="tl-sm">doc reminders</text>
+  <!-- 4AM -->
+  <circle cx="460" cy="70" r="4" class="tl-dot"/>
+  <text x="460" y="55" class="tl-time">04:00</text>
+  <text x="460" y="90" class="tl-label">Compliance</text>
+  <text x="460" y="102" class="tl-sm">TCPA check, DNC,</text>
+  <text x="460" y="112" class="tl-sm">send-window audit</text>
+  <!-- 5AM -->
+  <circle cx="560" cy="70" r="4" class="tl-dot"/>
+  <text x="560" y="55" class="tl-time">05:00</text>
+  <text x="560" y="90" class="tl-label">Reports</text>
+  <text x="560" y="102" class="tl-sm">Volume, revenue,</text>
+  <text x="560" y="112" class="tl-sm">pod health, anomalies</text>
+  <!-- 6AM — human wakes up -->
+  <circle cx="640" cy="70" r="6" class="tl-dot" style="fill:#cc6666; stroke:#cc6666;"/>
+  <text x="640" y="55" class="tl-time" style="fill:#cc6666;">06:00</text>
+  <text x="640" y="90" class="tl-label" style="fill:#cc6666;">Human</text>
+  <text x="640" y="102" class="tl-sm" style="fill:#cc6666;">wakes up</text>
+  <!-- Humor box -->
+  <rect x="140" y="140" width="400" height="55" rx="4" fill="#0a0a0a" stroke="#333"/>
+  <text x="340" y="160" text-anchor="middle" style="fill:#888; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px;">The machine processed 847 leads while I slept.</text>
+  <text x="340" y="176" text-anchor="middle" style="fill:#888; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px;">I processed zero. We are not the same.</text>
+  <text x="340" y="190" text-anchor="middle" style="fill:#555; font-family:'Cormorant Garamond',Georgia,serif; font-size:8px; font-style:italic;">6 green dots did more in 6 hours than most sales teams do in a week</text>
+</svg>
+
 That's the boring part. Cron jobs, API calls, database queries. Important but not interesting. Any competent engineering team could build this.
 
 The interesting part — the part that makes people's eyes go wide — is the autonomous sessions.

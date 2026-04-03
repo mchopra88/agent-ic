@@ -10,6 +10,45 @@ Between 2017 and 2019, all I did was focus on cost. Not revenue. Not growth. Not
 
 This is the thing nobody tells you about cost leadership: it's boring. Nobody writes blog posts about it. Nobody puts it in pitch decks. VCs don't get excited about "we made the same thing cheaper." They want "we invented a new category." But cost leadership is the ultimate infinite lever because it puts you in the bottom-left quadrant of every strategic matrix that matters — and once you're there, every strategic option in the game is available to you. Your competitors can only play the quadrants they can afford. You can play all four.
 
+<svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
+  <style>
+    .gnome-label { fill:#e8e4de; font-family:'Cormorant Garamond',Georgia,serif; font-size:13px; text-anchor:middle; }
+    .gnome-phase { fill:#88cc88; font-family:'Cormorant Garamond',Georgia,serif; font-size:11px; text-anchor:middle; font-weight:600; }
+    .gnome-sm { fill:#666; font-family:'Cormorant Garamond',Georgia,serif; font-size:9px; text-anchor:middle; font-style:italic; }
+    .gnome-box { fill:#0a0a0a; stroke:#333; stroke-width:1; rx:4; }
+    .gnome-arrow { stroke:#444; stroke-width:1.5; fill:none; marker-end:url(#arrowhead); }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#444"/>
+    </marker>
+  </defs>
+  <text x="340" y="18" class="gnome-sm" style="fill:#555; text-transform:uppercase; letter-spacing:0.15em; font-style:normal;">The Underpants Gnomes Theory of AI Transformation</text>
+  <!-- Phase 1 -->
+  <rect x="30" y="35" width="170" height="65" class="gnome-box"/>
+  <text x="115" y="55" class="gnome-phase">Phase 1</text>
+  <text x="115" y="75" class="gnome-label">Spend on AI</text>
+  <text x="115" y="90" class="gnome-sm">LLMs, cloud, Twilio, GKE</text>
+  <!-- Arrow 1 -->
+  <line x1="200" y1="67" x2="240" y2="67" class="gnome-arrow"/>
+  <!-- Phase 2 -->
+  <rect x="245" y="35" width="190" height="65" class="gnome-box" style="stroke:#cc6666;"/>
+  <text x="340" y="55" class="gnome-phase" style="fill:#cc6666;">Phase 2</text>
+  <text x="340" y="75" class="gnome-label">Replace humans with code</text>
+  <text x="340" y="90" class="gnome-sm">This is the part nobody talks about</text>
+  <!-- Arrow 2 -->
+  <line x1="435" y1="67" x2="475" y2="67" class="gnome-arrow"/>
+  <!-- Phase 3 -->
+  <rect x="480" y="35" width="170" height="65" class="gnome-box" style="stroke:#88cc88;"/>
+  <text x="565" y="55" class="gnome-phase">Phase 3</text>
+  <text x="565" y="75" class="gnome-label">Cost collapse</text>
+  <text x="565" y="90" class="gnome-sm">97% margins in a 20% industry</text>
+  <!-- Punchline -->
+  <text x="340" y="135" class="gnome-sm" style="fill:#888;">Everyone has a Phase 1 and a Phase 3.</text>
+  <text x="340" y="152" class="gnome-sm" style="fill:#888;">Phase 2 is seven years of scar tissue, 1M accidental texts, and a Simpsons-themed bash script.</text>
+  <text x="340" y="175" class="gnome-sm" style="fill:#555;">With apologies to South Park S2E17</text>
+</svg>
+
 Ray Dalio calls this a paradigm shift — when the fundamental assumptions of an industry change so completely that the strategies optimized for the old paradigm don't just underperform, they become structurally impossible. The apartment locating industry operated on a paradigm: human agents, linear scaling, 60-80% of revenue consumed by labor. Every company in the space was optimizing within that paradigm — better training, better CRM tools, better lead routing. Nobody was questioning the paradigm itself.
 
 The paradigm question isn't "how do we make human agents more efficient?" It's "why are there human agents at all?"
@@ -246,5 +285,41 @@ Dalio's framework for paradigm shifts says to look for the assumptions that ever
 The paradigm shift: it's not a people business. It's a data business with a conversational interface. The people were never the product. The matching was the product. The conversation was just the delivery mechanism. And delivery mechanisms can be automated once you understand the underlying logic well enough.
 
 I understood it well enough because I spent 2017-2019 doing nothing but staring at cost — not dreaming about AI or building products or chasing growth, but understanding, at the atomic level, where every dollar went and what it produced. That boring, unglamorous, nobody-writes-about-it work is what made everything else possible.
+
+<svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
+  <style>
+    .bar-label { fill:#e8e4de; font-family:'Cormorant Garamond',Georgia,serif; font-size:11px; }
+    .bar-sm { fill:#666; font-family:'Cormorant Garamond',Georgia,serif; font-size:9px; }
+    .bar-title { fill:#888; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; }
+  </style>
+  <text x="10" y="18" class="bar-title">Cost Structure: Before vs After</text>
+  <!-- BEFORE column -->
+  <text x="80" y="45" class="bar-label" text-anchor="middle">2018 (Humans)</text>
+  <rect x="30" y="55" width="100" height="140" fill="#cc6666" opacity="0.7" rx="2"/>
+  <text x="80" y="85" class="bar-sm" text-anchor="middle" style="fill:#e8e4de;">Agent salaries</text>
+  <rect x="30" y="195" width="100" height="35" fill="#8888cc" opacity="0.7" rx="2"/>
+  <text x="80" y="217" class="bar-sm" text-anchor="middle" style="fill:#e8e4de;">Tools</text>
+  <rect x="30" y="230" width="100" height="20" fill="#88cc88" opacity="0.7" rx="2"/>
+  <text x="80" y="244" class="bar-sm" text-anchor="middle" style="fill:#e8e4de;">Infra</text>
+  <text x="80" y="270" class="bar-sm" text-anchor="middle">~20% margin</text>
+  <!-- AFTER column -->
+  <text x="250" y="45" class="bar-label" text-anchor="middle">2026 (AI)</text>
+  <rect x="200" y="210" width="100" height="15" fill="#8888cc" opacity="0.7" rx="2"/>
+  <text x="250" y="222" class="bar-sm" text-anchor="middle" style="fill:#e8e4de;">API</text>
+  <rect x="200" y="225" width="100" height="15" fill="#88cc88" opacity="0.7" rx="2"/>
+  <text x="250" y="237" class="bar-sm" text-anchor="middle" style="fill:#e8e4de;">Infra</text>
+  <rect x="200" y="240" width="100" height="10" fill="#666" opacity="0.7" rx="2"/>
+  <text x="250" y="270" class="bar-sm" text-anchor="middle">~97% margin</text>
+  <!-- Arrow -->
+  <line x1="145" y1="160" x2="185" y2="160" stroke="#444" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <!-- Annotation -->
+  <text x="420" y="100" class="bar-sm" style="fill:#888;">The red block is humans.</text>
+  <text x="420" y="118" class="bar-sm" style="fill:#888;">It's not that humans are expensive.</text>
+  <text x="420" y="136" class="bar-sm" style="fill:#888;">It's that humans scale linearly.</text>
+  <text x="420" y="154" class="bar-sm" style="fill:#888;">Every 300 conversations = 1 more human.</text>
+  <text x="420" y="180" class="bar-sm" style="fill:#888;">Code handles 30,000 conversations</text>
+  <text x="420" y="198" class="bar-sm" style="fill:#888;">for the same monthly cost as one agent's</text>
+  <text x="420" y="216" class="bar-sm" style="fill:#888;">desk phone and CRM subscription.</text>
+</svg>
 
 The cost collapse wasn't a technology event. It was a knowledge event. The technology just made it executable.

@@ -66,6 +66,65 @@ Here is the actual file. This is what runs on my machine right now:
 
 Eight hooks. Four event types. Every one of them born from something that went wrong. Let me show you each file, and the disaster that created it.
 
+<svg viewBox="0 0 680 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:2rem 0;">
+  <style>
+    .scar-label { fill:#cc6666; font-family:'Cormorant Garamond',Georgia,serif; font-size:9px; }
+    .scar-hook { fill:#88cc88; font-family:'Cormorant Garamond',Georgia,serif; font-size:8px; }
+    .scar-title { fill:#888; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; }
+    .scar-line { stroke:#cc6666; stroke-width:0.8; stroke-dasharray:3,3; }
+    .body-line { stroke:#333; stroke-width:1.5; fill:none; }
+  </style>
+  <text x="340" y="18" text-anchor="middle" class="scar-title">The Scar Map</text>
+  <text x="340" y="33" text-anchor="middle" style="fill:#555; font-family:'Cormorant Garamond',Georgia,serif; font-size:9px; font-style:italic;">Every hook traces to a specific disaster</text>
+  <!-- Simplified body outline -->
+  <ellipse cx="340" cy="75" rx="28" ry="35" class="body-line"/>
+  <line x1="340" y1="110" x2="340" y2="260" class="body-line"/>
+  <line x1="340" y1="140" x2="270" y2="210" class="body-line"/>
+  <line x1="340" y1="140" x2="410" y2="210" class="body-line"/>
+  <line x1="340" y1="260" x2="300" y2="370" class="body-line"/>
+  <line x1="340" y1="260" x2="380" y2="370" class="body-line"/>
+  <!-- Scar: Head — 1M texts -->
+  <line x1="370" y1="65" x2="480" y2="50" class="scar-line"/>
+  <text x="485" y="45" class="scar-label">1,039,939 texts</text>
+  <text x="485" y="55" class="scar-hook">→ pre-bash-safeguard.sh</text>
+  <!-- Scar: Shoulder — credential redaction -->
+  <line x1="310" y1="130" x2="140" y2="100" class="scar-line"/>
+  <text x="135" y="95" class="scar-label" text-anchor="end">Credential "sanitized" at 2AM</text>
+  <text x="135" y="105" class="scar-hook" text-anchor="end">→ File Integrity rule in CLAUDE.md</text>
+  <!-- Scar: Right arm — client_stage_progression -->
+  <line x1="410" y1="200" x2="510" y2="170" class="scar-line"/>
+  <text x="515" y="165" class="scar-label">client_stage_progression</text>
+  <text x="515" y="175" class="scar-label">= LLM hallucination garbage</text>
+  <text x="515" y="185" class="scar-hook">→ pre-sql-bottomup.sh</text>
+  <!-- Scar: Left arm — CSV parser -->
+  <line x1="270" y1="200" x2="140" y2="170" class="scar-line"/>
+  <text x="135" y="165" class="scar-label" text-anchor="end">CSV parser missed 42%</text>
+  <text x="135" y="175" class="scar-hook" text-anchor="end">→ PDF balance method</text>
+  <!-- Scar: Chest — doom loop -->
+  <line x1="340" y1="180" x2="480" y2="240" class="scar-line"/>
+  <text x="485" y="235" class="scar-label">8-day doom loop</text>
+  <text x="485" y="245" class="scar-label">$4-5K/day revenue bleed</text>
+  <text x="485" y="255" class="scar-hook">→ session-end-save.sh</text>
+  <!-- Scar: Hip — DELETE FROM -->
+  <line x1="350" y1="255" x2="170" y2="280" class="scar-line"/>
+  <text x="165" y="275" class="scar-label" text-anchor="end">One click from DELETE FROM leads</text>
+  <text x="165" y="285" class="scar-hook" text-anchor="end">→ exit code 2 = wall, not warning</text>
+  <!-- Scar: Right leg — Windows line endings -->
+  <line x1="380" y1="340" x2="510" y2="330" class="scar-line"/>
+  <text x="515" y="325" class="scar-label">\\r\\n broke all hooks</text>
+  <text x="515" y="335" class="scar-label">6 deploys, zero gating</text>
+  <text x="515" y="345" class="scar-hook">→ hooks need their own safety</text>
+  <!-- Scar: Left leg — no fresh eyes -->
+  <line x1="300" y1="340" x2="140" y2="350" class="scar-line"/>
+  <text x="135" y="345" class="scar-label" text-anchor="end">Pushed to prod without review</text>
+  <text x="135" y="355" class="scar-hook" text-anchor="end">→ stop-fresh-eyes-check.sh</text>
+  <!-- Counter at bottom -->
+  <rect x="180" y="400" width="320" height="55" rx="4" fill="#0a0a0a" stroke="#333"/>
+  <text x="340" y="420" text-anchor="middle" style="fill:#888; font-family:'Cormorant Garamond',Georgia,serif; font-size:10px;">Number of times this system has prevented a disaster:</text>
+  <text x="340" y="440" text-anchor="middle" style="fill:#88cc88; font-family:'Cormorant Garamond',Georgia,serif; font-size:16px; font-weight:700;">∞ (it runs on every tool call)</text>
+  <text x="340" y="452" text-anchor="middle" style="fill:#555; font-family:'Cormorant Garamond',Georgia,serif; font-size:9px; font-style:italic;">Number of times I've thanked it: 0</text>
+</svg>
+
 ## Hook 1: pre-bash-safeguard.sh
 
 **The disaster:** The [Twilio incident](/essays/the-twilio-incident/). A code bug triggered a runaway SMS process. 1,039,939 messages in five days. The PostgreSQL database was overwhelmed and crashed. My Chase card got flagged for fraud. 33,900 messages were still sitting in the Twilio queue when we finally caught it.
