@@ -89,7 +89,7 @@ Eight hooks. Four event types. Every one of them born from something that went w
   <text x="485" y="55" class="scar-hook">→ pre-bash-safeguard.sh</text>
   <!-- Scar: Shoulder — credential redaction -->
   <line x1="310" y1="130" x2="140" y2="100" class="scar-line"/>
-  <text x="135" y="95" class="scar-label" text-anchor="end">Credential "sanitized" at 2AM</text>
+  <text x="135" y="95" class="scar-label" text-anchor="end">Credential "sanitized" in prod</text>
   <text x="135" y="105" class="scar-hook" text-anchor="end">→ File Integrity rule in CLAUDE.md</text>
   <!-- Scar: Right arm — client_stage_progression -->
   <line x1="410" y1="200" x2="510" y2="170" class="scar-line"/>
@@ -503,7 +503,7 @@ I fixed the line endings. Added a check. And learned: your safety systems need t
 ]
 </pre>
 
-Because humor is how you stay sane when you're writing ethical guidelines for bash scripts at 2 AM in a folder named after a Simpsons character.
+Because humor is how you stay sane when you're writing ethical guidelines for bash scripts in a folder named after a Simpsons character.
 
 Every hook is a scar. Every infrastructure wall is a bone that healed stronger after breaking. If you want to build with AI, start with the hooks. Not because they'll save you — they won't, not alone. Start with them because when things break, the hooks turn each disaster into a permanent improvement. The system gets harder to break over time.
 

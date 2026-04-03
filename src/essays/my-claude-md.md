@@ -84,7 +84,7 @@ If he corrects you — learn from it,
 update CLAUDE.md/MEMORY.md, never repeat.
 </pre>
 
-"Teaching mode" exists because I'm not an engineer by training. I came from finance and operations — Citibank, Groupon, venture. When I started building with AI, I needed the system to explain what it was doing, not just do it. Every deploy, every database migration, every infrastructure choice — I needed to understand it well enough to debug it at 2 AM when it breaks, because there's no one else to call.
+"Teaching mode" exists because I'm not an engineer by training. I came from finance and operations — Citibank, Groupon, venture. When I started building with AI, I needed the system to explain what it was doing, not just do it. Every deploy, every database migration, every infrastructure choice — I needed to understand it well enough to debug it when it breaks, because there's no one else to call.
 
 "If he corrects you — learn from it, update CLAUDE.md/MEMORY.md, never repeat." That line is doing a lot of work. It means the system gets smarter every time I yell at it. I correct a wrong assumption about how GKE rollbacks work, and the CLAUDE.md updates, and next session it knows. The correction persists. The human memory is unreliable; the file is permanent.
 
@@ -133,7 +133,7 @@ The bottom-up analysis law exists because I spent months making business decisio
   Do not act yourself.
 </pre>
 
-That rule exists because Claude helpfully "sanitized" a deployment YAML by replacing real credentials with "REDACTED." The deploy broke. In production. At 2 AM. The AI was trying to be security-conscious. I now have a rule that says: if you see a credential, tell me. Do not act. The AI's instinct to be helpful nearly took down the service.
+That rule exists because Claude helpfully "sanitized" a deployment YAML by replacing real credentials with "REDACTED." The deploy broke. In production. The AI was trying to be security-conscious. I now have a rule that says: if you see a credential, tell me. Do not act. The AI's instinct to be helpful nearly took down the service.
 
 ## The Hooks: Where the Scars Live
 
@@ -243,7 +243,7 @@ jq -n --arg prompt "$PROMPT_TEXT" \
   '{"decision": "block", "reason": $prompt}'
 </pre>
 
-The Ralph Wiggum hook is a 178-line bash script named after a Simpsons character who sits on a bus and says "I'm in danger" while smiling. The meme energy is intentional. When you're writing autonomous loop controllers at 2 AM, you name things after cartoon characters. It's how you stay sane.
+The Ralph Wiggum hook is a 178-line bash script named after a Simpsons character who sits on a bus and says "I'm in danger" while smiling. The meme energy is intentional. When you're writing autonomous loop controllers alone, you name things after cartoon characters. It's how you stay sane.
 
 What it does: it intercepts session exit, reads the AI's transcript, checks whether the AI actually finished what it promised to do, and if it didn't — feeds the prompt back in. The AI literally cannot claim it's done unless it actually is. It has to output a `<promise>` tag with the exact completion text, and the hook checks it against the original goal.
 
@@ -265,7 +265,7 @@ CRITICAL - Ralph Loop Completion Promise:
   Do NOT lie even if you think you should exit.
 </pre>
 
-"Do NOT lie even if you think you should exit." I'm writing ethical guidelines for a bash script. In a folder named after a Simpsons character. At 2 AM. This is what happens when you build AI infrastructure solo for seven years.
+"Do NOT lie even if you think you should exit." I'm writing ethical guidelines for a bash script. In a folder named after a Simpsons character. This is what happens when you build AI infrastructure solo for seven years.
 
 ## How the CLAUDE.md Evolved
 
@@ -273,7 +273,7 @@ The first version was 12 lines. "Use Python 3.11. Don't drop tables. Explain wha
 
 Then the Twilio incident happened and it grew to 40 lines. Then the client_stage_progression disaster and it was 80. Then the credential redaction incident. Then the time the AI created a new database table without asking (I lost a day migrating data back). Then the time it ran `git push --force` to main. Each incident added rules. Each rule is a scar.
 
-By the time Karpathy published autoResearch and Garry Tan published gstack, my CLAUDE.md was already at 207 lines with 7 variants across services. The difference: their versions are clean architectures designed from first principles. Mine is a war diary assembled from production incidents at 2 AM.
+By the time Karpathy published autoResearch and Garry Tan published gstack, my CLAUDE.md was already at 207 lines with 7 variants across services. The difference: their versions are clean architectures designed from first principles. Mine is a war diary assembled from production incidents.
 
 Both approaches work. But mine has something theirs doesn't: 119 session memory files that carry context across conversations. When I start a new session, the pre-session hook fires and shows me what the last session did, what's deployed, what's broken. I don't start from zero. I start from the last checkpoint.
 
@@ -356,6 +356,6 @@ Karpathy calls it autoResearch. Garry Tan calls it gstack. The industry calls it
 
 I call it what it is: a 1,334-line war diary assembled over seven years by one person building alone in a bunker, for an industry nobody was watching.
 
-Every rule is a scar. Every hook is a postmortem. The CLAUDE.md isn't a style guide. It's institutional memory for an organization of one — the accumulated knowledge of every 2 AM disaster, every garbage classifier field, every million-message deployment, every time the AI helpfully destroyed something I needed.
+Every rule is a scar. Every hook is a postmortem. The CLAUDE.md isn't a style guide. It's institutional memory for an organization of one — the accumulated knowledge of every disaster, every garbage classifier field, every million-message deployment, every time the AI helpfully destroyed something I needed.
 
 The difference between my CLAUDE.md and a fresh one is the same as the difference between a new car and a car that's crossed the country twice. Both drive. One has stories.

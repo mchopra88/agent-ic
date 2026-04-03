@@ -65,7 +65,7 @@ The overnight machine is described in full in [The Overnight Machine](/essays/th
 
 The structure is the same as the mantra: continuous, autonomous, indifferent to my mood. The system doesn't care if I'm frustrated or inspired. It runs or it doesn't. The leads flow or they don't. The overnight batch completes or it errors. The question isn't "how do I feel about this?" The question is "what does the data say?"
 
-This is what Marcus Aurelius was writing about. Not the Stoic-bro version — "just be tough, don't feel things." The real version: observe your reactions without being controlled by them. The system broke at 2 AM. I feel frustrated. I notice the frustration. I fix the bug. The frustration is information, not instruction. The data is the instruction.
+This is what Marcus Aurelius was writing about. Not the Stoic-bro version — "just be tough, don't feel things." The real version: observe your reactions without being controlled by them. The system broke overnight. I feel frustrated. I notice the frustration. I fix the bug. The frustration is information, not instruction. The data is the instruction.
 
 ## The Practice of Watching
 
@@ -73,11 +73,11 @@ The hardest part of building autonomous systems is watching them fail without in
 
 When the matching engine suggests a building that's wrong for a lead, my instinct is to override it. Hard-code a rule. Add a special case. Patch the immediate problem. But that's not meditation — that's anxiety. The meditative approach: watch the failure, understand why it happened, fix the underlying pattern, and let the system run again. The building was wrong because the geographic scoring overweighted price and underweighted proximity. That's a scoring adjustment, not a hard-coded override. The fix applies to all future leads, not just this one.
 
-Aurelius wrote: "The impediment to action advances action. What stands in the way becomes the way." Every system failure is training data. Every bug is a pattern to learn from. Every 2 AM incident is a future hook. The obstacle isn't separate from the work — it IS the work.
+Aurelius wrote: "The impediment to action advances action. What stands in the way becomes the way." Every system failure is training data. Every bug is a pattern to learn from. Every incident is a future hook. The obstacle isn't separate from the work — it IS the work.
 
 This is also ego depletion in practice. McRaney's insight about willpower being finite applies directly: the energy to debug patiently, to understand root causes instead of applying band-aids, to sit with a broken system and watch it carefully instead of frantically patching — that energy runs out. By the end of a long session, I'm applying band-aids. By the start of a fresh session, I can see the real pattern.
 
-The session memory exists for this reason. The depleted 2 AM version of me patches the immediate problem and writes a note: "Matching engine returned wrong building for lead 51980. Applied temporary override. Root cause: geographic scoring weights. TODO: fix the scoring, remove the override." The fresh morning version of me reads that note and does the real work.
+The session memory exists for this reason. The depleted version of me patches the immediate problem and writes a note: "Matching engine returned wrong building for lead 51980. Applied temporary override. Root cause: geographic scoring weights. TODO: fix the scoring, remove the override." The fresh morning version of me reads that note and does the real work.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 # The session memory cycle — depleted self talks to rested self
@@ -102,7 +102,7 @@ collaborating across time.
 The session memory is the medium.
 </pre>
 
-That pattern — the depleted self leaving notes for the rested self — is the closest thing I've found to a genuine contemplative practice in software engineering. You're not just building a system. You're building a relationship with your own cognitive limitations. You're acknowledging that the 2 AM version of you is not the same person as the 8 AM version, and designing infrastructure that bridges the gap.
+That pattern — the depleted self leaving notes for the rested self — is the closest thing I've found to a genuine contemplative practice in software engineering. You're not just building a system. You're building a relationship with your own cognitive limitations. You're acknowledging that the depleted version of you is not the same person as the rested version, and designing infrastructure that bridges the gap.
 
 ## Non-Attachment
 

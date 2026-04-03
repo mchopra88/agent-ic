@@ -94,7 +94,7 @@ The architecture that makes one machine feel like an office:
      │ MacBook Air │   │ iPhone              │
      │ (couch,     │   │ (monitoring,        │
      │  coffee     │   │  panic checks       │
-     │  shop,      │   │  at 2 AM)           │
+     │  shop,      │   │  anytime)           │
      │  airport    │   │                     │
      │  lounge)    │   └────────────────────┘
      └─────────────┘
@@ -117,7 +117,7 @@ The workflow:
 <span style="color:#666;">#</span>
 <span style="color:#666;"># The session didn't close when I disconnected.</span>
 <span style="color:#666;"># I can start debugging at 10 PM, disconnect,</span>
-<span style="color:#666;"># reconnect at 2 AM from bed, and pick up mid-thought.</span>
+<span style="color:#666;"># reconnect from bed, and pick up mid-thought.</span>
 </pre>
 
 I tested this architecture about as hard as you can test it: I got stranded in India. Airspace closed. No flights out. I [deployed a production fix from a Vienna airport lounge](/essays/stranded-in-delhi/) — SSH into the Studio, tmux attach, fix the bug, push, verify. Twenty-two minutes. The hooks ran the same. The CLAUDE.md loaded the same. The verification checklist was the same. The machine was in Chicago doing the work. I was in Austria eating an overpriced airport sandwich.

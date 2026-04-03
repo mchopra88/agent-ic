@@ -65,7 +65,7 @@ Agent conversation quality — one Wednesday, 23 leads:
   The battery drained in real time.
 </pre>
 
-I wrote about this phenomenon in [my CLAUDE.md essay](/essays/my-claude-md/) — the governance file that runs the whole system. One of its rules is "Teaching mode: ALWAYS ON." The AI explains everything it does, defines every term, shows every trade-off. Not because the AI needs to be didactic. Because at 2 AM, when I'm debugging and depleted, I need the cognitive cost of every interaction to be as low as possible. The system explains itself to me the way a pharmacist labels pills: not because you're stupid, but because you might be exhausted.
+I wrote about this phenomenon in [my CLAUDE.md essay](/essays/my-claude-md/) — the governance file that runs the whole system. One of its rules is "Teaching mode: ALWAYS ON." The AI explains everything it does, defines every term, shows every trade-off. Not because the AI needs to be didactic. Because when I'm debugging and depleted, I need the cognitive cost of every interaction to be as low as possible. The system explains itself to me the way a pharmacist labels pills: not because you're stupid, but because you might be exhausted.
 
 The hooks are the same pattern. There are 8 of them — deterministic scripts that run on every tool call, every edit, every session start and stop. They can't be skipped. They don't deplete. One blocks destructive SQL. One catches syntax errors on every file save. One forces context loading before any session starts.
 
@@ -81,12 +81,12 @@ architecture of my own weakness:
 
 If it's hard → make it prescriptive
 If it requires judgment → encode the rules
-If willpower fails at 2 AM → automate it
+If willpower fails → automate it
 If the human forgets → the hook remembers
 If ego depletes → the system doesn't
 </pre>
 
-This is what I mean when I say I'm building systems that compensate for being human. Not in the aspirational Silicon Valley sense of "augmenting human potential." In the honest, 2 AM, radish-experiment sense of: I know exactly how I fail, and I'm building machines that don't fail in the same ways.
+This is what I mean when I say I'm building systems that compensate for being human. Not in the aspirational Silicon Valley sense of "augmenting human potential." In the honest, radish-experiment sense of: I know exactly how I fail, and I'm building machines that don't fail in the same ways.
 
 The AI agent doesn't get tired at 5 PM. It qualifies the 30,000th lead the same as the first. It doesn't skip the follow-up because it's Friday. It doesn't reach for the aggregate query because reading individual records is boring. It doesn't procrastinate on the hard conversation because the easy email is right there.
 

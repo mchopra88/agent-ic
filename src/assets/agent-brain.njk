@@ -621,7 +621,7 @@ if round_idx > 0 and all_tool_calls:
 <div class="asset">
   <h2>Reasoning Traces</h2>
 
-  <p>Every agent turn produces a <code>ReasoningTrace</code>. This is the flight recorder. When something goes wrong at 2 AM, you read the trace.</p>
+  <p>Every agent turn produces a <code>ReasoningTrace</code>. This is the flight recorder. When something goes wrong, you read the trace.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 <span style="color:#e8e4de;">@dataclass</span>
@@ -657,7 +657,7 @@ if round_idx > 0 and all_tool_calls:
 
   <p>The trace captures everything. Which tools were called. What arguments they received. What they returned. Which guardrails passed. Which guardrails blocked. How long the entire turn took in milliseconds. The raw LLM output (first 500 characters in the serialized form).</p>
 
-  <p>The Discord format is designed for scanning at 2 AM with one eye open.</p>
+  <p>The Discord format is designed for scanning with one eye open.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 <span style="color:#e8e4de;">**Agent Turn: ygl**</span>

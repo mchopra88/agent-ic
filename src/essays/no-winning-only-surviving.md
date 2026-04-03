@@ -65,7 +65,7 @@ but were actually survival instincts:
 
   "Created the CLAUDE.md governance framework"
     → AI nearly wiped the database.
-      Wrote rules in a panic at 2 AM.
+      Wrote rules in a panic after an incident.
       The rules accumulated into a framework
       because the incidents kept happening.
 

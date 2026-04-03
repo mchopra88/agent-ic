@@ -46,7 +46,7 @@ Monthly commit velocity:
 
 The velocity is increasing, not decreasing. This is the opposite of what happens in traditional engineering teams, where velocity peaks early and gradually slows as the codebase grows, technical debt accumulates, and coordination overhead compounds. Solo AI-assisted development has a different curve: each session builds on the last because the CLAUDE.md encodes cumulative lessons, the session memory preserves context, and the hooks prevent regression.
 
-The 1,004,287 lines of Python includes generated code, test fixtures, and configuration. The actual hand-directed code is closer to 200,000 lines. But the distinction matters less than you'd think — I directed every line, I understand every module, and I can debug any part of the system at 2 AM. That's more than most team leads can say about their own codebase.
+The 1,004,287 lines of Python includes generated code, test fixtures, and configuration. The actual hand-directed code is closer to 200,000 lines. But the distinction matters less than you'd think — I directed every line, I understand every module, and I can debug any part of the system when it breaks. That's more than most team leads can say about their own codebase.
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 What those 531 commits look like — a real week (Feb 10-16, 2026):

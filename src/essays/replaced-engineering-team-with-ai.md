@@ -128,16 +128,16 @@ What the hooks catch (every single day):
 
 The hooks replaced the PR reviewers. Not because hooks are smarter than humans — they're not. A hook can't evaluate business logic. A hook can't assess whether a matching algorithm makes sense for the Dallas market. But the hooks have two properties that human reviewers don't:
 
-**They never get depleted.** The hook runs at 2 AM with the same diligence as at 10 AM. The hook runs on the 500th PR with the same attention as on the first. The hook doesn't get frustrated, bored, resentful, or distracted.
+**They never get depleted.** The hook runs on the 500th file with the same diligence as on the first. The hook runs on the 500th PR with the same attention as on the first. The hook doesn't get frustrated, bored, resentful, or distracted.
 
 **They never need context.** The hook doesn't need to understand the business to block a DROP TABLE. The hook doesn't need to understand the matching algorithm to verify that the edited file compiles. The hook doesn't need to understand the deploy strategy to require a /fresh-eyes review before pushing.
 
 The fresh-eyes system is the closest thing to a real PR review: it spawns a new Claude Code context — one that hasn't been working on the code all day, one that isn't biased by the decisions made during the session — and asks it to review the changes with cold eyes. It catches things the session context normalized. It's not as good as a great human reviewer. It's better than a depleted one. And it runs every time, automatically, without asking.
 
-The identity shift is the hardest part. I went from "I'm a business operator who hires engineers" to "I am the engineer." Here's what that actually looks like — an actual debugging session from 2 AM, November 2025:
+The identity shift is the hardest part. I went from "I'm a business operator who hires engineers" to "I am the engineer." Here's what that actually looks like — an actual debugging session, November 2025:
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# 2:14 AM — Twilio webhook timing out
+# Twilio webhook timing out
 
 Me:    "Webhooks are failing. 500 errors."
 
@@ -167,7 +167,7 @@ AI:    "Let me check the pod logs.
 Me:    "Do it."
 </pre>
 
-Every deployment, every database migration, every infrastructure choice — I needed to understand it well enough to debug it at 2 AM, because there was no one else to call. The [CLAUDE.md governance system](/essays/my-claude-md/) makes this possible: "Teaching mode: ALWAYS ON" means the AI doesn't just execute — it explains. The depleted 2 AM version of me gets the same level of explanation as the fresh 9 AM version. The cognitive cost stays low even when the battery is empty.
+Every deployment, every database migration, every infrastructure choice — I needed to understand it well enough to debug it when it breaks, because there was no one else to call. The [CLAUDE.md governance system](/essays/my-claude-md/) makes this possible: "Teaching mode: ALWAYS ON" means the AI doesn't just execute — it explains. The depleted version of me gets the same level of explanation as the fresh version. The cognitive cost stays low even when the battery is empty.
 
 ## The Velocity
 

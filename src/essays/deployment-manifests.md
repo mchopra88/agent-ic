@@ -103,7 +103,7 @@ First: DEPLOYMENT_STATE.md. This is the actual file, sitting in the repo right n
 5. THEN and only then begin new work
 </pre>
 
-Look at that "What's Broken Right Now" section. "No verified working state exists." I wrote that sentence at 2 AM after eight days of progressive deterioration. The most honest sentence in the entire repo.
+Look at that "What's Broken Right Now" section. "No verified working state exists." I wrote that sentence after eight days of progressive deterioration. The most honest sentence in the entire repo.
 
 The point of DEPLOYMENT_STATE.md is that it gets shoved in the AI's face before every session starts. The [pre-session hook](/essays/scar-tissue/) prints it. There's a line in all caps that says "READ THE ABOVE. Do NOT start work until you understand what is deployed, what broke, and what the last session did." You have to yell at the AI. In all caps. Because without that, it will cheerfully skip the context and start hacking on whatever you ask it to.
 

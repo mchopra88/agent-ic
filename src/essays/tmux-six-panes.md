@@ -45,7 +45,7 @@ $ ssh studio -t "tmux attach -t agent-v4"
 # The Mac Studio is always on. tmux is always running.
 # The sessions don't close when I disconnect.
 # I can start debugging a matching bug at 10 PM,
-# disconnect, reconnect at 2 AM from bed,
+# disconnect, reconnect from bed,
 # and the cursor is exactly where I left it.
 </pre>
 
