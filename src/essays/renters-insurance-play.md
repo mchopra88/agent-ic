@@ -95,7 +95,7 @@ The same AI system that matches renters to apartments can present insurance opti
 # The Ken Agent — same pattern, different inventory
 
 class KenAgent:
-    """Renters insurance sales agent.
+    """Renters insurance agent.
     Same conversational architecture as the locator.
     Different inventory, different compliance rules,
     same fundamental pattern."""
@@ -103,7 +103,7 @@ class KenAgent:
     async def handle_lead(self, lead: Lead):
         # Phase 1: Qualify
         profile = await self.build_customer_profile(lead)
-        if not self.passes_sniff_test(profile):
+        if not self.passes_qualification_check(profile):
             return self.route_to_dead(lead, reason="unqualifiable")
 
         # Phase 2: Quote
@@ -128,7 +128,7 @@ class KenAgent:
         if response.intent == "ready_to_purchase":
             return await self.bind_policy(lead, response.selected_quote)
 
-    def passes_sniff_test(self, profile):
+    def passes_qualification_check(self, profile):
         """Same 8-check pattern as the locator.
         Different checks for insurance context."""
         checks = [

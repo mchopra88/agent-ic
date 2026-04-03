@@ -43,7 +43,7 @@ Chicago Heights    450-480 W 16th St                     Chicago Heights
 
   <p>South Shore and Chatham are South Side Chicago. Chicago Heights is 30 miles south &mdash; a different market entirely. South Shore and Chatham buildings compete with each other. Chicago Heights competes with nobody in our portfolio; it serves the south suburbs.</p>
 
-  <p>Every building is a Python dict in <code>bluelake_inventory.py</code>. Not a database table. Not a CMS. A hardcoded dictionary that gets updated when Zalmy (the building manager) sends a vacancy email. When the dict changes, every conversation the agent has from that moment reflects the new reality.</p>
+  <p>Every building is a Python dict in <code>bluelake_inventory.py</code>. Not a database table. Not a CMS. A hardcoded dictionary that gets updated when the building manager sends a vacancy email. When the dict changes, every conversation the agent has from that moment reflects the new reality.</p>
 
 </div>
 
@@ -144,25 +144,25 @@ Same building, different unit type
 <div class="asset">
   <h2>Vacancy Updates</h2>
 
-  <p>The biggest failure mode in the managed portfolio is stale vacancy data. The INVENTORY dict says a unit is available. It was rented yesterday. Zalmy forgot to send the vacancy email. The agent offers a phantom unit. The renter shows up for a tour and finds furniture.</p>
+  <p>The biggest failure mode in the managed portfolio is stale vacancy data. The INVENTORY dict says a unit is available. It was rented yesterday. The building manager forgot to send the vacancy email. The agent offers a phantom unit. The renter shows up for a tour and finds furniture.</p>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 <span style="color:#e8e4de;"># Vacancy update flow</span>
 
-1. Zalmy sends vacancy email to renterdocs@homeeasy.com
+1. The building manager sends vacancy email to renterdocs@homeeasy.com
 2. Email parser extracts: building, unit number, date available
 3. INVENTORY dict updated (manual deploy)
 4. All active conversations re-evaluated against new inventory
 
 <span style="color:#cc8888;"># What goes wrong:</span>
 
-Zalmy forgets to email           &rarr; phantom unit offered
+Building manager forgets to email &rarr; phantom unit offered
 Email parser misreads unit #     &rarr; wrong unit marked available
 Deploy delayed by other work     &rarr; 12-hour stale window
 Unit rented between email/deploy &rarr; race condition, no fix
 </pre>
 
-  <p>The 12-hour stale window is the worst failure. A unit opens at 9 AM. Zalmy emails at noon. I deploy at 6 PM. For 9 hours, the agent did not know about a unit that could have been shown. For the 6 hours between the email and the deploy, the agent knew (in the email) but could not act (not in the dict). The solution is an API endpoint that Zalmy can hit directly &mdash; not yet built. That is the highest-priority infrastructure debt in the Landlord Rep business.</p>
+  <p>The 12-hour stale window is the worst failure. A unit opens at 9 AM. The building manager emails at noon. I deploy at 6 PM. For 9 hours, the agent did not know about a unit that could have been shown. For the 6 hours between the email and the deploy, the agent knew (in the email) but could not act (not in the dict). The solution is an API endpoint that the building manager can hit directly &mdash; not yet built. That is the highest-priority infrastructure debt in the Landlord Rep business.</p>
 
 </div>
 
@@ -175,7 +175,7 @@ Unit rented between email/deploy &rarr; race condition, no fix
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 <span style="color:#cc8888;">Stale inventory</span>
   INVENTORY dict says a unit is available.
-  It was rented yesterday. Zalmy forgot the email.
+  It was rented yesterday. The building manager forgot the email.
   Agent offers a phantom unit.
   Renter shows up and finds furniture.
   Fix: API endpoint for real-time vacancy updates (not yet built).

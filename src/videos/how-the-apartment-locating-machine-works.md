@@ -59,8 +59,8 @@ This is how the machine works.
   <line x1="290" y1="95" x2="350" y2="95" class="s-arrow"/>
 
   <rect x="350" y="70" width="120" height="50" class="s-box" style="stroke:#555;"/>
-  <text x="410" y="90" class="s-label">Sniff Test</text>
-  <text x="410" y="105" class="s-sm">8 qualification checks</text>
+  <text x="410" y="90" class="s-label">Qualification</text>
+  <text x="410" y="105" class="s-sm">8 readiness checks</text>
 
   <line x1="470" y1="95" x2="530" y2="95" class="s-arrow"/>
 
@@ -89,51 +89,49 @@ a different building — nicer, closer, cheaper.]
 The lead is a signal, not a destination.
 </pre>
 
-**NARRATION:** "We are a middleman. A leasing company that works for many property managers. The renter inquires on one building — we redirect them to buildings that pay us commission. Commission varies from 50% to 100% or more of the first month's rent. This is the business model that nobody in tech takes seriously, and that generates thousands of dollars per conversion."
+**NARRATION:** "We are a leasing company that works with many property managers. The renter inquires on one building — we match them with options across our entire network. Often a better fit than what they originally clicked on. This is the business model that nobody in tech takes seriously, and that processes thousands of placements per month."
 
 **CODE ON SCREEN:**
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 # From the actual CLAUDE.md — the AI's operating instructions
 
-## Core Philosophy: DRIVERS, NOT ORDER TAKERS
+## Core Philosophy: MATCH, DON'T JUST SEARCH
 
-WE DO NOT TAKE ORDERS. WE DRIVE DEALS.
+When a renter says "I want X" — we don't just search for X. We:
+1. Understand their NEEDS (budget, timeline, location)
+2. Find the FIT (where their preferences align with availability)
+3. MATCH them to the best option in our network
 
-When client says "I want X" - we don't just find X. We:
-1. Find the VULNERABILITY (their pain point)
-2. Find the FLEX (where they can bend)
-3. DRIVE them to a property that PAYS US
-
-The answer is on the PHONE, not in the data.
-Every "no" is just a "not yet."
+The answer is in the CONVERSATION, not just the data.
+Every inquiry is an opportunity to find a better fit.
 </pre>
 
 ---
 
-## ACT 2: THE SNIFF TEST (1:30–3:00)
+## ACT 2: THE QUALIFICATION CHECK (1:30–3:00)
 
-**NARRATION:** "Before we spend a dollar on a lead, we run eight checks. This is the sniff test — it runs in seconds, and it decides whether this lead is worth a conversation."
+**NARRATION:** "Before we invest in a lead, we run eight checks. This is the qualification check — it runs in seconds, and it decides whether this lead is ready for a conversation."
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# The 8-check sniff test — from production
+# The qualification check — from production
 
-1. Google the lead — verify identity (2-3 signals)
-2. Who are they? — job, household, why moving
-3. Likely income? — budget x3 rule, ZIP demographics
-4. Sketch? — evasive, red flags
-5. Likely credit? — estimate before confirming
-6. Where will they end up? — match style preference
-7. What ad did they click? — inquiry address != where they LIVE
-8. History? — new lead or repeat, prior denials
+1. Verify the lead — confirm contact info
+2. Who are they? — timeline, household, why moving
+3. Budget? — what they can comfortably afford
+4. Responsiveness? — engaged or unresponsive
+5. What are they looking for? — size, style, location
+6. Where will they end up? — match preference to inventory
+7. What did they click? — inquiry vs. actual neighborhood preference
+8. History? — new lead or returning renter
 
-CRITICAL: ZIP demographics lookup is MANDATORY.
-The ZIP tells you who they are.
+The inquiry tells you what caught their eye.
+The conversation tells you what they actually need.
 </pre>
 
-**NARRATION:** "Step 7 is where the magic is. The building someone clicked on tells you almost nothing about where they'll live. But the ZIP code they're coming FROM — their current address — tells you everything. Income bracket, household size, credit profile, price sensitivity. The inquiry is noise. The ZIP is signal."
+**NARRATION:** "Step 7 is where the insight is. The building someone clicked on tells you almost nothing about where they'll actually want to live. But the conversation — what they tell you about their commute, their budget, their timeline — that tells you everything. The click is a starting point. The conversation is where the real matching happens."
 
-**[ANIMATION: A heat map of Dallas ZIP codes, with income brackets fading in. A dot appears on a listing in Uptown, but the renter's current ZIP is in Garland. The AI recalculates — different buildings light up.]**
+**[ANIMATION: A listing fades. A conversation thread appears. The AI matches based on stated preferences — different buildings light up.]**
 
 ---
 
@@ -186,24 +184,23 @@ if you looked at the failures, not the wins.
 
 ## ACT 4: THE CONVERSATION (4:30–5:30)
 
-**NARRATION:** "The AI agent starts a text conversation. It's not a chatbot — it's a sales agent. It asks questions designed so the only honest answer moves the deal forward."
+**NARRATION:** "The AI agent starts a text conversation. It's not a chatbot — it's a leasing agent. It asks the right questions to understand what the renter actually needs, then matches them."
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.85rem; line-height:1.7; color:#888; overflow-x:auto; margin:2rem 0;">
 [SCREEN: A text conversation, animated
 message by message.]
 
-AI: Hey Marcus — I'm in leasing, you inquired
-    on a unit of mine on a listing site. When are you
+AI: Hey — I'm in leasing, you inquired
+    on a unit on a listing site. When are you
     looking to move?
 
-MARCUS: Next month. But that unit was too
+RENTER: Next month. But that unit was too
         expensive.
 
 AI: Got it — what's your budget?
 
 [SIDE PANEL: The AI's internal state updates.
-Budget = $1,400. Credit = estimated 620-660.
-ZIP demographics: household income $48K.
+Budget = $1,400.
 Matching algorithm recalculates...]
 
 AI: I've got three units that might work better.
@@ -211,10 +208,9 @@ AI: I've got three units that might work better.
     this month. Want me to set up tours?
 
 [NARRATION: The renter clicked on a $2,100
-unit in Uptown. The AI moved him to a $1,350
-unit in Richardson that pays us full commission.
-He didn't know he wanted Richardson. We knew
-before he did.]
+unit in Uptown. The AI found a $1,350 unit
+in Richardson that fit their budget and
+commute. Better match. Lower price.]
 </pre>
 
 ---

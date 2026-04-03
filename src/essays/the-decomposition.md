@@ -19,7 +19,7 @@ Alex Rampell at a16z wrote an investment memo about Fly Homes that decomposed a 
   <!-- Level 0 -->
   <text x="10" y="20" class="d-level">Level 0: The Monolith</text>
   <rect x="120" y="30" width="440" height="40" class="d-box"/>
-  <text x="340" y="55" class="d-label">One Sales Agent Does Everything</text>
+  <text x="340" y="55" class="d-label">One Leasing Agent Does Everything</text>
 
   <!-- Level 1 -->
   <text x="10" y="100" class="d-level">Level 1: Special Teams</text>
@@ -77,9 +77,9 @@ Alex Rampell at a16z wrote an investment memo about Fly Homes that decomposed a 
   <text x="340" y="375" class="d-sm" style="fill:#555;">Same architecture as Amazon's internal services. Applied to a leasing office.</text>
 </svg>
 
-**Level zero** is the monolith. One sales agent does everything — qualifies the lead, searches inventory, books tours, collects documents, submits applications, follows up. This is how every brokerage in America works. It's also why every brokerage in America has the same margin problem: the human is the bottleneck and the cost center simultaneously.
+**Level zero** is the monolith. One leasing agent does everything — qualifies the lead, searches inventory, books tours, collects documents, submits applications, follows up. This is how every brokerage in America works. It's also why every brokerage in America has the same margin problem: the human is the bottleneck and the cost center simultaneously.
 
-**Level one** is special teams. Decompose the sales agent into functions: lead qualification, inventory matching, tour booking, document collection, application processing, follow-up. Each function is a team. Each team can be measured independently. This is where Rampell stopped. This is where most organizations stop because it's already hard enough to manage.
+**Level one** is special teams. Decompose the leasing agent into functions: lead qualification, inventory matching, tour booking, document collection, application processing, follow-up. Each function is a team. Each team can be measured independently. This is where Rampell stopped. This is where most organizations stop because it's already hard enough to manage.
 
 **Level two** is atomic tasks. Decompose each function into its smallest meaningful unit of work: parse intent, check budget, query database, rank results, draft message, check compliance, send, log. Each task is a ticket. Each ticket has an input, an output, a cost, and a success metric. This is where the architecture starts looking like Amazon's internal services.
 

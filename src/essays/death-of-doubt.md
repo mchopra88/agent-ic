@@ -37,7 +37,7 @@ David McRaney writes about ego depletion in *You Are Not So Smart* — the idea 
 
 I know ego depletion from the inside. Not from reading about it — from living it. For years, I poured every unit of willpower into building the machine. The machine got better. Everything else got worse. Health. Relationships. The basic maintenance of being a human being. I'm very avoidant. I'm very neglectful of things that need attention. The easy thing to avoid is the thing that doesn't have a deploy button and a green checkmark.
 
-I went through a period where someone close to me drew a map on a whiteboard. Not a system architecture diagram. A personal one. At the center, in a circle, it said: "Don't be fat." Around it, all the avoidance patterns: don't go to the doctor, don't look at the scale, don't address the thing that's actually wrong. Focus on the machine instead. I ended up building myself a calorie tracking app — DBF, "Don't Be Fat" — because I needed the lowest-activation-energy possible system. A checkbox. A yes/no. The same design principle as the hooks: make the right behavior automatic. Karin helped me assemble a 75-page health package. The depleted version of me won't take care of himself. The system has to do it.
+I went through a period where someone close to me drew a map on a whiteboard. Not a system architecture diagram. A personal one. At the center, in a circle, it said: "Don't be fat." Around it, all the avoidance patterns: don't go to the doctor, don't look at the scale, don't address the thing that's actually wrong. Focus on the machine instead. I ended up building myself a calorie tracking app — DBF, "Don't Be Fat" — because I needed the lowest-activation-energy possible system. A checkbox. A yes/no. The same design principle as the hooks: make the right behavior automatic. A friend helped me assemble a 75-page health package. The depleted version of me won't take care of himself. The system has to do it.
 
 The honest truth about building autonomous systems is that the autonomy cuts both ways. The machine runs while you sleep — that's the pitch. But it also runs while you avoid. While you neglect. While you pour every ounce of energy into the thing with clean outputs and ignore everything with messy ones. The system compensates for your weaknesses. That's the design. But a system that compensates for your weaknesses can also enable them.
 
@@ -73,7 +73,7 @@ About three months ago, something broke through. I was showing someone the archi
 
 Then it happened again. And again. With technical people who build software for a living. With investors who evaluate companies for a living. With operators trying to figure out how to deploy AI into their own organizations. The same pause. The same recalibration.
 
-I showed Eric and Eddie the full view — the Claude Code evolution, the commit history, the CLAUDE.md architecture, the eight tmux sessions, the autonomous overnight runs, the adversarial testing pipeline, how I push more code solo than engineering teams of five or ten. The response wasn't polite interest. It was visceral. "Wait — this is one person?"
+I showed a couple of friends the full view — the Claude Code evolution, the commit history, the CLAUDE.md architecture, the eight tmux sessions, the autonomous overnight runs, the adversarial testing pipeline, how I push more code solo than engineering teams of five or ten. The response wasn't polite interest. It was visceral. "Wait — this is one person?"
 
 One person. Zero engineers. 531 commits in 15 months. Eight business-critical services in production. 30,000 conversations a month. 97% contribution margins. An insurance vertical bolted onto the same infrastructure in weeks. A quoting engine for a PE-backed distributor built in the same architecture. The system teaches me as it builds. The hooks prevent the disasters. The session memory carries context across conversations. The CLAUDE.md files encode every lesson from every 2 AM incident.
 
@@ -97,7 +97,7 @@ The machine generates more than $600K. The machine scales without headcount. The
 
 The $600K buys you a seat at someone else's table. The machine is the table.
 
-## For Ved and Reya
+## For My Kids
 
 Everything I build is for them. Not in the sentimental way — in the structural way. The Gayatri Mantra runs continuously. You set it in motion and it generates benefit without active attention. The overnight machine does the same thing — inventory refreshes, lead scoring, stale data detection, automated outreach. You wake up to a dashboard, not a backlog.
 

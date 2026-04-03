@@ -225,7 +225,7 @@ When I tell other founders about this, there's always a pause. "You just... went
 
 ## The Cosplay Sessions
 
-"Cosplay" is what I call adversarial scenario simulation. The AI pretends to be a client — dozens of different client archetypes — and runs them through the production conversation flows. Not testing against unit tests. Testing against the actual sales agent, with actual conversation logic, with actual inventory data.
+"Cosplay" is what I call adversarial scenario simulation. The AI pretends to be a client — dozens of different client archetypes — and runs them through the production conversation flows. Not testing against unit tests. Testing against the actual leasing agent, with actual conversation logic, with actual inventory data.
 
 The YGL (landlord rep) cosplay sessions in February ran 300 scenarios across 5 waves:
 
@@ -402,6 +402,6 @@ When overnight autonomous sessions make sense:
 
 The common thread: overnight sessions work for tasks that are labor-intensive but judgment-light. Reading every record, running every scenario, checking every connection, verifying every configuration. The machine has infinite patience for repetitive analysis. It doesn't have judgment for architecture decisions or production writes.
 
-I built this for Ved and Reya. Not a job to inherit. A system. A machine that runs while their father sleeps — generating dashboards, finding bugs, recovering leads, simulating conversations. The Gayatri Mantra was old when the Vedas were written. It will outlast every person who recites it. That's the property I wanted: something that keeps working after you stop.
+I built this for my kids. Not a job to inherit. A system. A machine that runs while their father sleeps — generating dashboards, finding bugs, recovering leads, simulating conversations. The Gayatri Mantra was old when the Vedas were written. It will outlast every person who recites it. That's the property I wanted: something that keeps working after you stop.
 
 Not a prayer. An architecture.

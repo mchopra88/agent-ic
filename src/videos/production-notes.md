@@ -97,38 +97,36 @@ That's *almost never* where they end up.
 
 The lead is a signal, not a destination.
 
-We are a middleman. A leasing company that
-works for many property managers.
+We are a leasing company that works with
+many property managers.
 The renter inquires on one building —
-we redirect them to buildings that *pay us*
-commission. Commission varies from fifty percent
-to a hundred percent or more of the first
-month's rent.
+we match them with options across our
+*entire* network. Often a better fit
+than what they originally clicked on.
 
 This is the business model that nobody in tech
 takes seriously. [BEAT]
-And that generates thousands of dollars
-per conversion.
+And that processes thousands of placements
+per month.
 
 
-[SECTION 3: THE SNIFF TEST — 1:30 to 3:00]
+[SECTION 3: THE QUALIFICATION CHECK — 1:30 to 3:00]
 
-Before we spend a dollar on a lead,
-we run eight checks. This is the sniff test.
-It runs in seconds. And it decides whether
-this lead is worth a conversation.
+Before we invest in a lead,
+we run qualification checks. They run in
+seconds. And they decide whether this lead
+is ready for a conversation.
 
-Step seven is where the magic is.
+Step seven is where the insight is.
 The building someone clicked on tells you
 *almost nothing* about where they'll live.
 
-But the ZIP code they're coming *from* —
-their current address — tells you everything.
-Income bracket. Household size. Credit profile.
-Price sensitivity.
+But the *conversation* — what they tell you
+about their commute, their budget,
+their timeline — tells you everything.
 
-The inquiry is noise. [BEAT]
-The ZIP is signal.
+The click is a starting point. [BEAT]
+The conversation is where matching happens.
 
 
 [SECTION 4: THE SURVIVORSHIP INSIGHT — 3:00 to 4:00]
@@ -164,10 +162,10 @@ not the wins.
 [SECTION 5: THE CONVERSATION — 4:00 to 5:00]
 
 The AI agent starts a text conversation.
-It's not a chatbot — it's a *sales agent*.
+It's not a chatbot — it's a *leasing agent*.
 
-It asks questions designed so the only
-honest answer moves the deal forward.
+It asks the right questions to understand
+what the renter actually needs.
 
 "Are you still looking?" Yes.
 "Is next month still your move date?" Yes.
@@ -175,13 +173,13 @@ honest answer moves the deal forward.
 two hundred dollars cheaper?" Yes.
 "Can I set up a tour for Thursday?"
 
-By the time you get there, saying *no*
-to the tour is the irrational choice.
-Every yes was a building block.
+Each question clarifies what the renter
+needs. Each answer narrows the search.
+The result is a better match.
 
-This is the Socratic framework.
-Same pattern in sales, in insurance disputes,
-in debugging, in negotiation. [BEAT]
+This is conversational qualification.
+Understanding needs through dialogue,
+not assumptions. [BEAT]
 It works *everywhere*.
 
 

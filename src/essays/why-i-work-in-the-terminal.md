@@ -5,17 +5,17 @@ order: 32
 date: 2026-04-01
 ---
 
-Eric keeps asking me why I don't just use the chat interface.
+A friend keeps asking me why I don't just use the chat interface.
 
 We get dinner every few weeks and he always brings it up. "Claude.ai works fine. Cursor is great. Why are you in the terminal like it's 1997?" He says this while I'm eating pasta, which weakens his rhetorical position, because nobody has ever changed their mind about anything while eating pasta.
 
-Fair question though. I used the chat for months — Claude.ai, then ChatGPT, then Cursor's sidebar thing. They're good products. Eric builds real shit with them. I won't pretend they don't work.
+Fair question though. I used the chat for months — Claude.ai, then ChatGPT, then Cursor's sidebar thing. They're good products. He builds real shit with them. I won't pretend they don't work.
 
 What I will tell you is there's a tax.
 
 Copy your code, paste it into the chat, type "this function doesn't match Dallas leads correctly, here's the error output," wait for the response, mentally diff the suggestion against what you've got, copy the relevant fix back into your editor, realize you forgot to include the database schema, go back to the chat, paste the schema, re-explain the problem with new context. Each cycle: maybe forty seconds. Fifty cycles a day. Over thirty minutes of clipboard management. Every day. For months.
 
-(I can already hear Eric: "thirty minutes, that's nothing." Sure. But every paste loses context. The code you paste is a snapshot from when you copied it. By cycle thirty the file has changed five times and the AI is reasoning about a version that no longer exists. That part isn't measured in minutes. That part is measured in bugs you can't explain.)
+(I can already hear him: "thirty minutes, that's nothing." Sure. But every paste loses context. The code you paste is a snapshot from when you copied it. By cycle thirty the file has changed five times and the AI is reasoning about a version that no longer exists. That part isn't measured in minutes. That part is measured in bugs you can't explain.)
 
 Claude Code runs inside the codebase. Same directory, same file system, same git repo. When I type "Dallas matching is returning zero results" it doesn't wait for my clipboard. It reads the file. Reads the git log. Reads the test output. Queries the production database. Then tells me the ILS feed flipped their coordinate format three days ago. Ninety seconds from Slack notification to root cause. I wrote about that specific bug in [Stranded in Delhi](/essays/stranded-in-delhi/).
 
@@ -45,9 +45,9 @@ Here's what the terminal gives the AI access to — right now, in my current ses
   GOOGLE_API_KEY     → Gemini (bulk mechanical work only)
 </pre>
 
-Five databases, two LLM APIs, the full file system, direct SQL to production Postgres — all accessible from the same place I type commands. Eric's chat can see whatever fits in his paste buffer.
+Five databases, two LLM APIs, the full file system, direct SQL to production Postgres — all accessible from the same place I type commands. His chat can see whatever fits in his paste buffer.
 
-I described the difference to Damon as: the chat interface is like texting your plumber about a leak. "Water on the kitchen floor. Here's a photo." They suggest turning a valve. You try it. Text back: "still water." Another photo. More suggestions. Back and forth, each message incomplete.
+I described the difference to a friend as: the chat interface is like texting your plumber about a leak. "Water on the kitchen floor. Here's a photo." They suggest turning a valve. You try it. Text back: "still water." Another photo. More suggestions. Back and forth, each message incomplete.
 
 The terminal is the plumber standing in your kitchen with his tools. Looking at the pipe. Turning the valve. Checking the water heater. Running outside to look at the shutoff. No photos needed. He just fixes it.
 
@@ -108,6 +108,6 @@ I'll be honest about the limitations. The context window fills up on long sessio
 
 The chat has those same problems plus the copy-paste tax. And in the chat, the context problem is worse — you're burning tokens on pasted code that might already be stale. In the terminal, it reads the file fresh. Every time. The file is the context, and it's always current.
 
-Eric's setup works for Eric. He builds smaller things, ships fast, his projects fit in a conversation window. The chat is great for that.
+His setup works for him. He builds smaller things, ships fast, his projects fit in a conversation window. The chat is great for that.
 
 My project has four business units, eight tmux sessions, 30,000 conversations a month, and [seven CLAUDE.md files](/essays/my-claude-md/) totaling 1,334 lines of institutional knowledge. It doesn't fit in a conversation. It fits in a terminal.

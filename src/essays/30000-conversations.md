@@ -30,7 +30,7 @@ Lead volume by year (approximate):
   Cumulative text messages: tens of millions
 </pre>
 
-The cumulative number is what matters. Not what we process this month — what the database contains. Hundreds of thousands of leads, each with a full conversation history, each with building preferences, geographic signals, price sensitivity, objection patterns, move dates, household composition. Every failed conversation is a training signal. Every drop-off point is a data point. Every ghosted follow-up tells you something about timing, pricing, or positioning that you can't learn from the deals that closed.
+The cumulative number is what matters. Not what we process this month — what the database contains. Hundreds of thousands of leads, each with a full conversation history, each with building preferences, geographic signals, budget ranges, objection patterns, move dates, household needs. Every failed conversation is a training signal. Every drop-off point is a data point. Every ghosted follow-up tells you something about timing, pricing, or positioning that you can't learn from the deals that closed.
 
 The composition shifted over the years too. In 2017, leads came from one source: a single ILS (Internet Listing Service) partnership. By 2025, leads flow from multiple listing services, direct web traffic, referrals, property manager partnerships, and landlord rep channels. The source matters because different sources produce different lead quality:
 
@@ -52,8 +52,8 @@ Lead quality by source (observed patterns):
                    Doc submissions, voucher processing
 
   The insight: source determines conversation strategy.
-  A listing site lead needs redirection (away from the
-  aspirational building toward reality).
+  A listing site lead needs guidance (from the
+  aspirational building toward realistic options).
   A direct referral needs confirmation (they already
   know what they want).
   A landlord rep lead needs qualification (docs,
@@ -87,7 +87,7 @@ Chicago market anomalies (discovered via bottom-up analysis):
       than original inquiry.
       This is the statistic that defines the business.
       The renter almost never ends up where they clicked.
-      We are a REDIRECT engine, not a FULFILLMENT engine.
+      We are a MATCHING engine, not a FULFILLMENT engine.
 
 Dallas market anomalies:
 
@@ -105,9 +105,9 @@ Dallas market anomalies:
       Proximity > price > amenities > reviews.
 
   Renter's inquiry ZIP ≠ where they live.
-      Inquiry is aspirational. ZIP is real.
-      The ZIP tells you income bracket, household size,
-      credit profile, and price sensitivity.
+      Inquiry is aspirational. Current location is real.
+      The conversation reveals their actual needs —
+      budget, timeline, and what matters to them.
       The inquiry tells you they like nice photos.
 </pre>
 
@@ -141,14 +141,14 @@ Then I finally looked at the raw data:
 
 That's where the [bottom-up analysis law](/essays/my-claude-md/) comes from — it's one of the absolute rules in the governance system that every AI session reads on startup. A specific database field name, called out as garbage, in a governance document. Because I will never make that mistake again, and neither will any AI that reads that file. The rule is enforced by a hook that literally blocks aggregate queries until you've read 20+ individual records first.
 
-## The Sniff Test
+## The Qualification Check
 
-The sniff test — the 8-check lead qualification that runs before we spend a dollar — exists because of these data patterns:
+The qualification check — the 8-check lead readiness assessment that runs before we invest resources — exists because of these data patterns:
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# From the CLAUDE.md — the 8-check sniff test
+# From the CLAUDE.md — the 8-check qualification
 
-## Phase 1: SNIFF TEST (8 checks)
+## Phase 1: QUALIFICATION CHECK (8 checks)
 
 1. Duplicate? → Check phone/email against existing leads
 2. DNC? → Check do-not-contact list
@@ -160,12 +160,12 @@ The sniff test — the 8-check lead qualification that runs before we spend a do
    INQUIRY address != where they LIVE
 8. History? → New lead or repeat, prior denials
 
-CRITICAL: ZIP demographics lookup is MANDATORY.
-The ZIP tells you who they are.
-The inquiry tells you what they wish they could afford.
+CRITICAL: Geographic context matters.
+The conversation reveals their actual needs.
+The inquiry tells you what caught their eye.
 </pre>
 
-Check 7 is where the magic is. The building someone clicked on tells you almost nothing about where they'll live. But the ZIP code they're coming from — their current address — tells you everything. Income bracket. Household size. Credit profile. Price sensitivity. The inquiry is aspirational noise. The ZIP is ground truth.
+Check 7 is where the insight is. The building someone clicked on tells you almost nothing about where they'll live. But their current location and the conversation itself reveal what actually matters to them — their budget, their timeline, their priorities. The inquiry is aspirational. The conversation reveals reality.
 
 This is survivorship bias in reverse. David McRaney writes about Abraham Wald and the bomber bullet holes — how the military wanted to armor the parts of returning planes that had bullet holes, and Wald pointed out that those planes survived *because* the bullets hit non-critical areas. The planes that didn't come back had bullets in different places. You have to study the failures, not the survivors.
 

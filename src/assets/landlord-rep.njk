@@ -14,7 +14,7 @@ navActive: assets
 <div class="asset">
   <p>This is not a referral play. I am not sending leads to someone else's leasing office. I AM the leasing office.</p>
 
-  <p>When a renter texts about an apartment at 7450 S Luella Ave, they are talking to my agent. When they submit documents, my system processes them. When they get approved, my system tells them. The building owner never talks to the tenant. That is the whole point. YNY Realty owns the buildings. I operate them. The only human in the loop is Zalmy Vidal, the building manager, who handles physical showings and key handoffs. Everything else &mdash; first contact, qualification, document collection, approval, followup, lease coordination &mdash; is my agent.</p>
+  <p>When a renter texts about an apartment at 7450 S Luella Ave, they are talking to my agent. When they submit documents, my system processes them. When they get approved, my system tells them. The building owner never talks to the tenant. That is the whole point. YNY Realty owns the buildings. I operate them. The only human in the loop is the building manager, who handles physical showings and key handoffs. Everything else &mdash; first contact, qualification, document collection, approval, followup, lease coordination &mdash; is my agent.</p>
 
   <p>35 units across 8 buildings in South Shore, Chatham, and Chicago Heights. Studios at $850/mo. 1-bedrooms at $1,100. 2-bedrooms at $1,250. 3-bedrooms at $1,550. All utilities included: heat, cooking gas, electric, water, trash. That last part is the number one selling point and the agent knows to mention it every time.</p>
 
@@ -132,7 +132,7 @@ Looking elsewhere:                        -10
 <div class="asset">
   <h2>The Document Pipeline</h2>
 
-  <p>Four files. Four stages. A document enters as a Gmail attachment and exits as an Asana ticket on Zalmy's board with a full AI review attached.</p>
+  <p>Four files. Four stages. A document enters as a Gmail attachment and exits as an Asana ticket on the building manager's board with a full AI review attached.</p>
 
   <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 <span style="color:#e8e4de;">Stage 1: email_monitor.py</span>
@@ -160,7 +160,7 @@ Looking elsewhere:                        -10
 
 <span style="color:#e8e4de;">Stage 4: asana_ygl.py</span>
   Creates Asana ticket with full AI review attached
-  Assignee: Zalmy Vidal (building manager)
+  Assignee: the building manager
   SLA tracking starts immediately
   Nag at 50% SLA, escalate at 100%, critical at 150%</pre>
 
@@ -208,7 +208,7 @@ DOC_TYPES = {
   Below 500: flagged for building manager review
     result["flags"].append(
       f"Credit score {score} - may need larger deposit")
-  The flag does not block submission. Zalmy decides.
+  The flag does not block submission. The building manager decides.
 
 <span style="color:#e8e4de;">BACKGROUND</span>
   Non-violent offenses, over 3 years ago: OK
@@ -345,7 +345,7 @@ VALID_TRANSITIONS = {
   <span style="color:#e8e4de;">COOLING_OFF</span>    &rarr; STALLED, ENGAGED, DEAD
 }</pre>
 
-  <p>Three things worth noting. First: DEAD is not terminal. A dead lead can come back to ENGAGED if they text again. We never delete leads. Second: DOCS_REQUESTED can jump directly to APPLIED, skipping DOCS_RECEIVED and DOCS_REVIEWED, for cases where docs were submitted through a non-email channel and Zalmy manually approves. Third: the backward transition from APPLIED back to DOCS_REQUESTED exists because the building sometimes rejects an application and asks for additional documentation.</p>
+  <p>Three things worth noting. First: DEAD is not terminal. A dead lead can come back to ENGAGED if they text again. We never delete leads. Second: DOCS_REQUESTED can jump directly to APPLIED, skipping DOCS_RECEIVED and DOCS_REVIEWED, for cases where docs were submitted through a non-email channel and the building manager manually approves. Third: the backward transition from APPLIED back to DOCS_REQUESTED exists because the building sometimes rejects an application and asks for additional documentation.</p>
 
   <p>The transition validator:</p>
 
@@ -643,7 +643,7 @@ _THREAT_PATTERNS = [
   Criteria: Qualified but complicating factor.
     Credit below 500. Needs a cosigner. Eviction on record.
     Income borderline (between 2.0x and 2.5x rent).
-  Priority: Normal, but flagged for Zalmy review.
+  Priority: Normal, but flagged for building manager review.
   These are NOT rejected. They are routed differently.
   The agent tells the lead: "the building needs a couple
     more things" — never "you might not qualify."
@@ -715,7 +715,7 @@ _THREAT_PATTERNS = [
 <span style="color:#cc8888;">Income unreadable from document</span>
   approval_engine flags: "manual review needed"
   Status: FLAGS_FOUND (not LIKELY_DENIED)
-  Zalmy reviews the actual document himself
+  The building manager reviews the actual document himself
 
 <span style="color:#cc8888;">Lead's deal stage data is corrupted/legacy</span>
   parse_deal_state tries JSON, pipe-delimited, free-text
@@ -744,7 +744,7 @@ _THREAT_PATTERNS = [
 4 approval statuses
 3 messages per day maximum per lead
 2 pricing tiers (market rate, Section 8)
-1 human in the loop (Zalmy Vidal, building manager)
+1 human in the loop (the building manager)
 0 staff in the leasing office</pre>
 
 </div>

@@ -66,7 +66,7 @@ In my operating history, every time I've hired people to do revenue-generating w
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
 Personnel experiments — what actually happened:
 
-  US sales agents (2017-2018):
+  US leasing agents (2017-2018):
     Hired 3. Tour-to-close rate: 53%.
     Revenue: positive.
     Then: inconsistency, no-shows, ego depletion.
@@ -120,7 +120,7 @@ The guarding pattern in my business:
 
   What guarding looks like:
     → Won't hire engineers (last team: zero output)
-    → Won't hire sales agents (revenue → zero)
+    → Won't hire leasing agents (revenue → zero)
     → Won't delegate to VAs (output degrades)
     → Won't partner on operations (trust deficit)
     → Build everything myself + AI
@@ -192,7 +192,7 @@ Guarding says: "I won't hire someone to check this deployment because the last p
 
 The hook solves ego depletion. It runs whether I'm depleted or not. But the hook doesn't solve guarding. The hook compensates for MY limitations. Guarding prevents me from testing whether OTHER people's limitations can be compensated for too.
 
-What if the engineering team had had the hooks? What if the PR reviewers had had the automated fresh-eyes system? What if the sales agents had had the conversation engine handling 80% of the work and the human just handled the tours and calls? Those systems didn't exist when I had humans. They exist now. The environment has changed. The shoulder has healed. But the flinch persists.
+What if the engineering team had had the hooks? What if the PR reviewers had had the automated fresh-eyes system? What if the leasing agents had had the conversation engine handling 80% of the work and the human just handled the tours and calls? Those systems didn't exist when I had humans. They exist now. The environment has changed. The shoulder has healed. But the flinch persists.
 
 The Bhagavad Gita's instruction — action without attachment to outcome — applies here too. Don't hire because you're sure it will work. Don't refuse to hire because you're sure it won't. Act without attachment to the outcome. Run the experiment. Read the data. Update the model.
 

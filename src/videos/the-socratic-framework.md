@@ -23,13 +23,13 @@ honest answer confirms one building
 block of my position.
 
 By the time I get to the fifth question,
-the conclusion is inescapable.
+the match is clear.
 
 [Five question marks appear in a cascade,
 each one clicking into place like a lock.]
 
 This works in insurance disputes.
-In sales. In negotiation. In debugging AI.
+In leasing. In negotiation. In debugging AI.
 In every single domain I've applied it to.
 
 This is the Socratic framework.
@@ -109,7 +109,7 @@ Instead of arguing, I asked questions.
   <text x="520" y="262" class="qc-sm" style="fill:#c66;">"It was a mistake." — The adjuster</text>
 
   <line x1="20" y1="295" x2="660" y2="295" stroke="#222" stroke-width="1"/>
-  <text x="340" y="315" class="qc-sm">Each question has only one honest answer. The logical conclusion is inescapable.</text>
+  <text x="340" y="315" class="qc-sm">Each question has only one honest answer. The logical conclusion is clear.</text>
   <text x="340" y="332" class="qc-sm" style="fill:#666;">A determination was made, accepted, and implemented. You can't unwind it because you realized it was generous.</text>
 </svg>
 
@@ -119,7 +119,7 @@ Instead of arguing, I asked questions.
 
 ---
 
-## ACT 2: THE PATTERN IN SALES (2:00–3:30)
+## ACT 2: THE PATTERN IN LEASING (2:00–3:30)
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.85rem; line-height:1.7; color:#888; overflow-x:auto; margin:2rem 0;">
 [ANIMATION: The question chain dissolves and
@@ -129,26 +129,24 @@ conversation between an AI agent and a renter.]
 NARRATOR (V.O.):
 The same pattern shows up everywhere.
 
-In apartment sales:
+In apartment leasing:
 </pre>
 
 <pre style="background:#0a0a0a; border:1px solid #222; padding:1.5rem; font-size:0.8rem; line-height:1.6; color:#888; overflow-x:auto; margin:2rem 0;">
-# From the actual CLAUDE.md — the AI's sales doctrine
+# From the actual CLAUDE.md — the AI's conversation design
 
-## INVERT THE BURDEN OF PROOF
+## GUIDE WITH NATURAL QUESTIONS
 
-Constantly lower the bar so saying NO
-becomes the insane option.
+Ask questions where the honest answer
+moves toward a match.
 
-"At a minimum, if nothing else worked out,
- could you make this work?"
+"Are you still looking for a place?"
 
-"I've got a renter ready to sign.
- Want the commission or should I send them
- across the street?"
+"Would you like to see options
+ that fit your budget better?"
 </pre>
 
-**NARRATION:** "Each question is designed so the honest answer moves the deal forward. 'Are you still looking for an apartment?' Yes. 'Is next month still your move date?' Yes. 'Would you like to see a place that's $200 cheaper than what you clicked on?' Yes. 'Can I set up a tour for Thursday?' By the time you get there, saying no to the tour is the irrational choice. Every yes was a building block."
+**NARRATION:** "Each question builds naturally on the last. 'Are you still looking for an apartment?' Yes. 'Is next month still your move date?' Yes. 'Would you like to see a place that's $200 cheaper than what you clicked on?' Yes. 'Can I set up a tour for Thursday?' Each yes clarifies what the renter needs. The conversation moves toward a match because the questions are honest."
 
 ---
 
@@ -192,7 +190,7 @@ The logic was already there.
 The questions just make it visible.
 
 [ANIMATION: The question chain from the
-insurance case, the sales conversation,
+insurance case, the leasing conversation,
 and the debugging session — all three
 side by side. The structure is identical.
 Five yes/no questions. A cascade. A conclusion.]

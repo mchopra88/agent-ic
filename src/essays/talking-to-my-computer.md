@@ -101,9 +101,9 @@ I'm still on the trial, technically. $170/month for the Mac Studio, whatever Wis
 
 ## The Crazy Person Problem
 
-The people in coffee shops have adjusted. The regulars at the place on Lincoln Avenue stopped staring after week two. My wife stopped asking who I'm talking to after week one. Ved sometimes talks to me when I'm mid-dictation, which creates interesting prompts. ("Fix the matching algorithm papa what's for dinner" is not a valid Claude Code instruction, but I've submitted worse.)
+The people in coffee shops have adjusted. The regulars at the place on Lincoln Avenue stopped staring after week two. My wife stopped asking who I'm talking to after week one. My son sometimes talks to me when I'm mid-dictation, which creates interesting prompts. ("Fix the matching algorithm papa what's for dinner" is not a valid Claude Code instruction, but I've submitted worse.)
 
-The home office is where most of the dictation happens. Eight tmux sessions on the Mac Studio, Wispr Flow running in the background, me pacing around the room talking about database schemas and Twilio webhook timeouts. My wife Yamini thinks I'm a loon. My son Ved — he's four — walks in and asks "why is papa talking to his laptop?" which is a reasonable question that I don't have a four-year-old-friendly answer to. ("Papa is dictating natural language prompts to an autonomous code generation agent" does not land with the preschool crowd.)
+The home office is where most of the dictation happens. Eight tmux sessions on the Mac Studio, Wispr Flow running in the background, me pacing around the room talking about database schemas and Twilio webhook timeouts. My wife thinks I'm a loon. My son — he's four — walks in and asks "why is papa talking to his laptop?" which is a reasonable question that I don't have a four-year-old-friendly answer to. ("Papa is dictating natural language prompts to an autonomous code generation agent" does not land with the preschool crowd.)
 
 I'm producing [531 commits](/essays/git-log/) and [processing 30,000 conversations a month](/essays/30000-conversations/). The output speaks for itself even if what I'm saying sounds unhinged.
 
