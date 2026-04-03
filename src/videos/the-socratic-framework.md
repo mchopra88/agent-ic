@@ -5,6 +5,7 @@ series: "What I Learned From..."
 duration: "5 min"
 order: 35
 date: 2026-03-15
+videoFile: socratic-framework.mp4
 ---
 
 <div style="color:#666; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:2rem;">Script &middot; Cross-Cutting Theme</div>
@@ -218,4 +219,4 @@ years later, it still works.
 
 ---
 
-<p class="coming-soon">Production notes: Animated question chains that build visually — each question clicking into place with a satisfying lock sound. Three parallel examples (insurance, sales, debugging) shown side by side to reveal the structural identity. Tone: measured confidence, not aggression. The power is in the calm.</p>
+<p style="color:#555; font-size:0.85rem; font-style:italic; margin-top:2rem;">Produced with Remotion. 1920x1080, H.264. Animated question chains across three domains.</p>

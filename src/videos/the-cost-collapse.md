@@ -5,6 +5,7 @@ series: "How It Works"
 duration: "7 min"
 order: 40
 date: 2026-03-10
+videoFile: cost-collapse.mp4
 ---
 
 <div style="color:#666; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:2rem;">Script &middot; Animated Explainer</div>
@@ -235,4 +236,4 @@ Chase the cost. The revenue follows.
 
 ---
 
-<p class="coming-soon">Production notes: Animated line charts for the cost collapse. Split-screen conversion funnels for US vs offshore. The four-quadrant matrix animated with each option lighting up in sequence, then the chosen one glowing. Dalio-style calm narration over data visualizations.</p>
+<p style="color:#555; font-size:0.85rem; font-style:italic; margin-top:2rem;">Produced with Remotion. 1920x1080, H.264. Kinetic typography with animated charts.</p>

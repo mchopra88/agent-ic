@@ -7,6 +7,14 @@ navActive: videos
   <h1>{{ title }}</h1>
   {% if date %}<div style="color:#666; font-size:0.9rem; margin-bottom:0.5rem; font-style:italic;">{{ date | isoDate }}</div>{% endif %}
   {% if duration %}<div style="color:#555; font-size:0.85rem; margin-bottom:2rem;">{{ duration }} &middot; {{ series }}</div>{% endif %}
+  {% if videoFile %}
+  <div style="margin:2rem 0;">
+    <video controls preload="metadata" style="width:100%; max-width:1200px; border-radius:8px; border:1px solid #222;" poster="">
+      <source src="/videos/{{ videoFile }}" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+  {% endif %}
   <div class="essay-body">
     {{ content | safe }}
   </div>

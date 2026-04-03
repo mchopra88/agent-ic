@@ -1,6 +1,7 @@
 export default function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("src/CNAME");
   eleventyConfig.addPassthroughCopy({"src/_data/journal-cache.json": "journal/data.json"});
+  eleventyConfig.addPassthroughCopy({"src/videos/*.mp4": "videos/"});
   eleventyConfig.addFilter("isoDate", function(date) {
     if (!date) return "";
     const d = new Date(date);

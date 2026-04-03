@@ -5,6 +5,7 @@ series: "How It Works"
 duration: "6 min"
 order: 50
 date: 2026-03-01
+videoFile: apartment-machine.mp4
 ---
 
 <div style="color:#666; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:2rem;">Script &middot; Animated Explainer</div>
@@ -269,4 +270,4 @@ He's asleep.
 
 ---
 
-<p class="coming-soon">Production notes: Animated with Remotion (React-based animation framework). Code snippets rendered via Carbon. Architecture diagrams as animated SVGs. Voiceover recorded in home studio. Target: YouTube, LinkedIn, agent-ic.co embed.</p>
+<p style="color:#555; font-size:0.85rem; font-style:italic; margin-top:2rem;">Produced with Remotion. 1920x1080, H.264. Kinetic typography with animated diagrams.</p>

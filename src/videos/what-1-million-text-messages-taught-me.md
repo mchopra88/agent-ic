@@ -5,6 +5,7 @@ series: "What I Learned From..."
 duration: "4 min"
 order: 45
 date: 2026-03-05
+videoFile: text-messages.mp4
 ---
 
 <div style="color:#666; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:2rem;">Script &middot; Personal Story</div>
@@ -159,4 +160,4 @@ Every hook is a postmortem."]
 
 ---
 
-<p class="coming-soon">Production notes: Phone screen animation for the opening flood of messages. Split-screen showing code on left, consequence on right. CLAUDE.md scroll-through with rule highlighting. Voiceover: quiet, reflective — not dramatic.</p>
+<p style="color:#555; font-size:0.85rem; font-style:italic; margin-top:2rem;">Produced with Remotion. 1920x1080, H.264. Kinetic typography with animated diagrams.</p>

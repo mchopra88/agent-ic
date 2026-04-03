@@ -5,6 +5,7 @@ series: "The Code"
 duration: "3 min"
 order: 30
 date: 2026-03-20
+videoFile: war-diary.mp4
 ---
 
 <div style="color:#666; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:2rem;">Script &middot; Code Walkthrough</div>
@@ -185,4 +186,4 @@ system itself.
 
 ---
 
-<p class="coming-soon">Production notes: Screen recording of actual CLAUDE.md file scrolling, with key sections highlighting. Code snippets rendered in Carbon with the black theme. Terminal recording showing hook output in real time. Short, punchy — Ben Thompson style. One concept, one artifact, one principle.</p>
+<p style="color:#555; font-size:0.85rem; font-style:italic; margin-top:2rem;">Produced with Remotion. 1920x1080, H.264. Kinetic typography with code walkthroughs.</p>
