@@ -4,6 +4,7 @@ title: "Ego Depletion: Why I Built an AI to Compensate for Being Human"
 order: 26
 date: 2026-03-01
 private: true
+permalink: false
 ---
 
 David McRaney tells the story of the radish experiment. Researchers put people in a room with two bowls — chocolate chip cookies and radishes. One group could eat the cookies. The other had to resist them and eat only radishes. Then both groups were given an unsolvable puzzle.

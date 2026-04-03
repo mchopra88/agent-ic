@@ -5,6 +5,7 @@ status: "Draft"
 order: 20
 date: 2026-02-01
 private: true
+permalink: false
 ---
 
 For most of the last few years, I believed I was unemployable.

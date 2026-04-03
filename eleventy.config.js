@@ -10,9 +10,11 @@ export default function(eleventyConfig) {
     return `${months[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
   });
   eleventyConfig.addCollection("essays", function(collectionApi) {
-    return collectionApi.getFilteredByGlob("src/essays/*.md").sort((a, b) => {
-      return (b.data.order || 0) - (a.data.order || 0);
-    });
+    return collectionApi.getFilteredByGlob("src/essays/*.md")
+      .filter(item => !item.data.private)
+      .sort((a, b) => {
+        return (b.data.order || 0) - (a.data.order || 0);
+      });
   });
   // Videos hidden for now
   // eleventyConfig.addCollection("videos", function(collectionApi) {

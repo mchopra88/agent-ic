@@ -5,6 +5,7 @@ status: "Draft"
 order: 23
 date: 2026-02-05
 private: true
+permalink: false
 ---
 
 A PE-backed portfolio company in commercial electrical distribution. Switchboards, panelboards, circuit breakers. 180,000 SKUs in the catalog. Three sales reps. No CRM. The entire customer relationship existed in email inboxes and the heads of people who might quit.
