@@ -15,6 +15,7 @@ navActive: essays
 
   <div class="encrypted-gate" id="encrypted-gate">
     <div class="gate-box">
+      <button class="gate-close" id="gate-close" title="Close">&times;</button>
       <h3>{% if tier == "personal" %}Personal Essay{% else %}Commercial Essay{% endif %}</h3>
       <p>{% if tier == "personal" %}This is personal writing shared with close friends. Enter the access code to read.{% else %}This essay contains commercially sensitive content. Enter the access code to read.{% endif %}</p>
       <input type="password" id="gate-password" placeholder="Access code" autocomplete="off" />
@@ -47,6 +48,10 @@ navActive: essays
       error.style.display = 'block';
     }
   }
+
+  document.getElementById('gate-close').addEventListener('click', function() {
+    gate.style.display = 'none';
+  });
 
   document.getElementById('gate-unlock').addEventListener('click', function() {
     error.style.display = 'none';
